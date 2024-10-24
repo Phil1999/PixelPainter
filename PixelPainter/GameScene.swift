@@ -13,6 +13,8 @@ class GameScene: SKScene {
     var gameInfo: GameInfo { context.gameInfo }
     var layoutInfo: LayoutInfo { context.layoutInfo }
     
+    var playState: PlayState?
+
     init(context: GameContext, size: CGSize) {
         self.context = context
         super.init(size: size)

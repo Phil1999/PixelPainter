@@ -11,7 +11,7 @@ import SpriteKit
 class MemorizeState: GKState {
     unowned let gameScene: GameScene
     var memorizeTimer: Timer?
-    let memorizeTime: TimeInterval = 10
+    let memorizeTime: TimeInterval = 3
     
     init(gameScene: GameScene) {
         self.gameScene = gameScene
