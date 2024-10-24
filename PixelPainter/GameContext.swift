@@ -54,4 +54,5 @@ struct PuzzlePiece: Identifiable {
     let image: UIImage
     var correctPosition: CGPoint
     var currentPosition: CGPoint
+    var isPlaced: Bool = false
 }

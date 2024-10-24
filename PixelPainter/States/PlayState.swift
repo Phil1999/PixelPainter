@@ -10,11 +10,10 @@ import SpriteKit
 
 class PlayState: GKState {
     unowned let gameScene: GameScene
-    var draggedPiece: SKSpriteNode?
-    
     let gridManager: GridManager
     let bankManager: BankManager
     let hudManager: HUDManager
+    var powerUpManager: PowerUpManager!
     
     init(gameScene: GameScene) {
         self.gameScene = gameScene
@@ -22,6 +21,7 @@ class PlayState: GKState {
         self.bankManager = BankManager(gameScene: gameScene)
         self.hudManager = HUDManager(gameScene: gameScene)
         super.init()
+        self.powerUpManager = PowerUpManager(gameScene: gameScene, playState: self)
     }
     
     override func didEnter(from previousState: GKState?) {
@@ -34,18 +34,15 @@ class PlayState: GKState {
         gameScene.removeAction(forKey: "updateTimer")
     }
     
-    override func isValidNextState(_ stateClass: AnyClass) -> Bool {
-        return stateClass is GameOverState.Type
-    }
-    
     private func setupPlayScene() {
         gridManager.createGrid()
         bankManager.createPictureBank()
         hudManager.createHUD()
-        gameScene.context.gameInfo.timeRemaining = 60 // Set initial time
+        powerUpManager.setupPowerUps()
+        gameScene.context.gameInfo.timeRemaining = 60
     }
     
-    private func startTimer() {
+    func startTimer() {
         let updateTimerAction = SKAction.sequence([
             SKAction.run { [weak self] in
                 self?.hudManager.updateTimer()
@@ -58,74 +55,137 @@ class PlayState: GKState {
     func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
         guard let touch = touches.first else { return }
         let location = touch.location(in: gameScene)
-        let bankLocation = bankManager.bankScrollNode?.convert(location, from: gameScene)
-        let touchedNodes = bankManager.bankScrollNode?.nodes(at: bankLocation ?? .zero) ?? []
         
-        for node in touchedNodes {
-            if node.name?.starts(with: "piece_") == true, let pieceNode = node as? SKSpriteNode {
-                if touch.tapCount == 2 {
-                    handleDoubleTap(pieceNode: pieceNode)
-                } else {
-                    draggedPiece = pieceNode
-                    draggedPiece?.zPosition = 100
-                    draggedPiece?.position = gameScene.convert(pieceNode.position, from: bankManager.bankScrollNode!)
-                    draggedPiece?.removeFromParent()
-                    gameScene.addChild(draggedPiece!)
+        // Check for power-up touches
+        if powerUpManager.handleTouch(at: location) {
+            return
+        }
+        
+        // Handle piece selection in bank
+        if let bankNode = bankManager.bankNode,
+           bankNode.contains(location) {
+            let bankLocation = bankNode.convert(location, from: gameScene)
+            if let touchedPiece = bankNode.nodes(at: bankLocation)
+                .first(where: { $0.name?.starts(with: "piece_") == true }) as? SKSpriteNode {
+                bankManager.selectPiece(touchedPiece)
+            }
+            return
+        }
+        
+        // Handle grid placement
+        if let gridNode = gameScene.childNode(withName: "grid") as? SKSpriteNode,
+           let selectedPiece = bankManager.getSelectedPiece(),
+           gridNode.contains(location) {
+            let gridLocation = gridNode.convert(location, from: gameScene)
+            if gridManager.tryPlacePiece(selectedPiece, at: gridLocation) {
+                hudManager.updateScore()
+                bankManager.clearSelection()
+                bankManager.refreshBankIfNeeded()
+                
+                if gameScene.context.gameInfo.score == 9 {
+                    gameScene.context.stateMachine?.enter(GameOverState.self)
                 }
-                break
             }
         }
     }
-    
+
     func touchesMoved(_ touches: Set<UITouch>, with event: UIEvent?) {
-        guard let touch = touches.first, let draggedPiece = draggedPiece else { return }
-        let location = touch.location(in: gameScene)
-        draggedPiece.position = location
     }
     
     func touchesEnded(_ touches: Set<UITouch>, with event: UIEvent?) {
-        guard let draggedPiece = draggedPiece else { return }
-        let dropLocation = draggedPiece.position
-        
-        if let gridNode = gameScene.childNode(withName: "grid") as? SKSpriteNode {
-            let localPoint = gridNode.convert(dropLocation, from: gameScene)
-            if gridNode.contains(localPoint) {
-                if gridManager.snapToGrid(piece: draggedPiece, at: localPoint) {
-                    hudManager.updateScore()
-                    bankManager.shiftPiecesLeft()
-                } else {
-                    bankManager.returnToBank(piece: draggedPiece)
-                }
-            } else {
-                bankManager.returnToBank(piece: draggedPiece)
-            }
-        }
-        
-        self.draggedPiece = nil
+    }
+}
+
+class PowerUpManager {
+    weak var gameScene: GameScene?
+    weak var playState: PlayState?
+    private var powerUps: [PowerUpType: SKNode] = [:]
+    
+    init(gameScene: GameScene, playState: PlayState) {
+        self.gameScene = gameScene
+        self.playState = playState
     }
     
-    private func handleDoubleTap(pieceNode: SKSpriteNode) {
-        if let gridNode = gameScene.childNode(withName: "grid") as? SKSpriteNode,
-           let pieceName = pieceNode.name,
-           let pieceIndex = gameScene.context.gameInfo.pieces.firstIndex(where: { "piece_\(Int($0.correctPosition.y))_\(Int($0.correctPosition.x))" == pieceName }) {
-            let puzzlePiece = gameScene.context.gameInfo.pieces[pieceIndex]
-            let correctPosition = puzzlePiece.correctPosition
-            
-            let pieceSize = CGSize(width: gridNode.size.width / 3, height: gridNode.size.height / 3)
-            let newPosition = CGPoint(x: correctPosition.x * pieceSize.width - gridNode.size.width / 2 + pieceSize.width / 2,
-                                      y: (2 - correctPosition.y) * pieceSize.height - gridNode.size.height / 2 + pieceSize.height / 2)
-            
-            pieceNode.removeFromParent()
-            gridNode.addChild(pieceNode)
-            pieceNode.run(SKAction.move(to: newPosition, duration: 0.2))
-            
-            gameScene.context.gameInfo.score += 1
-            hudManager.updateScore()
-            
-            bankManager.shiftPiecesLeft()
-            
-            if gameScene.context.gameInfo.score == 9 {
-                gameScene.context.stateMachine?.enter(GameOverState.self)
+    func setupPowerUps() {
+        guard let gameScene = gameScene else { return }
+        
+        let powerUpTypes: [PowerUpType] = [.timeStop, .place, .flash]
+        let spacing: CGFloat = 80
+        let startX = gameScene.size.width - CGFloat(powerUpTypes.count) * spacing
+        
+        for (index, type) in powerUpTypes.enumerated() {
+            let powerUp = createPowerUpNode(type: type)
+            powerUp.position = CGPoint(x: startX + CGFloat(index) * spacing, y: gameScene.size.height - 50)
+            gameScene.addChild(powerUp)
+            powerUps[type] = powerUp
+        }
+    }
+    
+    private func createPowerUpNode(type: PowerUpType) -> SKNode {
+        let container = SKNode()
+        
+        let circle = SKShapeNode(circleOfRadius: 25)
+        circle.fillColor = .blue
+        circle.strokeColor = .white
+        circle.lineWidth = 2
+        container.addChild(circle)
+        
+        let label = SKLabelNode(text: type.rawValue.prefix(1).uppercased())
+        label.fontName = "AvenirNext-Bold"
+        label.fontSize = 20
+        label.verticalAlignmentMode = .center
+        container.addChild(label)
+        
+        container.name = "powerup_\(type.rawValue)"
+        return container
+    }
+    
+    func handleTouch(at location: CGPoint) -> Bool {
+        guard let gameScene = gameScene else { return false }
+        
+        let touchedNodes = gameScene.nodes(at: location)
+        for node in touchedNodes {
+            if let powerUpType = getPowerUpType(from: node.name) {
+                activatePowerUp(powerUpType)
+                return true
+            }
+        }
+        return false
+    }
+    
+    private func getPowerUpType(from nodeName: String?) -> PowerUpType? {
+        guard let name = nodeName,
+              name.starts(with: "powerup_"),
+              let typeString = name.split(separator: "_").last,
+              let type = PowerUpType(rawValue: String(typeString)) else {
+            return nil
+        }
+        return type
+    }
+    
+    private func activatePowerUp(_ type: PowerUpType) {
+        switch type {
+        case .timeStop:
+            gameScene?.removeAction(forKey: "updateTimer")
+            DispatchQueue.main.asyncAfter(deadline: .now() + 5) { [weak self] in
+                self?.playState?.startTimer()
+            }
+        case .place:
+            // Auto-place next piece correctly
+            if let selectedPiece = gameScene?.context.gameInfo.pieces.first(where: { !$0.isPlaced }) {
+                // Implementation for auto-placing piece
+            }
+        case .flash:
+            // Show original image briefly
+            if let image = gameScene?.context.gameInfo.currentImage {
+                let imageNode = SKSpriteNode(texture: SKTexture(image: image))
+                imageNode.position = CGPoint(x: gameScene?.size.width ?? 0 / 2,
+                                          y: gameScene?.size.height ?? 0 / 2)
+                gameScene?.addChild(imageNode)
+                
+                DispatchQueue.main.asyncAfter(deadline: .now() + 1) {
+                    imageNode.removeFromParent()
+                }
             }
         }
     }
