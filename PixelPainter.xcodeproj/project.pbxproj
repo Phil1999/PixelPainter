@@ -3,21 +3,15 @@
 	archiveVersion = 1;
 	classes = {
 	};
-	objectVersion = 56;
+	objectVersion = 70;
 	objects = {
 
 /* Begin PBXBuildFile section */
-		D4AC0F8D2CBEF292004FF844 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4AC0F8C2CBEF292004FF844 /* AppDelegate.swift */; };
-		D4AC0F8F2CBEF292004FF844 /* GameScene.sks in Resources */ = {isa = PBXBuildFile; fileRef = D4AC0F8E2CBEF292004FF844 /* GameScene.sks */; };
-		D4AC0F912CBEF292004FF844 /* Actions.sks in Resources */ = {isa = PBXBuildFile; fileRef = D4AC0F902CBEF292004FF844 /* Actions.sks */; };
-		D4AC0F932CBEF292004FF844 /* GameScene.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4AC0F922CBEF292004FF844 /* GameScene.swift */; };
-		D4AC0F952CBEF292004FF844 /* GameViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4AC0F942CBEF292004FF844 /* GameViewController.swift */; };
-		D4AC0F982CBEF292004FF844 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = D4AC0F962CBEF292004FF844 /* Main.storyboard */; };
+		A95E258D2CC7F3DE00163C5C /* PicturePerfectApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = A95E258C2CC7F3DE00163C5C /* PicturePerfectApp.swift */; };
+		A95E258F2CC7F3FD00163C5C /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A95E258E2CC7F3FD00163C5C /* ContentView.swift */; };
+		A95E25912CC7F46400163C5C /* GameContext.swift in Sources */ = {isa = PBXBuildFile; fileRef = A95E25902CC7F46400163C5C /* GameContext.swift */; };
+		A95E25932CC7F56D00163C5C /* GameScene.swift in Sources */ = {isa = PBXBuildFile; fileRef = A95E25922CC7F56D00163C5C /* GameScene.swift */; };
 		D4AC0F9A2CBEF294004FF844 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = D4AC0F992CBEF294004FF844 /* Assets.xcassets */; };
-		D4AC0F9D2CBEF294004FF844 /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = D4AC0F9B2CBEF294004FF844 /* LaunchScreen.storyboard */; };
-		D4AC0FA72CBEF294004FF844 /* PixelPainterTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4AC0FA62CBEF294004FF844 /* PixelPainterTests.swift */; };
-		D4AC0FB12CBEF294004FF844 /* PixelPainterUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4AC0FB02CBEF294004FF844 /* PixelPainterUITests.swift */; };
-		D4AC0FB32CBEF294004FF844 /* PixelPainterUITestsLaunchTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4AC0FB22CBEF294004FF844 /* PixelPainterUITestsLaunchTests.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -38,21 +32,22 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		A95E258C2CC7F3DE00163C5C /* PicturePerfectApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PicturePerfectApp.swift; sourceTree = "<group>"; };
+		A95E258E2CC7F3FD00163C5C /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
+		A95E25902CC7F46400163C5C /* GameContext.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GameContext.swift; sourceTree = "<group>"; };
+		A95E25922CC7F56D00163C5C /* GameScene.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GameScene.swift; sourceTree = "<group>"; };
 		D4AC0F892CBEF292004FF844 /* PixelPainter.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = PixelPainter.app; sourceTree = BUILT_PRODUCTS_DIR; };
-		D4AC0F8C2CBEF292004FF844 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
-		D4AC0F8E2CBEF292004FF844 /* GameScene.sks */ = {isa = PBXFileReference; lastKnownFileType = file.sks; path = GameScene.sks; sourceTree = "<group>"; };
-		D4AC0F902CBEF292004FF844 /* Actions.sks */ = {isa = PBXFileReference; lastKnownFileType = file.sks; path = Actions.sks; sourceTree = "<group>"; };
-		D4AC0F922CBEF292004FF844 /* GameScene.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GameScene.swift; sourceTree = "<group>"; };
-		D4AC0F942CBEF292004FF844 /* GameViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GameViewController.swift; sourceTree = "<group>"; };
-		D4AC0F972CBEF292004FF844 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/Main.storyboard; sourceTree = "<group>"; };
 		D4AC0F992CBEF294004FF844 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
-		D4AC0F9C2CBEF294004FF844 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/LaunchScreen.storyboard; sourceTree = "<group>"; };
 		D4AC0FA22CBEF294004FF844 /* PixelPainterTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = PixelPainterTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
-		D4AC0FA62CBEF294004FF844 /* PixelPainterTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PixelPainterTests.swift; sourceTree = "<group>"; };
 		D4AC0FAC2CBEF294004FF844 /* PixelPainterUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = PixelPainterUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
-		D4AC0FB02CBEF294004FF844 /* PixelPainterUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PixelPainterUITests.swift; sourceTree = "<group>"; };
-		D4AC0FB22CBEF294004FF844 /* PixelPainterUITestsLaunchTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PixelPainterUITestsLaunchTests.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
+
+/* Begin PBXFileSystemSynchronizedRootGroup section */
+		A95E25942CC7F6D600163C5C /* States */ = {isa = PBXFileSystemSynchronizedRootGroup; explicitFileTypes = {}; explicitFolders = (); path = States; sourceTree = "<group>"; };
+		A95E259B2CC7F91200163C5C /* Helpers */ = {isa = PBXFileSystemSynchronizedRootGroup; explicitFileTypes = {}; explicitFolders = (); path = Helpers; sourceTree = "<group>"; };
+		A95E25A02CC7FA2800163C5C /* Models */ = {isa = PBXFileSystemSynchronizedRootGroup; explicitFileTypes = {}; explicitFolders = (); path = Models; sourceTree = "<group>"; };
+		A95E25A22CC7FA3D00163C5C /* Nodes */ = {isa = PBXFileSystemSynchronizedRootGroup; explicitFileTypes = {}; explicitFolders = (); path = Nodes; sourceTree = "<group>"; };
+/* End PBXFileSystemSynchronizedRootGroup section */
 
 /* Begin PBXFrameworksBuildPhase section */
 		D4AC0F862CBEF292004FF844 /* Frameworks */ = {
@@ -83,8 +78,6 @@
 			isa = PBXGroup;
 			children = (
 				D4AC0F8B2CBEF292004FF844 /* PixelPainter */,
-				D4AC0FA52CBEF294004FF844 /* PixelPainterTests */,
-				D4AC0FAF2CBEF294004FF844 /* PixelPainterUITests */,
 				D4AC0F8A2CBEF292004FF844 /* Products */,
 			);
 			sourceTree = "<group>";
@@ -102,33 +95,17 @@
 		D4AC0F8B2CBEF292004FF844 /* PixelPainter */ = {
 			isa = PBXGroup;
 			children = (
-				D4AC0F8C2CBEF292004FF844 /* AppDelegate.swift */,
-				D4AC0F8E2CBEF292004FF844 /* GameScene.sks */,
-				D4AC0F902CBEF292004FF844 /* Actions.sks */,
-				D4AC0F922CBEF292004FF844 /* GameScene.swift */,
-				D4AC0F942CBEF292004FF844 /* GameViewController.swift */,
-				D4AC0F962CBEF292004FF844 /* Main.storyboard */,
+				A95E259B2CC7F91200163C5C /* Helpers */,
+				A95E25A02CC7FA2800163C5C /* Models */,
+				A95E25A22CC7FA3D00163C5C /* Nodes */,
+				A95E25942CC7F6D600163C5C /* States */,
 				D4AC0F992CBEF294004FF844 /* Assets.xcassets */,
-				D4AC0F9B2CBEF294004FF844 /* LaunchScreen.storyboard */,
+				A95E258C2CC7F3DE00163C5C /* PicturePerfectApp.swift */,
+				A95E258E2CC7F3FD00163C5C /* ContentView.swift */,
+				A95E25902CC7F46400163C5C /* GameContext.swift */,
+				A95E25922CC7F56D00163C5C /* GameScene.swift */,
 			);
 			path = PixelPainter;
-			sourceTree = "<group>";
-		};
-		D4AC0FA52CBEF294004FF844 /* PixelPainterTests */ = {
-			isa = PBXGroup;
-			children = (
-				D4AC0FA62CBEF294004FF844 /* PixelPainterTests.swift */,
-			);
-			path = PixelPainterTests;
-			sourceTree = "<group>";
-		};
-		D4AC0FAF2CBEF294004FF844 /* PixelPainterUITests */ = {
-			isa = PBXGroup;
-			children = (
-				D4AC0FB02CBEF294004FF844 /* PixelPainterUITests.swift */,
-				D4AC0FB22CBEF294004FF844 /* PixelPainterUITestsLaunchTests.swift */,
-			);
-			path = PixelPainterUITests;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -145,6 +122,12 @@
 			buildRules = (
 			);
 			dependencies = (
+			);
+			fileSystemSynchronizedGroups = (
+				A95E25942CC7F6D600163C5C /* States */,
+				A95E259B2CC7F91200163C5C /* Helpers */,
+				A95E25A02CC7FA2800163C5C /* Models */,
+				A95E25A22CC7FA3D00163C5C /* Nodes */,
 			);
 			name = PixelPainter;
 			productName = PixelPainter;
@@ -235,11 +218,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				D4AC0F982CBEF292004FF844 /* Main.storyboard in Resources */,
-				D4AC0F8F2CBEF292004FF844 /* GameScene.sks in Resources */,
 				D4AC0F9A2CBEF294004FF844 /* Assets.xcassets in Resources */,
-				D4AC0F9D2CBEF294004FF844 /* LaunchScreen.storyboard in Resources */,
-				D4AC0F912CBEF292004FF844 /* Actions.sks in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -264,9 +243,10 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				D4AC0F932CBEF292004FF844 /* GameScene.swift in Sources */,
-				D4AC0F952CBEF292004FF844 /* GameViewController.swift in Sources */,
-				D4AC0F8D2CBEF292004FF844 /* AppDelegate.swift in Sources */,
+				A95E25912CC7F46400163C5C /* GameContext.swift in Sources */,
+				A95E25932CC7F56D00163C5C /* GameScene.swift in Sources */,
+				A95E258F2CC7F3FD00163C5C /* ContentView.swift in Sources */,
+				A95E258D2CC7F3DE00163C5C /* PicturePerfectApp.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -274,7 +254,6 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				D4AC0FA72CBEF294004FF844 /* PixelPainterTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -282,8 +261,6 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				D4AC0FB12CBEF294004FF844 /* PixelPainterUITests.swift in Sources */,
-				D4AC0FB32CBEF294004FF844 /* PixelPainterUITestsLaunchTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -301,25 +278,6 @@
 			targetProxy = D4AC0FAD2CBEF294004FF844 /* PBXContainerItemProxy */;
 		};
 /* End PBXTargetDependency section */
-
-/* Begin PBXVariantGroup section */
-		D4AC0F962CBEF292004FF844 /* Main.storyboard */ = {
-			isa = PBXVariantGroup;
-			children = (
-				D4AC0F972CBEF292004FF844 /* Base */,
-			);
-			name = Main.storyboard;
-			sourceTree = "<group>";
-		};
-		D4AC0F9B2CBEF294004FF844 /* LaunchScreen.storyboard */ = {
-			isa = PBXVariantGroup;
-			children = (
-				D4AC0F9C2CBEF294004FF844 /* Base */,
-			);
-			name = LaunchScreen.storyboard;
-			sourceTree = "<group>";
-		};
-/* End PBXVariantGroup section */
 
 /* Begin XCBuildConfiguration section */
 		D4AC0FB42CBEF294004FF844 /* Debug */ = {
@@ -374,6 +332,7 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
+				GENERATE_INFOPLIST_FILE = YES;
 				IPHONEOS_DEPLOYMENT_TARGET = 17.2;
 				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
 				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
@@ -431,6 +390,7 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
+				GENERATE_INFOPLIST_FILE = YES;
 				IPHONEOS_DEPLOYMENT_TARGET = 17.2;
 				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
 				MTL_ENABLE_DEBUG_INFO = NO;
@@ -448,10 +408,12 @@
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = 9FBN78Z68A;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = PixelPainter/Info.plist;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
-				INFOPLIST_KEY_UILaunchStoryboardName = LaunchScreen;
-				INFOPLIST_KEY_UIMainStoryboardFile = Main;
+				INFOPLIST_KEY_UILaunchStoryboardName = "";
+				INFOPLIST_KEY_UIMainStoryboardFile = "";
 				INFOPLIST_KEY_UIStatusBarHidden = YES;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
@@ -475,10 +437,12 @@
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = 9FBN78Z68A;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = PixelPainter/Info.plist;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
-				INFOPLIST_KEY_UILaunchStoryboardName = LaunchScreen;
-				INFOPLIST_KEY_UIMainStoryboardFile = Main;
+				INFOPLIST_KEY_UILaunchStoryboardName = "";
+				INFOPLIST_KEY_UIMainStoryboardFile = "";
 				INFOPLIST_KEY_UIStatusBarHidden = YES;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
@@ -498,7 +462,6 @@
 		D4AC0FBA2CBEF294004FF844 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
 				BUNDLE_LOADER = "$(TEST_HOST)";
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
@@ -517,7 +480,6 @@
 		D4AC0FBB2CBEF294004FF844 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
 				BUNDLE_LOADER = "$(TEST_HOST)";
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
@@ -536,7 +498,6 @@
 		D4AC0FBD2CBEF294004FF844 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				GENERATE_INFOPLIST_FILE = YES;
@@ -553,7 +514,6 @@
 		D4AC0FBE2CBEF294004FF844 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				GENERATE_INFOPLIST_FILE = YES;
