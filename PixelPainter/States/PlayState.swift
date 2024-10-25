@@ -106,16 +106,28 @@ class PowerUpManager {
         self.playState = playState
     }
     
-    func setupPowerUps() {
+    func setupPowerUps() {	
         guard let gameScene = gameScene else { return }
         
         let powerUpTypes: [PowerUpType] = [.timeStop, .place, .flash]
-        let spacing: CGFloat = 80
-        let startX = gameScene.size.width - CGFloat(powerUpTypes.count) * spacing
+        let powerUpSize: CGFloat = 40
+        
+        // constants for positioning
+        let centerX = gameScene.size.width / 2
+        
+        // calculate total width
+        let totalSpacing: CGFloat = powerUpSize * 2
+        let totalWidth = CGFloat(powerUpTypes.count - 1) * totalSpacing
+        
+        // Center horizontally
+        let startX = centerX - (totalWidth / 2)
+        
+        // Position right above the pixel bank (150 is rough estimate of bank height)
+        let yPosition = 150 + powerUpSize
         
         for (index, type) in powerUpTypes.enumerated() {
             let powerUp = createPowerUpNode(type: type)
-            powerUp.position = CGPoint(x: startX + CGFloat(index) * spacing, y: gameScene.size.height - 50)
+            powerUp.position = CGPoint(x: startX + CGFloat(index) * totalSpacing, y: yPosition)
             gameScene.addChild(powerUp)
             powerUps[type] = powerUp
         }
@@ -179,8 +191,8 @@ class PowerUpManager {
             // Show original image briefly
             if let image = gameScene?.context.gameInfo.currentImage {
                 let imageNode = SKSpriteNode(texture: SKTexture(image: image))
-                imageNode.position = CGPoint(x: gameScene?.size.width ?? 0 / 2,
-                                          y: gameScene?.size.height ?? 0 / 2)
+                imageNode.position = CGPoint(x: (gameScene?.size.width ?? 0) / 2,
+                                          y: (gameScene?.size.height ?? 0) / 2)
                 gameScene?.addChild(imageNode)
                 
                 DispatchQueue.main.asyncAfter(deadline: .now() + 1) {

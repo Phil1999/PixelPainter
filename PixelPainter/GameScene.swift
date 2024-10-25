@@ -31,8 +31,21 @@ class GameScene: SKScene {
     }
     
     override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
-        if let playState = context.stateMachine?.currentState as? PlayState {
-            playState.touchesBegan(touches, with: event)
+        if let currentState = context.stateMachine?.currentState {
+            switch currentState {
+            case let playState as PlayState:
+                playState.touchesBegan(touches, with: event)
+                
+            case let gameOverState as GameOverState:
+                gameOverState.handleTouches(touches, with: event)
+                
+            case is MemorizeState:
+                break
+                
+            default:
+                break
+            }
+            
         }
     }
     
