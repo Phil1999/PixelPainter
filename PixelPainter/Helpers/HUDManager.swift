@@ -22,7 +22,7 @@ class HUDManager {
         gameScene.addChild(hudNode)
         
         let timerLabel = SKLabelNode(text: "Time: \(Int(gameScene.context.gameInfo.timeRemaining))")
-        timerLabel.fontName = "AvenirNext-Bold"
+        timerLabel.fontName = "PPNeueMontreal-Bold"
         timerLabel.fontSize = 24
         timerLabel.horizontalAlignmentMode = .left
         timerLabel.position = CGPoint(x: 20, y: 0)
@@ -30,7 +30,7 @@ class HUDManager {
         hudNode.addChild(timerLabel)
         
         let scoreLabel = SKLabelNode(text: "Score: \(gameScene.context.gameInfo.score)")
-        scoreLabel.fontName = "AvenirNext-Bold"
+        scoreLabel.fontName = "PPNeueMontreal-Bold"
         scoreLabel.fontSize = 24
         scoreLabel.horizontalAlignmentMode = .right
         scoreLabel.position = CGPoint(x: gameScene.size.width - 20, y: 0)

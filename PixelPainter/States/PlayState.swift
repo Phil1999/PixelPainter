@@ -106,7 +106,7 @@ class PowerUpManager {
         self.playState = playState
     }
     
-    func setupPowerUps() {
+    func setupPowerUps() {	
         guard let gameScene = gameScene else { return }
         
         let powerUpTypes: [PowerUpType] = [.timeStop, .place, .flash]
@@ -143,7 +143,7 @@ class PowerUpManager {
         container.addChild(circle)
         
         let label = SKLabelNode(text: type.rawValue.prefix(1).uppercased())
-        label.fontName = "PPNeueMontreal-Bold"
+        label.fontName = "AvenirNext-Bold"
         label.fontSize = 20
         label.verticalAlignmentMode = .center
         container.addChild(label)
