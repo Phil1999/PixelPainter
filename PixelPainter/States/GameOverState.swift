@@ -80,11 +80,11 @@ class GameOverState: GKState {
         
         for node in touchedNodes {
             if node.name == "playAgainButton" {
-                gameScene.context.stateMachine?.enter(MemorizeState.self)
+                gameScene.context.resetGame()
             } else if node.name == "mainMenuButton" {
                 // If you have a main menu state, enter it here
                 // For now, we'll just restart the game
-                gameScene.context.stateMachine?.enter(MemorizeState.self)
+                gameScene.context.resetGame()
             }
         }
     }
