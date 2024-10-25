@@ -2,8 +2,8 @@
 
 *.xccheckout
 
-{Your_ProductName}.xcodeproj/xcuserdata/*
-{Your_ProductName}.xcodeproj/xcuserdata/*.xcbkptlist
+PixelPainter.xcodeproj/xcuserdata/*
+PixelPainter.xcodeproj/xcuserdata/*.xcbkptlist
 
 *.xcbkptlist
 **/.DS_Store
