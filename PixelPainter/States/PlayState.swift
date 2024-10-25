@@ -110,12 +110,24 @@ class PowerUpManager {
         guard let gameScene = gameScene else { return }
         
         let powerUpTypes: [PowerUpType] = [.timeStop, .place, .flash]
-        let spacing: CGFloat = 80
-        let startX = gameScene.size.width - CGFloat(powerUpTypes.count) * spacing
+        let powerUpSize: CGFloat = 40
+        
+        // constants for positioning
+        let centerX = gameScene.size.width / 2
+        
+        // calculate total width
+        let totalSpacing: CGFloat = powerUpSize * 2
+        let totalWidth = CGFloat(powerUpTypes.count - 1) * totalSpacing
+        
+        // Center horizontally
+        let startX = centerX - (totalWidth / 2)
+        
+        // Position right above the pixel bank (150 is rough estimate of bank height)
+        let yPosition = 150 + powerUpSize
         
         for (index, type) in powerUpTypes.enumerated() {
             let powerUp = createPowerUpNode(type: type)
-            powerUp.position = CGPoint(x: startX + CGFloat(index) * spacing, y: gameScene.size.height - 50)
+            powerUp.position = CGPoint(x: startX + CGFloat(index) * totalSpacing, y: yPosition)
             gameScene.addChild(powerUp)
             powerUps[type] = powerUp
         }
@@ -131,7 +143,7 @@ class PowerUpManager {
         container.addChild(circle)
         
         let label = SKLabelNode(text: type.rawValue.prefix(1).uppercased())
-        label.fontName = "AvenirNext-Bold"
+        label.fontName = "PPNeueMontreal-Bold"
         label.fontSize = 20
         label.verticalAlignmentMode = .center
         container.addChild(label)
