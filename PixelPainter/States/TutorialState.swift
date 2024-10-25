@@ -43,7 +43,7 @@ class TutorialState: GKState {
         gameScene.addChild(contentNode)
         
         let titleLabel = SKLabelNode(text: "How to Play")
-        titleLabel.fontName = "AvenirNext-Bold"
+        titleLabel.fontName = "PPNeueMontreal-Bold"
         titleLabel.fontSize = 40
         titleLabel.fontColor = .white
         titleLabel.position = CGPoint(x: safeWidth / 2, y: safeHeight * 0.9)
@@ -61,7 +61,7 @@ class TutorialState: GKState {
         
         for (index, instruction) in instructions.enumerated() {
             let label = SKLabelNode(text: instruction)
-            label.fontName = "AvenirNext-Regular"
+            label.fontName = "PPNeueMontreal-Regular"
             label.fontSize = 24
             label.fontColor = .white
             label.position = CGPoint(x: 0, y: -CGFloat(index * 40))
@@ -83,7 +83,7 @@ class TutorialState: GKState {
         let button = SKSpriteNode(color: .systemBlue, size: size)
         
         let label = SKLabelNode(text: text)
-        label.fontName = "AvenirNext-Bold"
+        label.fontName = "PPNeueMontreal-Bold"
         label.fontSize = 20
         label.fontColor = .white
         label.verticalAlignmentMode = .center

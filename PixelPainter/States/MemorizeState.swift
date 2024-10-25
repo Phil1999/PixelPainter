@@ -42,11 +42,27 @@ class MemorizeState: GKState {
         gameScene.addChild(imageNode)
         
         let timerLabel = SKLabelNode(text: "Time: \(Int(memorizeTime))")
-        timerLabel.fontName = "AvenirNext-Bold"
+        timerLabel.fontName = "PPNeueMontreal-Bold"
         timerLabel.fontSize = 24
         timerLabel.position = CGPoint(x: gameScene.size.width / 2, y: gameScene.size.height - 100)
         timerLabel.name = "timerLabel"
         gameScene.addChild(timerLabel)
+        
+        let memorizeLabel = SKLabelNode(text: "MEMORIZE THIS")
+        memorizeLabel.fontName = "PPNeueMontreal-Bold"
+        memorizeLabel.fontSize = 24
+        memorizeLabel.fontColor = .red
+        memorizeLabel.position = CGPoint(x: gameScene.size.width / 2, y: gameScene.size.height - 150)
+        memorizeLabel.name = "memorizeLabel"
+        gameScene.addChild(memorizeLabel)
+        
+        let fadeOut = SKAction.fadeOut(withDuration: 0.5)
+        let fadeIn = SKAction.fadeIn(withDuration: 0.5)
+        let blink = SKAction.sequence([fadeOut, fadeIn])
+        let blinkForever = SKAction.repeatForever(blink)
+
+        // Run the blinking action on the memorize label
+        memorizeLabel.run(blinkForever)
     }
     
     private func startMemorizeTimer() {
