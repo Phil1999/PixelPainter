@@ -191,8 +191,8 @@ class PowerUpManager {
             // Show original image briefly
             if let image = gameScene?.context.gameInfo.currentImage {
                 let imageNode = SKSpriteNode(texture: SKTexture(image: image))
-                imageNode.position = CGPoint(x: gameScene?.size.width ?? 0 / 2,
-                                          y: gameScene?.size.height ?? 0 / 2)
+                imageNode.position = CGPoint(x: (gameScene?.size.width ?? 0) / 2,
+                                          y: (gameScene?.size.height ?? 0) / 2)
                 gameScene?.addChild(imageNode)
                 
                 DispatchQueue.main.asyncAfter(deadline: .now() + 1) {
