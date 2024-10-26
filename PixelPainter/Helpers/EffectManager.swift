@@ -20,7 +20,7 @@ class EffectManager {
     
     func flashScreen(color: UIColor, alpha: CGFloat) {
         
-        guard let gameScene = gameScene else { return }
+        guard let gameScene = gameScene, !isFlashing else { return } // Prevent overlapping flashes
         
         isFlashing = true
         
@@ -37,8 +37,7 @@ class EffectManager {
         let remove = SKAction.removeFromParent()
         let flashSequence = SKAction.sequence([fadeIn, fadeOut, fadeIn, fadeOut,
             SKAction.run { [weak self] in
-            // Prevent overlapping screen flashes
-                self?.isFlashing = false
+                self?.isFlashing = false // reset flashing status
             },
             remove
         ])
