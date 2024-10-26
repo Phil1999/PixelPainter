@@ -58,6 +58,13 @@ class BankManager {
         showNextThreePieces()
     }
     
+    func isBankEmpty() -> Bool {
+        if remainingPiecesIndices.isEmpty {
+            return true
+        }
+        return false
+    }
+    
     func showNextThreePieces() {
         guard let bankNode = bankNode,
               let gameScene = gameScene else { return }
@@ -147,7 +154,7 @@ class BankManager {
             
             print("Refreshing bank. Remaining pieces: \(remainingPiecesIndices.count)")
             
-            if !remainingPiecesIndices.isEmpty {
+            if !isBankEmpty() {
                 showNextThreePieces()
             }
         }
