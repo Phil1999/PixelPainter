@@ -41,10 +41,17 @@ class MemorizeState: GKState {
         imageNode.position = CGPoint(x: gameScene.size.width / 2, y: gameScene.size.height / 2)
         gameScene.addChild(imageNode)
         
+        let levelLabel = SKLabelNode(text: "Level: \(Int(gameScene.context.gameInfo.level))")
+        levelLabel.fontName = "PPNeueMontreal-Bold"
+        levelLabel.fontSize = 24
+        levelLabel.position = CGPoint(x: gameScene.size.width / 2, y: gameScene.size.height - 100)
+        levelLabel.name = "levelLabel"
+        gameScene.addChild(levelLabel)
+        
         let timerLabel = SKLabelNode(text: "Time: \(Int(memorizeTime))")
         timerLabel.fontName = "PPNeueMontreal-Bold"
         timerLabel.fontSize = 24
-        timerLabel.position = CGPoint(x: gameScene.size.width / 2, y: gameScene.size.height - 100)
+        timerLabel.position = CGPoint(x: gameScene.size.width / 2, y: gameScene.size.height - 150)
         timerLabel.name = "timerLabel"
         gameScene.addChild(timerLabel)
         
@@ -52,7 +59,7 @@ class MemorizeState: GKState {
         memorizeLabel.fontName = "PPNeueMontreal-Bold"
         memorizeLabel.fontSize = 24
         memorizeLabel.fontColor = .red
-        memorizeLabel.position = CGPoint(x: gameScene.size.width / 2, y: gameScene.size.height - 150)
+        memorizeLabel.position = CGPoint(x: gameScene.size.width / 2, y: gameScene.size.height - 200)
         memorizeLabel.name = "memorizeLabel"
         gameScene.addChild(memorizeLabel)
         

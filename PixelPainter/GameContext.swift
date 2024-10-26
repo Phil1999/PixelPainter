@@ -26,7 +26,8 @@ class GameContext: ObservableObject {
         stateMachine = GKStateMachine(states: [
             MemorizeState(gameScene: scene),
             PlayState(gameScene: scene),
-            GameOverState(gameScene: scene)
+            GameOverState(gameScene: scene),
+            NextLevelState(gameScene: scene)
         ])
     }
     
@@ -46,7 +47,8 @@ struct GameInfo {
     var currentImage: UIImage?
     var pieces: [PuzzlePiece] = []
     var score: Int = 0
-    var timeRemaining: TimeInterval = 60
+    var timeRemaining: TimeInterval = 30
+    var level: Int = 1
 }
 
 struct PuzzlePiece: Identifiable {
