@@ -70,7 +70,7 @@ class GridManager {
                 
                 // Update the piece's status to placed
                 gameScene.context.gameInfo.pieces[pieceIndex].isPlaced = true
-                gameScene.context.gameInfo.score += 1
+                gameScene.context.gameInfo.score += 15
                 
                 return true
             }

@@ -25,6 +25,7 @@ class PlayState: GKState {
     }
     
     override func didEnter(from previousState: GKState?) {
+        print("Entering Play State")
         setupPlayScene()
         startTimer()
     }
@@ -82,8 +83,14 @@ class PlayState: GKState {
                 bankManager.clearSelection()
                 bankManager.refreshBankIfNeeded()
                 
-                if gameScene.context.gameInfo.score == 9 {
-                    gameScene.context.stateMachine?.enter(GameOverState.self)
+                // if bank is empty transition to next level
+                if bankManager.isBankEmpty() {
+                    // if time remaining is 10+ secs then add extra 10 pts
+                    if Int(gameScene.context.gameInfo.timeRemaining) >= 10 {
+                        gameScene.context.gameInfo.score += 10
+                    }
+                    gameScene.context.gameInfo.level += 1
+                    gameScene.context.stateMachine?.enter(NextLevelState.self)
                 }
             } else {
                 // Incorrect placement - stutter punishment
