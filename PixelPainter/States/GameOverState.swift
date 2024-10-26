@@ -37,14 +37,14 @@ class GameOverState: GKState {
         gameScene.addChild(background)
         
         let gameOverLabel = SKLabelNode(text: "Game Over")
-        gameOverLabel.fontName = "AvenirNext-Bold"
+        gameOverLabel.fontName = "PPNeueMontreal-Bold"
         gameOverLabel.fontSize = 48
         gameOverLabel.fontColor = .white
         gameOverLabel.position = CGPoint(x: gameScene.size.width / 2, y: gameScene.size.height * 0.7)
         gameScene.addChild(gameOverLabel)
         
         let scoreLabel = SKLabelNode(text: "Final Score: \(gameScene.gameInfo.score)")
-        scoreLabel.fontName = "AvenirNext-Medium"
+        scoreLabel.fontName = "PPNeueMontreal-Medium"
         scoreLabel.fontSize = 32
         scoreLabel.fontColor = .white
         scoreLabel.position = CGPoint(x: gameScene.size.width / 2, y: gameScene.size.height * 0.6)
@@ -64,7 +64,7 @@ class GameOverState: GKState {
         button.position = position
         
         let label = SKLabelNode(text: text)
-        label.fontName = "AvenirNext-Bold"
+        label.fontName = "PPNeueMontreal-Bold"
         label.fontSize = 20
         label.fontColor = .white
         label.verticalAlignmentMode = .center

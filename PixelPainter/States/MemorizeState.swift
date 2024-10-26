@@ -41,12 +41,35 @@ class MemorizeState: GKState {
         imageNode.position = CGPoint(x: gameScene.size.width / 2, y: gameScene.size.height / 2)
         gameScene.addChild(imageNode)
         
+        let levelLabel = SKLabelNode(text: "Level: \(Int(gameScene.context.gameInfo.level))")
+        levelLabel.fontName = "PPNeueMontreal-Bold"
+        levelLabel.fontSize = 24
+        levelLabel.position = CGPoint(x: gameScene.size.width / 2, y: gameScene.size.height - 100)
+        levelLabel.name = "levelLabel"
+        gameScene.addChild(levelLabel)
+        
         let timerLabel = SKLabelNode(text: "Time: \(Int(memorizeTime))")
-        timerLabel.fontName = "AvenirNext-Bold"
+        timerLabel.fontName = "PPNeueMontreal-Bold"
         timerLabel.fontSize = 24
-        timerLabel.position = CGPoint(x: gameScene.size.width / 2, y: gameScene.size.height - 100)
+        timerLabel.position = CGPoint(x: gameScene.size.width / 2, y: gameScene.size.height - 150)
         timerLabel.name = "timerLabel"
         gameScene.addChild(timerLabel)
+        
+        let memorizeLabel = SKLabelNode(text: "MEMORIZE THIS")
+        memorizeLabel.fontName = "PPNeueMontreal-Bold"
+        memorizeLabel.fontSize = 24
+        memorizeLabel.fontColor = .red
+        memorizeLabel.position = CGPoint(x: gameScene.size.width / 2, y: gameScene.size.height - 200)
+        memorizeLabel.name = "memorizeLabel"
+        gameScene.addChild(memorizeLabel)
+        
+        let fadeOut = SKAction.fadeOut(withDuration: 0.5)
+        let fadeIn = SKAction.fadeIn(withDuration: 0.5)
+        let blink = SKAction.sequence([fadeOut, fadeIn])
+        let blinkForever = SKAction.repeatForever(blink)
+
+        // Run the blinking action on the memorize label
+        memorizeLabel.run(blinkForever)
     }
     
     private func startMemorizeTimer() {

@@ -25,6 +25,7 @@ class PlayState: GKState {
     }
     
     override func didEnter(from previousState: GKState?) {
+        print("Entering Play State")
         setupPlayScene()
         startTimer()
     }
@@ -39,7 +40,7 @@ class PlayState: GKState {
         bankManager.createPictureBank()
         hudManager.createHUD()
         powerUpManager.setupPowerUps()
-        gameScene.context.gameInfo.timeRemaining = 60
+        gameScene.context.gameInfo.timeRemaining = 30
     }
     
     func startTimer() {
@@ -82,9 +83,27 @@ class PlayState: GKState {
                 bankManager.clearSelection()
                 bankManager.refreshBankIfNeeded()
                 
-                if gameScene.context.gameInfo.score == 9 {
-                    gameScene.context.stateMachine?.enter(GameOverState.self)
+                // if bank is empty transition to next level
+                if bankManager.isBankEmpty() {
+                    // if time remaining is 10+ secs then add extra 10 pts
+                    if Int(gameScene.context.gameInfo.timeRemaining) >= 10 {
+                        gameScene.context.gameInfo.score += 10
+                    }
+                    gameScene.context.gameInfo.level += 1
+                    gameScene.context.stateMachine?.enter(NextLevelState.self)
                 }
+            } else {
+                // Incorrect placement - stutter punishment
+                let disableTouchAction = SKAction.run { [weak self] in self?.gameScene.isUserInteractionEnabled = false }
+                let waitAction = SKAction.wait(forDuration: 1.0)
+                let enableTouchAction = SKAction.run { [weak self] in self?.gameScene.isUserInteractionEnabled = true }
+                let stutterSequence = SKAction.sequence([disableTouchAction, waitAction, enableTouchAction])
+                gameScene.run(stutterSequence)
+                
+                let shakeLeft = SKAction.moveBy(x: -10, y: 0, duration: 0.05)
+                let shakeRight = SKAction.moveBy(x: 20, y: 0, duration: 0.05)
+                let shakeSequence = SKAction.sequence([shakeLeft, shakeRight, shakeLeft])
+                selectedPiece.run(shakeSequence)
             }
         }
     }
@@ -106,7 +125,7 @@ class PowerUpManager {
         self.playState = playState
     }
     
-    func setupPowerUps() {	
+    func setupPowerUps() {
         guard let gameScene = gameScene else { return }
         
         let powerUpTypes: [PowerUpType] = [.timeStop, .place, .flash]
@@ -143,7 +162,7 @@ class PowerUpManager {
         container.addChild(circle)
         
         let label = SKLabelNode(text: type.rawValue.prefix(1).uppercased())
-        label.fontName = "AvenirNext-Bold"
+        label.fontName = "PPNeueMontreal-Bold"
         label.fontSize = 20
         label.verticalAlignmentMode = .center
         container.addChild(label)
