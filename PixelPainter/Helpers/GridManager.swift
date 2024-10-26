@@ -84,11 +84,7 @@ class GridManager {
               let gridNode = gameScene.childNode(withName: "grid") as? SKSpriteNode else { return }
         
         // Remove previous highlights
-        gridNode.children.forEach { node in
-            if node.name?.starts(with: "frame_") == true {
-                (node as? SKSpriteNode)?.color = .darkGray
-            }
-        }
+        
         
         let pieceSize = CGSize(width: gridNode.size.width / 3, height: gridNode.size.height / 3)
         let col = Int((point.x + gridNode.size.width / 2) / pieceSize.width)
@@ -99,5 +95,34 @@ class GridManager {
                 frame.color = .blue.withAlphaComponent(0.5)
             }
         }
+    }
+    
+    func isCellEmpty(at point: CGPoint) -> Bool {
+        guard let gridNode = gameScene?.childNode(withName: "grid") as? SKSpriteNode else { return false }
+        
+        let pieceSize = CGSize(width: gridNode.size.width / 3, height: gridNode.size.height / 3)
+        let col = Int((point.x + gridNode.size.width / 2) / pieceSize.width)
+        let row = 2 - Int((point.y + gridNode.size.height / 2) / pieceSize.height)
+        
+        // Check valid coords
+        if row < 0 || row > 2 || col < 0 || col > 2 {
+            return false
+        }
+        
+        // Determine pos for this cell
+        let cellPos = CGPoint(
+            x: CGFloat(col) * pieceSize.width - gridNode.size.width / 2 + pieceSize.width / 2,
+            y: CGFloat(2 - row) * pieceSize.height - gridNode.size.height / 2 + pieceSize.height / 2
+        )
+        
+        // Check if there is already a piece in this position
+        let piecesAtPosition = gridNode.children.filter { node in
+            node.name?.starts(with: "piece_") == true &&
+            node.position == cellPos
+        }
+        
+        return piecesAtPosition.isEmpty
+    
+        
     }
 }

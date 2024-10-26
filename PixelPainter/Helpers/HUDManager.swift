@@ -44,8 +44,27 @@ class HUDManager {
         gameScene.context.gameInfo.timeRemaining -= 1
         if let timerLabel = gameScene.childNode(withName: "//timerLabel") as? SKLabelNode {
             timerLabel.text = "Time: \(Int(gameScene.context.gameInfo.timeRemaining))"
+            
+            let timeRemaining = gameScene.context.gameInfo.timeRemaining
+            
+            if timeRemaining > 0 && timeRemaining <= 5 {
+                timerLabel.fontColor = .red
+            } else {
+                timerLabel.fontColor = .white
+            }
         }
         
+        // Time warning flash before game over.
+        let timeRemaining = gameScene.context.gameInfo.timeRemaining
+        
+        if timeRemaining > 0 && timeRemaining <= 5 {
+            if let playState = gameScene.context.stateMachine?.currentState as? PlayState {
+                playState.effectManager.flashScreen(color: .red, alpha: 0.3)
+            }
+        }
+        
+        
+        // Game over check
         if gameScene.context.gameInfo.timeRemaining <= 0 {
             gameScene.context.stateMachine?.enter(GameOverState.self)
         }
