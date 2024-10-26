@@ -84,7 +84,11 @@ class GridManager {
               let gridNode = gameScene.childNode(withName: "grid") as? SKSpriteNode else { return }
         
         // Remove previous highlights
-        
+        gridNode.children.forEach { node in
+            if node.name?.starts(with: "frame_") == true {
+                (node as? SKSpriteNode)?.color = .darkGray
+            }
+        }
         
         let pieceSize = CGSize(width: gridNode.size.width / 3, height: gridNode.size.height / 3)
         let col = Int((point.x + gridNode.size.width / 2) / pieceSize.width)

@@ -57,7 +57,6 @@ class PlayState: GKState {
         
         if gridManager.tryPlacePiece(selectedPiece, at: gridLocation) {
             handleSuccessfulPlacement()
-            gridManager.highlightGridSpace(at: gridLocation)
         } else {
             showWrongPlacementAnimation(for: selectedPiece)
         }
