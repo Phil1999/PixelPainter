@@ -24,7 +24,7 @@ class EffectManager {
         
         isFlashing = true
         
-        // add red overlay
+        // add overlay
         let overlay = SKSpriteNode(color: color, size: gameScene.size)
         overlay.position = CGPoint(x: gameScene.size.width / 2, y: gameScene.size.height / 2)
         overlay.zPosition = 9999 // arbitrary value here just want to make it above everything

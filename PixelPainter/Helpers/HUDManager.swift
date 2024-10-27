@@ -53,12 +53,6 @@ class HUDManager {
             }
         }
         
-        // Time warning flash before game over
-        if timeRemaining > 0 && timeRemaining <= 5 {
-            if let playState = gameScene.context.stateMachine?.currentState as? PlayState {
-                playState.effectManager.flashScreen(color: .red, alpha: 0.3)
-            }
-        }
         
         // Game over check
         if timeRemaining <= 0 {
@@ -78,7 +72,7 @@ class HUDManager {
         countdownLabel.position = CGPoint(
             x: gameScene.size.width / 2,
             y: gridTopY + 50
-        )
+            )
 
         countdownLabel.zPosition = 9999
         gameScene.addChild(countdownLabel)

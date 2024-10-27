@@ -83,7 +83,6 @@ class PlayState: GKState {
     
     
     private func showWrongPlacementAnimation(for piece: SKSpriteNode) {
-        effectManager.flashScreen(color: .yellow, alpha: 0.3)
         effectManager.disableInteraction()
         effectManager.shakeNode(piece)
     }
