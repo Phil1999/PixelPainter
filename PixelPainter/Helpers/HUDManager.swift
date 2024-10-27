@@ -49,7 +49,7 @@ class HUDManager {
             timerLabel.text = "Time: \(Int(timeRemaining))"
             
             if timeRemaining > 0 && timeRemaining <= 5 {
-                showBigCountdown(time: Int(timeRemaining))
+                triggerFiveSecondWarning(time: Int(timeRemaining))
             }
         }
         
@@ -60,37 +60,26 @@ class HUDManager {
         }
     }
 
-    private func showBigCountdown(time: Int) {
+    private func triggerFiveSecondWarning(time: Int) {
         guard let gameScene = gameScene else { return }
         
-        let countdownLabel = SKLabelNode(text: "\(time)")
-        countdownLabel.fontName = "PPNeueMontreal-Bold"
-        countdownLabel.fontSize = 100
-        countdownLabel.fontColor = .red
+        if let timerLabel = gameScene.childNode(withName: "//timerLabel") as? SKLabelNode {
+            
+            timerLabel.fontColor = .red
+            
+            let minDuration: Double = 0.05
+            let maxDuration: Double = 0.6
+            // Using sinusoidal easing to make the animation smoother. Dividing by 5 to normalize values
+            let scaleDuration = minDuration + (maxDuration - minDuration) * sin(Double(time) / 5.0 * .pi / 2)
+            
+            let scaleUp = SKAction.scale(to: 1.25, duration: scaleDuration / 2)
+            let scaleDown = SKAction.scale(to: 1.0, duration: scaleDuration / 2)
+            let pulsate = SKAction.sequence([scaleUp, scaleDown])
+            
+            
+            timerLabel.run(pulsate)
+        }
         
-        let gridTopY = (gameScene.size.height / 2 + 50) + (gameScene.context.layoutInfo.gridSize.height / 2)
-        countdownLabel.position = CGPoint(
-            x: gameScene.size.width / 2,
-            y: gridTopY + 50
-            )
-
-        countdownLabel.zPosition = 9999
-        gameScene.addChild(countdownLabel)
-        
-        // Animation sequence
-        let scaleUp = SKAction.scale(to: 1.5, duration: 0.2)
-        let scaleDown = SKAction.scale(to: 1.0, duration: 0.2)
-        let fadeOut = SKAction.fadeOut(withDuration: 0.2)
-        let remove = SKAction.removeFromParent()
-        
-        let sequence = SKAction.sequence([
-            scaleUp,
-            scaleDown,
-            fadeOut,
-            remove
-        ])
-        
-        countdownLabel.run(sequence)
     }
     
     func updateScore() {
