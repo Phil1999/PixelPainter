@@ -8,13 +8,13 @@ class BankManager {
     private var currentBatchStartIndex = 0
     private var remainingPiecesIndices: [Int] = []
     
-    init(gameScene: GameScene) {
+    init(gameScene: GameScene?) {
         self.gameScene = gameScene
     }
     
     func createPictureBank() {
         guard let gameScene = gameScene,
-              let image = UIImage(named: "sample_image") else { return }
+              let image = gameScene.queueManager.getCurrentImage() else { return }
         
         let bankHeight = gameScene.context.layoutInfo.bankHeight
         let bankWidth = gameScene.size.width
@@ -29,7 +29,7 @@ class BankManager {
         let gridSize = gameScene.context.layoutInfo.gridSize
         let rows = 3 // This can be made dynamic later
         let cols = 3 // This can be made dynamic later
-        let pieceSize = CGSize(width: gridSize.width / CGFloat(cols), 
+        let pieceSize = CGSize(width: gridSize.width / CGFloat(cols),
                              height: gridSize.height / CGFloat(rows))
         var pieces: [PuzzlePiece] = []
         
@@ -74,9 +74,8 @@ class BankManager {
         visiblePieces.removeAll()
         
         // Update remaining pieces indices
-        remainingPiecesIndices = gameScene.context.gameInfo.pieces.enumerated()
-            .filter { !$0.element.isPlaced }
-            .map { $0.offset }
+        let unplacedPieces = gameScene.context.gameInfo.pieces.enumerated().filter { !$0.element.isPlaced }
+        remainingPiecesIndices = unplacedPieces.map { $0.offset }
         
         print("Remaining pieces indices: \(remainingPiecesIndices)")
         

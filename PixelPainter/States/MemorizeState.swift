@@ -33,10 +33,10 @@ class MemorizeState: GKState {
     }
     
     private func setupMemorizeScene() {
-        let image = UIImage(named: "sample_image") // Replace with your image
+        guard let image = gameScene.queueManager.getCurrentImage() else { return }
         gameScene.context.gameInfo.currentImage = image
         
-        let imageNode = SKSpriteNode(texture: SKTexture(image: image!))
+        let imageNode = SKSpriteNode(texture: SKTexture(image: image))
         imageNode.size = gameScene.context.layoutInfo.gridSize
         imageNode.position = CGPoint(x: gameScene.size.width / 2, y: gameScene.size.height / 2)
         gameScene.addChild(imageNode)
