@@ -284,14 +284,19 @@ class PowerUpManager {
         // Check power-up has uses remaining
         guard let uses = powerUpUses[type], uses > 0 else { return }
         guard let powerUpNode = powerUps[type] else { return }
+        if powerUpsInCooldown.contains(type) { return }
         
         switch type {
         case .timeStop:
-            if powerUpsInCooldown.contains(type) { return }
             
             powerUpUses[type] = uses - 1
             updatePowerUpVisual(type: type)
             powerUpsInCooldown.insert(type)
+            
+            if uses > 1 {
+                powerUpsInCooldown.insert(type)
+                playState?.effectManager.cooldown(powerUpNode, duration: 5)
+            }
             
             gameScene?.removeAction(forKey: "updateTimer")
 
@@ -302,8 +307,6 @@ class PowerUpManager {
 
                 timerLabel.fontColor = .cyan
                 
-                // start cooldown effect
-                playState?.effectManager.cooldown(powerUpNode, duration: 5)
 
                 DispatchQueue.main.asyncAfter(deadline: .now() + 5) {
                     [weak self] in
