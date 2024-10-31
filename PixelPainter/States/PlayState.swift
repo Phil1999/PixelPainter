@@ -211,8 +211,17 @@ class PowerUpManager {
         switch type {
         case .timeStop:
             gameScene?.removeAction(forKey: "updateTimer")
-            DispatchQueue.main.asyncAfter(deadline: .now() + 5) { [weak self] in
-                self?.playState?.startTimer()
+            
+            if let timerLabel = gameScene?.childNode(withName: "//timerLabel") as? SKLabelNode {
+                let originalColor = timerLabel.fontColor
+                
+                timerLabel.fontColor = .cyan
+                
+                DispatchQueue.main.asyncAfter(deadline: .now() + 5) { [weak self] in
+                    // restore the original timer label color
+                    timerLabel.fontColor = originalColor
+                    self?.playState?.startTimer()
+                }
             }
         case .place:
             // Auto-place next piece correctly

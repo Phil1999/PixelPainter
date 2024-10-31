@@ -64,5 +64,5 @@ class EffectManager {
         let sequence = SKAction.sequence([disableTouchAction, waitAction, enableTouchAction])
         gameScene?.run(sequence)
     }
-    
+
 }
