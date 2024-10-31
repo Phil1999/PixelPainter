@@ -284,14 +284,14 @@ class PowerUpManager {
         // Check power-up has uses remaining
         guard let uses = powerUpUses[type], uses > 0 else { return }
         guard let powerUpNode = powerUps[type] else { return }
+        
+        // check if power-up is in cooldown
         if powerUpsInCooldown.contains(type) { return }
         
         switch type {
         case .timeStop:
-            
             powerUpUses[type] = uses - 1
             updatePowerUpVisual(type: type)
-            powerUpsInCooldown.insert(type)
             
             if uses > 1 {
                 powerUpsInCooldown.insert(type)
@@ -354,6 +354,12 @@ class PowerUpManager {
             // Show original image briefly
             powerUpUses[type] = uses - 1
             updatePowerUpVisual(type: type)
+            
+            if uses > 1 {
+                powerUpsInCooldown.insert(type)
+                playState?.effectManager.cooldown(powerUpNode, duration: 1)
+            }
+            
             if let image = gameScene?.context.gameInfo.currentImage {
                 let imageNode = SKSpriteNode(texture: SKTexture(image: image))
 
@@ -375,6 +381,7 @@ class PowerUpManager {
 
                 DispatchQueue.main.asyncAfter(deadline: .now() + 1) {
                     imageNode.removeFromParent()
+                    self.powerUpsInCooldown.remove(type)
                 }
             }
         }
