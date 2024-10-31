@@ -62,7 +62,7 @@ class PlayState: GKState {
         }
     }
     
-    private func handleSuccessfulPlacement() {
+    func handleSuccessfulPlacement() {
         hudManager.updateScore()
         bankManager.clearSelection()
         bankManager.refreshBankIfNeeded()
@@ -216,15 +216,32 @@ class PowerUpManager {
             }
         case .place:
             // Auto-place next piece correctly
-            if let selectedPiece = gameScene?.context.gameInfo.pieces.first(where: { !$0.isPlaced }) {
-                // Implementation for auto-placing piece
+            if let selectedPiece = gameScene?.context.gameInfo.pieces.first(where: { !$0.isPlaced }),
+               let gridNode = gameScene?.childNode(withName: "grid") as? SKSpriteNode {
+                let correctPosition = selectedPiece.correctPosition
+                
+                // Calculate the appropriate grid position
+                let gridPosition = CGPoint(
+                    x: CGFloat(Int(correctPosition.x)) * gridNode.size.width/3 - gridNode.size.width/2 + gridNode.size.width/6,
+                    y: CGFloat(2 - Int(correctPosition.y)) * gridNode.size.height/3 - gridNode.size.height/2 + gridNode.size.height/6
+                )
+                
+                if let bankNode = playState?.bankManager.bankNode,
+                   let pieceInBank = bankNode.childNode(withName: "piece_\(Int(correctPosition.y))_\(Int(correctPosition.x))") as? SKSpriteNode {
+                    if playState?.gridManager.tryPlacePiece(pieceInBank, at: gridPosition) == true {
+                        // Handle successful placement same as manual placement
+                        playState?.handleSuccessfulPlacement()
+                        
+                    }
+                }
             }
         case .flash:
             // Show original image briefly
             if let image = gameScene?.context.gameInfo.currentImage {
                 let imageNode = SKSpriteNode(texture: SKTexture(image: image))
+                
                 imageNode.position = CGPoint(x: (gameScene?.size.width ?? 0) / 2,
-                                          y: (gameScene?.size.height ?? 0) / 2)
+                                          y: (gameScene?.size.height ?? 0) / 2 + 50)
                 gameScene?.addChild(imageNode)
                 
                 DispatchQueue.main.asyncAfter(deadline: .now() + 1) {
