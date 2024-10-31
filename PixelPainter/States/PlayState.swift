@@ -43,6 +43,7 @@ class PlayState: GKState {
         bankManager.createPictureBank()
         hudManager.createHUD()
         powerUpManager.setupPowerUps()
+        powerUpManager.resetPowerUps()
         gameScene.context.gameInfo.timeRemaining = 30
     }
 
@@ -139,10 +140,18 @@ class PowerUpManager {
     weak var gameScene: GameScene?
     weak var playState: PlayState?
     private var powerUps: [PowerUpType: SKNode] = [:]
+    private var powerUpUses: [PowerUpType: Int] = [:]
+    private var powerUpsInCooldown: Set<PowerUpType> = []
 
     init(gameScene: GameScene, playState: PlayState) {
         self.gameScene = gameScene
         self.playState = playState
+        
+        powerUpUses = [
+            .timeStop: 3,
+            .place: 3,
+            .flash: 3
+        ]
     }
 
     func setupPowerUps() {
@@ -172,6 +181,29 @@ class PowerUpManager {
             powerUps[type] = powerUp
         }
     }
+    
+    func resetPowerUps() {
+        powerUpUses = [
+            .timeStop: 3,
+            .place: 3,
+            .flash: 3
+        ]
+        
+        // Update visuals for all power-ups
+        for type in PowerUpType.allCases {
+            if let powerUpNode = powerUps[type] {
+                if let circle = powerUpNode.children.first as? SKShapeNode {
+                    circle.fillColor = .blue
+                    circle.strokeColor = .white
+                }
+                powerUpNode.alpha = 1.0
+                if let usesLabel = powerUpNode.childNode(withName: "uses") as? SKLabelNode {
+                    usesLabel.text = "\(powerUpUses[type] ?? 0)"
+                }
+            }
+        }
+    }
+    
 
     private func createPowerUpNode(type: PowerUpType) -> SKNode {
         let container = SKNode()
@@ -187,9 +219,37 @@ class PowerUpManager {
         label.fontSize = 20
         label.verticalAlignmentMode = .center
         container.addChild(label)
+        
+        
+        // Uses counter
+        let usesLabel = SKLabelNode(text: "\(powerUpUses[type] ?? 0)")
+        usesLabel.fontName = "PPNeueMontreal-Bold"
+        usesLabel.fontSize = 14
+        usesLabel.position = CGPoint(x: 0, y: -20)
+        usesLabel.name = "uses"
+        container.addChild(usesLabel)
 
         container.name = "powerup_\(type.rawValue)"
         return container
+    }
+    
+    
+    private func updatePowerUpVisual(type: PowerUpType) {
+        guard let powerUpNode = powerUps[type] else { return }
+        
+        let uses = powerUpUses[type] ?? 0
+        
+        if let usesLabel = powerUpNode.childNode(withName: "uses") as? SKLabelNode {
+            usesLabel.text = "\(uses)"
+        }
+        
+        if uses == 0 {
+            if let circle = powerUpNode.children.first as? SKShapeNode {
+                circle.fillColor = .gray
+                circle.strokeColor = .darkGray
+            }
+            powerUpNode.alpha = 0.5
+        }
     }
 
     func handleTouch(at location: CGPoint) -> Bool {
@@ -198,6 +258,10 @@ class PowerUpManager {
         let touchedNodes = gameScene.nodes(at: location)
         for node in touchedNodes {
             if let powerUpType = getPowerUpType(from: node.name) {
+                if powerUpsInCooldown.contains(powerUpType) {
+                    // Power-up is in cooldown, don't activate
+                    return true
+                }
                 activatePowerUp(powerUpType)
                 return true
             }
@@ -217,8 +281,18 @@ class PowerUpManager {
     }
 
     private func activatePowerUp(_ type: PowerUpType) {
+        // Check power-up has uses remaining
+        guard let uses = powerUpUses[type], uses > 0 else { return }
+        guard let powerUpNode = powerUps[type] else { return }
+        
         switch type {
         case .timeStop:
+            if powerUpsInCooldown.contains(type) { return }
+            
+            powerUpUses[type] = uses - 1
+            updatePowerUpVisual(type: type)
+            powerUpsInCooldown.insert(type)
+            
             gameScene?.removeAction(forKey: "updateTimer")
 
             if let timerLabel = gameScene?.childNode(withName: "//timerLabel")
@@ -227,11 +301,15 @@ class PowerUpManager {
                 let originalColor = timerLabel.fontColor
 
                 timerLabel.fontColor = .cyan
+                
+                // start cooldown effect
+                playState?.effectManager.cooldown(powerUpNode, duration: 5)
 
                 DispatchQueue.main.asyncAfter(deadline: .now() + 5) {
                     [weak self] in
                     // restore the original timer label color
                     timerLabel.fontColor = originalColor
+                    self?.powerUpsInCooldown.remove(type)
                     self?.playState?.startTimer()
                 }
             }
@@ -264,12 +342,15 @@ class PowerUpManager {
                     {
                         // Handle successful placement same as manual placement
                         playState?.handleSuccessfulPlacement()
-
+                        powerUpUses[type] = uses - 1
+                        updatePowerUpVisual(type: type)
                     }
                 }
             }
         case .flash:
             // Show original image briefly
+            powerUpUses[type] = uses - 1
+            updatePowerUpVisual(type: type)
             if let image = gameScene?.context.gameInfo.currentImage {
                 let imageNode = SKSpriteNode(texture: SKTexture(image: image))
 
