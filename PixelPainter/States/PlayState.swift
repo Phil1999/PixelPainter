@@ -82,7 +82,6 @@ class PlayState: GKState {
         if Int(gameScene.context.gameInfo.timeRemaining) >= 10 {
             gameScene.context.gameInfo.score += 10
         }
-        gameScene.context.gameInfo.level += 1
         gameScene.context.stateMachine?.enter(NextLevelState.self)
     }
 

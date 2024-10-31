@@ -48,7 +48,7 @@ class NextLevelState: GKState {
         nextLevelLabel.name = "nextLevelLabel"
         gameScene.addChild(nextLevelLabel)
         
-        let levelLabel = SKLabelNode(text: "Level: \(gameScene.context.gameInfo.level)")
+        let levelLabel = SKLabelNode(text: "Level: \(gameScene.context.gameInfo.level + 1)")
         levelLabel.fontName = "PPNeueMontreal-Bold"
         levelLabel.fontSize = 24
         levelLabel.position = CGPoint(x: gameScene.size.width / 2, y: gameScene.size.height / 2 - 50)
@@ -75,6 +75,7 @@ class NextLevelState: GKState {
     private func moveToNextImage() {
         gameScene.queueManager.moveToNextImage()
         gameScene.queueManager.printCurrentQueue()
+        gameScene.context.gameInfo.level += 1
         print("Moving to next image for level \(gameScene.context.gameInfo.level)")
     }
 }
