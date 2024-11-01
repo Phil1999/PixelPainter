@@ -144,9 +144,10 @@ class PowerUpManager {
     private var powerUps: [PowerUpType: SKNode] = [:]
     private var powerUpsInCooldown: Set<PowerUpType> = []
     private var powerUpPool: [PowerUpType] = []
-
+    
+    // Refer to the uses from GameInfo
     private var powerUpUses: [PowerUpType: Int] {
-        get { return gameScene?.context.gameInfo.powerUpUses ?? [:] }
+        get { gameScene?.context.gameInfo.powerUpUses ?? [:] }
         set {
             gameScene?.context.gameInfo.powerUpUses = newValue
         }
@@ -155,35 +156,43 @@ class PowerUpManager {
     init(gameScene: GameScene, playState: PlayState) {
         self.gameScene = gameScene
         self.playState = playState
-        refillPool()
+        fillPool()
     }
 
-    private func refillPool() {
-        powerUpPool = PowerUpType.allCases.map { $0 }
+    private func fillPool() {
+        powerUpPool = []
+        
+        for type in PowerUpType.allCases {
+            let availableUses = powerUpUses[type] ?? 0
+            
+            if availableUses < GameConstants.PowerUp.maxUses {
+                // Add based on powerUpType weight
+                powerUpPool.append(contentsOf: Array(repeating: type, count: type.weight))
+            }
+        }
 
         powerUpPool.shuffle()
     }
 
-    func grantRandomPowerup() -> PowerUpType? {
-
-        if powerUpPool.isEmpty {
-            refillPool()
+    func grantRandomPowerup() -> PowerUpType? {        
+        // Only look for valid power-ups
+        let availablePowerUps = powerUpPool.filter { type in
+            let currentUses = powerUpUses[type] ?? 0
+            return currentUses < GameConstants.PowerUp.maxUses
         }
-
-        // Try to find valid power-up from pool
-        while !powerUpPool.isEmpty {
-            let powerUp = powerUpPool.removeLast()
-            let currentUses =
-                gameScene?.context.gameInfo.powerUpUses[powerUp] ?? 0
-
-            if currentUses < GameConstants.PowerUp.maxUses {
-                gameScene?.context.gameInfo.powerUpUses[powerUp] =
-                    currentUses + 1
-                return powerUp
-            }
+        
+        guard !availablePowerUps.isEmpty else {
+            // No available power-ups
+            return nil
         }
-
-        return nil
+        
+        print("Current power-up pool: ", availablePowerUps)
+        
+        // Choose random powerup (weighted pool)
+        let selectedPowerUp = availablePowerUps.randomElement()!
+        powerUpUses[selectedPowerUp]! += 1
+        
+        return selectedPowerUp
     }
 
     func setupPowerUps() {
@@ -312,12 +321,12 @@ class PowerUpManager {
 
         // check if power-up is in cooldown
         if powerUpsInCooldown.contains(type) { return }
-
+        
+        powerUpUses[type] = uses - 1
+        updatePowerUpVisual(type: type)
+        
         switch type {
         case .timeStop:
-            powerUpUses[type] = uses - 1
-            updatePowerUpVisual(type: type)
-            
             if uses > 1 {
                 powerUpsInCooldown.insert(type)
                 playState?.effectManager.cooldown(powerUpNode, duration: 5)
@@ -369,8 +378,6 @@ class PowerUpManager {
                     {
                         // Handle successful placement same as manual placement
                         playState?.notifyPiecePlaced()
-                        powerUpUses[type] = uses - 1
-                        updatePowerUpVisual(type: type)
                     }
                 }
             }
@@ -408,13 +415,10 @@ class PowerUpManager {
                 }
             }
             
-        case .shuffle:
-            powerUpUses[type] = uses - 1
-            updatePowerUpVisual(type: type)
-            
+        case .shuffle:            
             if uses > 1 {
                 powerUpsInCooldown.insert(type)
-                playState?.effectManager.cooldown(powerUpNode, duration: 1)
+                playState?.effectManager.cooldown(powerUpNode, duration: 0.5)
             }
             
             if let bankManager = playState?.bankManager {
@@ -435,7 +439,7 @@ class PowerUpManager {
                     bankManager.showNextThreePieces()
                 }
                 
-                DispatchQueue.main.asyncAfter(deadline: .now() + 1) {
+                DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
                     self.powerUpsInCooldown.remove(type)
                 }
                 

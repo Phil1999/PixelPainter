@@ -22,6 +22,15 @@ extension PowerUpType {
         return GameConstants.PowerUp.minUses
     }
     
+    var weight: Int {
+        switch self {
+        case .timeStop: return 2
+        case .place: return 1
+        case .flash: return 3
+        case .shuffle: return 4
+        }
+    }
+    
     var displayName: String {
         return self.rawValue
     }
