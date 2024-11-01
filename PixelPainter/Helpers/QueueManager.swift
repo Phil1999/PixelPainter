@@ -16,7 +16,7 @@ class QueueManager {
     }
     
     func refreshImageQueue() {
-        let assetNames = (1...4).compactMap { index -> String? in
+        let assetNames = (1...100).compactMap { index -> String? in
             let name = "sample_image\(index)"
             return UIImage(named: name) != nil ? name : nil
         }
