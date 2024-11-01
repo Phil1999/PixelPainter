@@ -14,7 +14,8 @@ class GameScene: SKScene {
     var layoutInfo: LayoutInfo { context.layoutInfo }
     
     var playState: PlayState?
-
+    let queueManager = QueueManager()
+    
     init(context: GameContext, size: CGSize) {
         self.context = context
         super.init(size: size)
@@ -28,6 +29,9 @@ class GameScene: SKScene {
         // Enable user interaction
         self.isUserInteractionEnabled = true
         view.isMultipleTouchEnabled = true
+        
+        // Print initial image queue
+        queueManager.printCurrentQueue()
     }
     
     override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {

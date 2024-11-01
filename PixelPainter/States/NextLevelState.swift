@@ -8,7 +8,7 @@
 import GameplayKit
 import SpriteKit
 
-class NextLevelState : GKState {
+class NextLevelState: GKState {
     unowned let gameScene: GameScene
     var nextLevelTimer: Timer?
     let nextLevelTime: TimeInterval = 3
@@ -21,6 +21,7 @@ class NextLevelState : GKState {
     override func didEnter(from previousState: GKState?) {
         setupNextLvlScene()
         startNextLvlTimer()
+        moveToNextImage()
     }
     
     override func willExit(to nextState: GKState) {
@@ -46,6 +47,13 @@ class NextLevelState : GKState {
         nextLevelLabel.position = CGPoint(x: gameScene.size.width / 2, y: gameScene.size.height / 2)
         nextLevelLabel.name = "nextLevelLabel"
         gameScene.addChild(nextLevelLabel)
+        
+        let levelLabel = SKLabelNode(text: "Level: \(gameScene.context.gameInfo.level + 1)")
+        levelLabel.fontName = "PPNeueMontreal-Bold"
+        levelLabel.fontSize = 24
+        levelLabel.position = CGPoint(x: gameScene.size.width / 2, y: gameScene.size.height / 2 - 50)
+        levelLabel.name = "levelLabel"
+        gameScene.addChild(levelLabel)
     }
     
     private func startNextLvlTimer() {
@@ -62,5 +70,12 @@ class NextLevelState : GKState {
                 self.gameScene.context.stateMachine?.enter(MemorizeState.self)
             }
         }
+    }
+    
+    private func moveToNextImage() {
+        gameScene.queueManager.moveToNextImage()
+        gameScene.queueManager.printCurrentQueue()
+        gameScene.context.gameInfo.level += 1
+        print("Moving to next image for level \(gameScene.context.gameInfo.level)")
     }
 }
