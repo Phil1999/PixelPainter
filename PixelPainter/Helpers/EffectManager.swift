@@ -124,7 +124,7 @@ class EffectManager {
                 cooldown.path = newPath
             }
 
-            let reset = SKAction.run { [weak self] in
+            let reset = SKAction.run {
                 cooldownNode.removeFromParent()
                 node.alpha = originalAlpha
                 circle.fillColor = originalFillColor

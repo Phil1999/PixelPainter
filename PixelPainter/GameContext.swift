@@ -49,6 +49,12 @@ struct GameInfo {
     var score: Int = 0
     var timeRemaining: TimeInterval = 30
     var level: Int = 1
+    var powerUpUses: [PowerUpType: Int] = [
+        .timeStop: GameConstants.PowerUp.minUses,
+        .place: GameConstants.PowerUp.minUses,
+        .flash: GameConstants.PowerUp.minUses
+    ]
+    
 }
 
 struct PuzzlePiece: Identifiable {

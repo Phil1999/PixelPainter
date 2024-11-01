@@ -19,6 +19,7 @@
 		D46D0FA82CCB1B6200E8D37C /* PPNeueMontreal-Thin.otf in Resources */ = {isa = PBXBuildFile; fileRef = D46D0FA12CCB1B6200E8D37C /* PPNeueMontreal-Thin.otf */; };
 		D46D0FA92CCB1B6200E8D37C /* PPNeueMontreal-Book.otf in Resources */ = {isa = PBXBuildFile; fileRef = D46D0F9C2CCB1B6200E8D37C /* PPNeueMontreal-Book.otf */; };
 		D4AC0F9A2CBEF294004FF844 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = D4AC0F992CBEF294004FF844 /* Assets.xcassets */; };
+		D4D2E6522CD4721000E713B5 /* GameConstants.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4D2E6512CD4721000E713B5 /* GameConstants.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -54,6 +55,7 @@
 		D4AC0F992CBEF294004FF844 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		D4AC0FA22CBEF294004FF844 /* PixelPainterTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = PixelPainterTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		D4AC0FAC2CBEF294004FF844 /* PixelPainterUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = PixelPainterUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		D4D2E6512CD4721000E713B5 /* GameConstants.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GameConstants.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
@@ -133,6 +135,7 @@
 				A95E258E2CC7F3FD00163C5C /* ContentView.swift */,
 				A95E25902CC7F46400163C5C /* GameContext.swift */,
 				A95E25922CC7F56D00163C5C /* GameScene.swift */,
+				D4D2E6512CD4721000E713B5 /* GameConstants.swift */,
 			);
 			path = PixelPainter;
 			sourceTree = "<group>";
@@ -279,6 +282,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				D4D2E6522CD4721000E713B5 /* GameConstants.swift in Sources */,
 				A95E25912CC7F46400163C5C /* GameContext.swift in Sources */,
 				A95E25932CC7F56D00163C5C /* GameScene.swift in Sources */,
 				A95E258F2CC7F3FD00163C5C /* ContentView.swift in Sources */,
