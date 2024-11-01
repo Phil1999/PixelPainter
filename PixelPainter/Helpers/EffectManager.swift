@@ -84,6 +84,7 @@ class EffectManager {
             // Turn grey to indicate on cooldown
             node.alpha = 0.5
             circle.fillColor = .gray
+            circle.strokeColor = .darkGray
 
             // cooldown overlay
             let cooldownNode = SKShapeNode(

@@ -144,7 +144,7 @@ class PowerUpManager {
     private var powerUps: [PowerUpType: SKNode] = [:]
     private var powerUpsInCooldown: Set<PowerUpType> = []
     private var powerUpPool: [PowerUpType] = []
-    
+
     // Refer to the uses from GameInfo
     private var powerUpUses: [PowerUpType: Int] {
         get { gameScene?.context.gameInfo.powerUpUses ?? [:] }
@@ -161,37 +161,33 @@ class PowerUpManager {
 
     private func fillPool() {
         powerUpPool = []
-        
+
         for type in PowerUpType.allCases {
-            let availableUses = powerUpUses[type] ?? 0
-            
-            if availableUses < GameConstants.PowerUp.maxUses {
-                // Add based on powerUpType weight
-                powerUpPool.append(contentsOf: Array(repeating: type, count: type.weight))
-            }
+            powerUpPool.append(
+                contentsOf: Array(repeating: type, count: type.weight))
         }
 
         powerUpPool.shuffle()
     }
 
-    func grantRandomPowerup() -> PowerUpType? {        
+    func grantRandomPowerup() -> PowerUpType? {
         // Only look for valid power-ups
         let availablePowerUps = powerUpPool.filter { type in
             let currentUses = powerUpUses[type] ?? 0
             return currentUses < GameConstants.PowerUp.maxUses
         }
-        
+
         guard !availablePowerUps.isEmpty else {
             // No available power-ups
             return nil
         }
-        
+
         print("Current power-up pool: ", availablePowerUps)
-        
+
         // Choose random powerup (weighted pool)
         let selectedPowerUp = availablePowerUps.randomElement()!
         powerUpUses[selectedPowerUp]! += 1
-        
+
         return selectedPowerUp
     }
 
@@ -226,7 +222,7 @@ class PowerUpManager {
 
     func resetPowerUps() {
         gameScene?.context.gameInfo.powerUpUses = Dictionary(
-            uniqueKeysWithValues: PowerUpType.all.map { ($0, $0.initialUses )}
+            uniqueKeysWithValues: PowerUpType.all.map { ($0, $0.initialUses) }
         )
 
         // Update visuals for all power-ups
@@ -275,13 +271,10 @@ class PowerUpManager {
 
         if let circle = powerUpNode.children.first as? SKShapeNode {
             if uses == 0 {
+                // Grey out if either on cooldown or uses are 0
                 circle.fillColor = .gray
                 circle.strokeColor = .darkGray
                 powerUpNode.alpha = 0.5
-            } else {
-                circle.fillColor = .blue
-                circle.strokeColor = .white
-                powerUpNode.alpha = 1.0
             }
         }
     }
@@ -321,26 +314,23 @@ class PowerUpManager {
 
         // check if power-up is in cooldown
         if powerUpsInCooldown.contains(type) { return }
-        
-        powerUpUses[type] = uses - 1
-        updatePowerUpVisual(type: type)
-        
+
         switch type {
         case .timeStop:
             if uses > 1 {
                 powerUpsInCooldown.insert(type)
                 playState?.effectManager.cooldown(powerUpNode, duration: 5)
             }
-            
+
             gameScene?.removeAction(forKey: "updateTimer")
-            
+
             if let timerLabel = gameScene?.childNode(withName: "//timerLabel")
                 as? SKLabelNode
             {
                 let originalColor = timerLabel.fontColor
-                
+
                 timerLabel.fontColor = .cyan
-                
+
                 DispatchQueue.main.asyncAfter(deadline: .now() + 5) {
                     [weak self] in
                     // restore the original timer label color
@@ -353,25 +343,25 @@ class PowerUpManager {
             // Auto-place next piece correctly
             if let selectedPiece = gameScene?.context.gameInfo.pieces.first(
                 where: { !$0.isPlaced }),
-               let gridNode = gameScene?.childNode(withName: "grid")
-                as? SKSpriteNode
+                let gridNode = gameScene?.childNode(withName: "grid")
+                    as? SKSpriteNode
             {
                 let correctPosition = selectedPiece.correctPosition
-                
+
                 // Calculate the appropriate grid position
                 let gridPosition = CGPoint(
                     x: CGFloat(Int(correctPosition.x)) * gridNode.size.width / 3
-                    - gridNode.size.width / 2 + gridNode.size.width / 6,
+                        - gridNode.size.width / 2 + gridNode.size.width / 6,
                     y: CGFloat(2 - Int(correctPosition.y))
-                    * gridNode.size.height / 3 - gridNode.size.height / 2
-                    + gridNode.size.height / 6
+                        * gridNode.size.height / 3 - gridNode.size.height / 2
+                        + gridNode.size.height / 6
                 )
-                
+
                 if let bankNode = playState?.bankManager.bankNode,
-                   let pieceInBank = bankNode.childNode(
-                    withName:
-                        "piece_\(Int(correctPosition.y))_\(Int(correctPosition.x))"
-                   ) as? SKSpriteNode
+                    let pieceInBank = bankNode.childNode(
+                        withName:
+                            "piece_\(Int(correctPosition.y))_\(Int(correctPosition.x))"
+                    ) as? SKSpriteNode
                 {
                     if playState?.gridManager.tryPlacePiece(
                         pieceInBank, at: gridPosition) == true
@@ -383,69 +373,67 @@ class PowerUpManager {
             }
         case .flash:
             // Show original image briefly
-            powerUpUses[type] = uses - 1
-            updatePowerUpVisual(type: type)
-            
+
             if uses > 1 {
                 powerUpsInCooldown.insert(type)
                 playState?.effectManager.cooldown(powerUpNode, duration: 1)
             }
-            
+
             if let image = gameScene?.context.gameInfo.currentImage {
                 let imageNode = SKSpriteNode(texture: SKTexture(image: image))
-                
+
                 let gridTopY =
-                (gameScene!.size.height / 2 + 50)
-                + (gameScene!.context.layoutInfo.gridSize.height / 2)
-                
+                    (gameScene!.size.height / 2 + 50)
+                    + (gameScene!.context.layoutInfo.gridSize.height / 2)
+
                 imageNode.setScale(0.6)
-                
+
                 imageNode.position = CGPoint(
                     x: gameScene!.size.width / 2,
                     y: gridTopY + 75
                 )
-                
+
                 imageNode.zPosition = 9999
-                
+
                 gameScene?.addChild(imageNode)
-                
+
                 DispatchQueue.main.asyncAfter(deadline: .now() + 1) {
                     imageNode.removeFromParent()
                     self.powerUpsInCooldown.remove(type)
                 }
             }
-            
-        case .shuffle:            
+
+        case .shuffle:
             if uses > 1 {
                 powerUpsInCooldown.insert(type)
                 playState?.effectManager.cooldown(powerUpNode, duration: 0.5)
             }
-            
+
             if let bankManager = playState?.bankManager {
                 // Remove current visible pieces
                 bankManager.clearSelection()
-                
+
                 // shuffle the remaining unplaced pieces
                 if var pieces = gameScene?.context.gameInfo.pieces {
                     let placedPieces = pieces.filter { $0.isPlaced }
                     var unplacedPieces = pieces.filter { !$0.isPlaced }
                     unplacedPieces.shuffle()
-                    
+
                     // Now combine placed and shuffled unplaced pieces
                     pieces = placedPieces + unplacedPieces
                     gameScene?.context.gameInfo.pieces = pieces
-                    
+
                     // Show the new arrangement.
                     bankManager.showNextThreePieces()
                 }
-                
+
                 DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
                     self.powerUpsInCooldown.remove(type)
                 }
-                
-                
+
             }
-            
         }
+        powerUpUses[type] = uses - 1
+        updatePowerUpVisual(type: type)
     }
 }
