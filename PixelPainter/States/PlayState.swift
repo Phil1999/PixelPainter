@@ -8,6 +8,7 @@
 import GameplayKit
 import SpriteKit
 
+
 class PlayState: GKState {
     unowned let gameScene: GameScene
     let gridManager: GridManager
@@ -25,6 +26,27 @@ class PlayState: GKState {
         super.init()
         self.powerUpManager = PowerUpManager(
             gameScene: gameScene, playState: self)
+    }
+    
+    func notifyPiecePlaced() {
+        didSuccessfullyPlacePiece()
+    }
+    
+    private func didSuccessfullyPlacePiece() {
+        hudManager.updateScore()
+        bankManager.clearSelection()
+        bankManager.refreshBankIfNeeded()
+        
+        if bankManager.isBankEmpty() {
+            handleLevelComplete()
+        }
+    }
+    
+    private func handleLevelComplete() {
+        if Int(gameScene.context.gameInfo.timeRemaining) >= 10 {
+            gameScene.context.gameInfo.score += 10
+        }
+        gameScene.context.stateMachine?.enter(NextLevelState.self)
     }
 
     override func didEnter(from previousState: GKState?) {
@@ -61,29 +83,12 @@ class PlayState: GKState {
         guard gridManager.isCellEmpty(at: gridLocation) else { return }
 
         if gridManager.tryPlacePiece(selectedPiece, at: gridLocation) {
-            handleSuccessfulPlacement()
+            didSuccessfullyPlacePiece()
         } else {
             showWrongPlacementAnimation(for: selectedPiece)
         }
     }
 
-    func handleSuccessfulPlacement() {
-        hudManager.updateScore()
-        bankManager.clearSelection()
-        bankManager.refreshBankIfNeeded()
-
-        if bankManager.isBankEmpty() {
-            handleLevelComplete()
-        }
-    }
-
-    private func handleLevelComplete() {
-        // if time remaining is 10+ secs then add extra 10 pts
-        if Int(gameScene.context.gameInfo.timeRemaining) >= 10 {
-            gameScene.context.gameInfo.score += 10
-        }
-        gameScene.context.stateMachine?.enter(NextLevelState.self)
-    }
 
     private func showWrongPlacementAnimation(for piece: SKSpriteNode) {
         effectManager.disableInteraction()
@@ -343,7 +348,7 @@ class PowerUpManager {
                         pieceInBank, at: gridPosition) == true
                     {
                         // Handle successful placement same as manual placement
-                        playState?.handleSuccessfulPlacement()
+                        playState?.notifyPiecePlaced()
                         powerUpUses[type] = uses - 1
                         updatePowerUpVisual(type: type)
                     }
