@@ -42,13 +42,44 @@ class HUDManager {
         guard let gameScene = gameScene else { return }
         
         gameScene.context.gameInfo.timeRemaining -= 1
+        let timeRemaining = gameScene.context.gameInfo.timeRemaining
+        
+        // Update regular timer label
         if let timerLabel = gameScene.childNode(withName: "//timerLabel") as? SKLabelNode {
-            timerLabel.text = "Time: \(Int(gameScene.context.gameInfo.timeRemaining))"
+            timerLabel.text = "Time: \(Int(timeRemaining))"
+            
+            if timeRemaining > 0 && timeRemaining <= 5 {
+                triggerFiveSecondWarning(time: Int(timeRemaining))
+            }
         }
         
-        if gameScene.context.gameInfo.timeRemaining <= 0 {
+        
+        // Game over check
+        if timeRemaining <= 0 {
             gameScene.context.stateMachine?.enter(GameOverState.self)
         }
+    }
+
+    private func triggerFiveSecondWarning(time: Int) {
+        guard let gameScene = gameScene else { return }
+        
+        if let timerLabel = gameScene.childNode(withName: "//timerLabel") as? SKLabelNode {
+            
+            timerLabel.fontColor = .red
+            
+            let minDuration: Double = 0.05
+            let maxDuration: Double = 0.6
+            // Using sinusoidal easing to make the animation smoother. Dividing by 5 to normalize values
+            let scaleDuration = minDuration + (maxDuration - minDuration) * sin(Double(time) / 5.0 * .pi / 2)
+            
+            let scaleUp = SKAction.scale(to: 1.25, duration: scaleDuration / 2)
+            let scaleDown = SKAction.scale(to: 1.0, duration: scaleDuration / 2)
+            let pulsate = SKAction.sequence([scaleUp, scaleDown])
+            
+            
+            timerLabel.run(pulsate)
+        }
+        
     }
     
     func updateScore() {

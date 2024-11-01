@@ -14,12 +14,14 @@ class PlayState: GKState {
     let bankManager: BankManager
     let hudManager: HUDManager
     var powerUpManager: PowerUpManager!
+    var effectManager: EffectManager!
     
     init(gameScene: GameScene) {
         self.gameScene = gameScene
         self.gridManager = GridManager(gameScene: gameScene)
         self.bankManager = BankManager(gameScene: gameScene)
         self.hudManager = HUDManager(gameScene: gameScene)
+        self.effectManager = EffectManager(gameScene: gameScene)
         super.init()
         self.powerUpManager = PowerUpManager(gameScene: gameScene, playState: self)
     }
@@ -41,6 +43,48 @@ class PlayState: GKState {
         hudManager.createHUD()
         powerUpManager.setupPowerUps()
         gameScene.context.gameInfo.timeRemaining = 30
+    }
+    
+    func handleGridPlacement(at location: CGPoint) {
+        guard let gridNode = gameScene.childNode(withName: "grid") as? SKSpriteNode,
+              let selectedPiece = bankManager.getSelectedPiece(),
+              gridNode.contains(location) else { return }
+        
+        let gridLocation = gridNode.convert(location, from: gameScene)
+        
+        // exit early if cell not empty
+        guard gridManager.isCellEmpty(at: gridLocation) else { return }
+        
+        if gridManager.tryPlacePiece(selectedPiece, at: gridLocation) {
+            handleSuccessfulPlacement()
+        } else {
+            showWrongPlacementAnimation(for: selectedPiece)
+        }
+    }
+    
+    private func handleSuccessfulPlacement() {
+        hudManager.updateScore()
+        bankManager.clearSelection()
+        bankManager.refreshBankIfNeeded()
+        
+        if bankManager.isBankEmpty() {
+            handleLevelComplete()
+        }
+    }
+    
+    private func handleLevelComplete() {
+        // if time remaining is 10+ secs then add extra 10 pts
+        if Int(gameScene.context.gameInfo.timeRemaining) >= 10 {
+            gameScene.context.gameInfo.score += 10
+        }
+        gameScene.context.gameInfo.level += 1
+        gameScene.context.stateMachine?.enter(NextLevelState.self)
+    }
+    
+    
+    private func showWrongPlacementAnimation(for piece: SKSpriteNode) {
+        effectManager.disableInteraction()
+        effectManager.shakeNode(piece)
     }
     
     func startTimer() {
@@ -74,38 +118,7 @@ class PlayState: GKState {
         }
         
         // Handle grid placement
-        if let gridNode = gameScene.childNode(withName: "grid") as? SKSpriteNode,
-           let selectedPiece = bankManager.getSelectedPiece(),
-           gridNode.contains(location) {
-            let gridLocation = gridNode.convert(location, from: gameScene)
-            if gridManager.tryPlacePiece(selectedPiece, at: gridLocation) {
-                hudManager.updateScore()
-                bankManager.clearSelection()
-                bankManager.refreshBankIfNeeded()
-                
-                // if bank is empty transition to next level
-                if bankManager.isBankEmpty() {
-                    // if time remaining is 10+ secs then add extra 10 pts
-                    if Int(gameScene.context.gameInfo.timeRemaining) >= 10 {
-                        gameScene.context.gameInfo.score += 10
-                    }
-                    gameScene.context.gameInfo.level += 1
-                    gameScene.context.stateMachine?.enter(NextLevelState.self)
-                }
-            } else {
-                // Incorrect placement - stutter punishment
-                let disableTouchAction = SKAction.run { [weak self] in self?.gameScene.isUserInteractionEnabled = false }
-                let waitAction = SKAction.wait(forDuration: 1.0)
-                let enableTouchAction = SKAction.run { [weak self] in self?.gameScene.isUserInteractionEnabled = true }
-                let stutterSequence = SKAction.sequence([disableTouchAction, waitAction, enableTouchAction])
-                gameScene.run(stutterSequence)
-                
-                let shakeLeft = SKAction.moveBy(x: -10, y: 0, duration: 0.05)
-                let shakeRight = SKAction.moveBy(x: 20, y: 0, duration: 0.05)
-                let shakeSequence = SKAction.sequence([shakeLeft, shakeRight, shakeLeft])
-                selectedPiece.run(shakeSequence)
-            }
-        }
+        handleGridPlacement(at: location)
     }
 
     func touchesMoved(_ touches: Set<UITouch>, with event: UIEvent?) {
