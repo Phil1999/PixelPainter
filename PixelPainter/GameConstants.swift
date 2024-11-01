@@ -11,5 +11,6 @@ enum GameConstants {
     enum PowerUp {
         static let maxUses = 3
         static let minUses = 0
+        static let maxShufflePieces = 3
     }
 }

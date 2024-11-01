@@ -31,7 +31,7 @@ class NextLevelState: GKState {
             as? PlayState)?.powerUpManager
         {
             if let grantedPowerUp = powerUpManager.grantRandomPowerup() {
-                let powerUpName = grantedPowerUp.rawValue.capitalized
+                let powerUpName = grantedPowerUp.displayName
                 let powerUpMessage = "Granted the '\(powerUpName)' Power-Up!"
                 let powerUpLabel = SKLabelNode(text: powerUpMessage)
                 
