@@ -38,6 +38,8 @@ class HUDManager {
         hudNode.addChild(scoreLabel)
     }
     
+    private var isWarningActive = false //5 second warning checker
+    
     func updateTimer() {
         guard let gameScene = gameScene else { return }
         
@@ -50,6 +52,9 @@ class HUDManager {
             
             if timeRemaining > 0 && timeRemaining <= 5 {
                 triggerFiveSecondWarning(time: Int(timeRemaining))
+            } else if isWarningActive && timeRemaining > 5 {
+                // Reset the warning if time goes above 5 seconds
+                resetTimerLabelAppearance(timerLabel)
             }
         }
         
@@ -64,6 +69,7 @@ class HUDManager {
         guard let gameScene = gameScene else { return }
         
         if let timerLabel = gameScene.childNode(withName: "//timerLabel") as? SKLabelNode {
+            isWarningActive = true
             
             timerLabel.fontColor = .red
             
@@ -80,6 +86,12 @@ class HUDManager {
             timerLabel.run(pulsate)
         }
         
+    }
+    
+    private func resetTimerLabelAppearance(_ timerLabel: SKLabelNode) {
+        timerLabel.fontColor = .white
+        timerLabel.removeAction(forKey: "pulsate") // Stop the pulsate animation
+        isWarningActive = false
     }
     
     func updateScore() {
