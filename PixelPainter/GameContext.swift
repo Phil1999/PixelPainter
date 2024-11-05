@@ -52,7 +52,7 @@ struct GameInfo {
     var powerUpUses: [PowerUpType: Int] = Dictionary(
         uniqueKeysWithValues: PowerUpType.all.map { ($0, $0.initialUses )}
     )
-    var boardSize = 1 //3x3, size 2 would be 4x4, size 3 would be 5x5, size 4 would be 6x6
+    var boardSize = 3 //3x3, 4 = 4x4, so on...
     
 }
 
