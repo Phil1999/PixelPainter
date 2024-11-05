@@ -49,6 +49,10 @@ struct GameInfo {
     var score: Int = 0
     var timeRemaining: TimeInterval = 30
     var level: Int = 1
+    var powerUpUses: [PowerUpType: Int] = Dictionary(
+        uniqueKeysWithValues: PowerUpType.all.map { ($0, $0.initialUses )}
+    )
+    
 }
 
 struct PuzzlePiece: Identifiable {
