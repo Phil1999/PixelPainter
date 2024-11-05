@@ -43,8 +43,8 @@ class HUDManager {
     func updateTimer() {
         guard let gameScene = gameScene else { return }
         
-        gameScene.context.gameInfo.timeRemaining -= 1
         let timeRemaining = gameScene.context.gameInfo.timeRemaining
+        gameScene.context.gameInfo.timeRemaining -= 1
         
         // Update regular timer label
         if let timerLabel = gameScene.childNode(withName: "//timerLabel") as? SKLabelNode {
