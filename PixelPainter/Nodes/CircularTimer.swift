@@ -119,7 +119,6 @@ class CircularTimer: SKNode {
         discreteTimeRemaining = newTimeRemaining
         lastUpdateTime = CACurrentMediaTime()
 
-
         // Update colors and effects based on state
         if !isFrozen {
             if isOvertime {
@@ -162,7 +161,6 @@ class CircularTimer: SKNode {
         // Calculate progress differently for overtime
         let progress: CGFloat
         if isOvertime {
-            // When in overtime, show a full circle plus a bit extra
             let overtimeProgress =
                 (interpolatedTimeRemaining - totalDuration) / totalDuration
             progress = 1.0 + overtimeProgress
@@ -171,9 +169,14 @@ class CircularTimer: SKNode {
         }
         updateTimerCircle(progress: CGFloat(progress))
 
-        // Continue updating
+        scheduleNextUpdate()
+    }
+
+    private func scheduleNextUpdate() {
+        guard isRunning, !isFrozen else { return }
+
         let updateAction = SKAction.sequence([
-            SKAction.wait(forDuration: 1.0 / 60.0),  // 60fps update
+            SKAction.wait(forDuration: 1.0 / 60.0),  // 60 fps
             SKAction.run { [weak self] in
                 self?.updateTimer()
             },
@@ -213,11 +216,7 @@ class CircularTimer: SKNode {
         isFrozen = active
 
         if active {
-            // Store current overtime state, but remove effects
-            if isOvertime {
-                removeOvertimeEffects()
-            }
-            // remove the update action for our internal timer
+            // Pause the timer update
             removeAction(forKey: "timerUpdate")
 
             // Change visuals
@@ -242,7 +241,7 @@ class CircularTimer: SKNode {
             cooldownNode.path = path
             addChild(cooldownNode)
 
-            // Cooldown animation (should match with the actual cooldown for time freeze)
+            // Cooldown animation
             let animate = SKAction.customAction(withDuration: 5.0) {
                 node, elapsedTime in
                 guard let cooldown = node as? SKShapeNode else { return }
@@ -267,18 +266,18 @@ class CircularTimer: SKNode {
                 ]))
 
         } else {
-            // restore overtime effects if we were in overtime.
+            updateTimer()  // Resumes the main timer update
+
             if isOvertime {
+                // restart the overtime animations
                 setupOvertimeEffects()
                 timerCircle.strokeColor = overtimeColor
                 timeLabel.fontColor = overtimeColor
             } else {
-                timerCircle.strokeColor = isWarningActive ? warningColor : .white
+                timerCircle.strokeColor =
+                    isWarningActive ? warningColor : .white
                 timeLabel.fontColor = isWarningActive ? warningColor : .white
             }
-            // restart the update action
-            updateTimer()
-
 
             // Remove frozen overlay
             childNode(withName: "frozen")?.removeFromParent()
