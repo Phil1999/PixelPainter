@@ -5,19 +5,22 @@
 //  Created by Philip Lee on 11/6/24.
 //
 
-import AVFoundation
 import SpriteKit
 
 class SoundManager {
     // Implement as a singleton, use this shared SoundManager
     static let shared = SoundManager()
-    
-    private var soundEffects: [String: AVAudioPlayer] = [:]
+    private var soundActions: [String: SKAction] = [:]
     private var isSoundEnabled = true
+    private weak var gameScene: SKScene?
     
     
     private init() {
         preloadSounds()
+    }
+    
+    func setGameScene(_ scene: SKScene) {
+        self.gameScene = scene
     }
     
     private func preloadSounds() {
@@ -30,34 +33,17 @@ class SoundManager {
         
         // Preload each sound
         for (key, filename) in soundFiles {
-            if let soundURL = Bundle.main.url(forResource: filename, withExtension: nil) {
-                do {
-                    let player = try AVAudioPlayer(contentsOf: soundURL)
-                    player.prepareToPlay()
-                    soundEffects[key] = player
-                } catch {
-                    print("Error loading sound \(filename): \(error.localizedDescription)")
-                }
-            }
+            soundActions[key] = SKAction.playSoundFileNamed(filename, waitForCompletion: false)
         }
     }
     
     func playSound(_ sound: GameSound) {
-        guard isSoundEnabled else { return }
+        guard isSoundEnabled,
+        let scene = gameScene else { return }
         
-        if let player = soundEffects[sound.rawValue] {
-            // create copy of player for simultaenous sound effects
-            if player.isPlaying {
-                do {
-                    let newPlayer = try AVAudioPlayer(contentsOf: player.url!)
-                    newPlayer.play()
-                } catch {
-                    print("Error when creating new player: \(error.localizedDescription)")
-                }
-            } else {
-                player.currentTime = 0
-                player.play();
-            }
+        if let action = soundActions[sound.rawValue] {
+            scene.run(action)
+            
         }
     }
     
@@ -75,3 +61,5 @@ enum GameSound: String {
     case piecePlaced = "piece_placed"
     case levelComplete = "level_complete"
 }
+
+
