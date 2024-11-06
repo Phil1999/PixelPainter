@@ -126,6 +126,7 @@ class PlayState: GKState {
                 // Game over check
                 if self.gameScene.context.gameInfo.timeRemaining <= 0 {
                     self.gameScene.context.stateMachine?.enter(GameOverState.self)
+                    SoundManager.shared.playSound(.gameOver)
                 }
             },
             SKAction.wait(forDuration: 1.0),
