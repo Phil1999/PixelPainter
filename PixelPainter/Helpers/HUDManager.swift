@@ -41,7 +41,7 @@ class HUDManager {
         scoreLabel.name = "scoreLabel"
         hudNode.addChild(scoreLabel)
     }
-
+  
     func updateScore() {
         guard let gameScene = gameScene else { return }
 

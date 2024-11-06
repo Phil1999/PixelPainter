@@ -17,23 +17,87 @@ class GridManager {
     func createGrid() {
         guard let gameScene = gameScene else { return }
         
-        let gridNode = SKSpriteNode(color: .lightGray, size: gameScene.context.layoutInfo.gridSize)
+        // Create the main grid rectangle with rounded corners
+        let gridSize = gameScene.context.layoutInfo.gridSize
+        let cornerRadius: CGFloat = 15
+        
+        // Create rounded rectangle path for the main grid
+        let gridRect = CGRect(origin: .zero, size: gridSize)
+        let path = UIBezierPath(roundedRect: gridRect, cornerRadius: cornerRadius)
+        
+        // Create a shape layer and render it
+        let shape = CAShapeLayer()
+        shape.path = path.cgPath
+        shape.fillColor = UIColor.lightGray.cgColor
+        
+        // Convert to UIImage
+        UIGraphicsBeginImageContextWithOptions(gridSize, false, 0)
+        if let context = UIGraphicsGetCurrentContext() {
+            shape.render(in: context)
+        }
+        let image = UIGraphicsGetImageFromCurrentImageContext()
+        UIGraphicsEndImageContext()
+        
+        // Create the main grid node with rounded corners
+        let gridNode = SKSpriteNode(texture: SKTexture(image: image!))
         gridNode.position = CGPoint(x: gameScene.size.width / 2, y: gameScene.size.height / 2 + 50)
         gridNode.name = "grid"
         gameScene.addChild(gridNode)
         
+        // Add the inner grid frames
         let pieceSize = CGSize(width: gridNode.size.width / 3, height: gridNode.size.height / 3)
         for row in 0..<3 {
             for col in 0..<3 {
-                let frame = SKSpriteNode(color: .darkGray, size: CGSize(width: pieceSize.width - 2, height: pieceSize.height - 2))
-                frame.position = CGPoint(x: CGFloat(col) * pieceSize.width - gridNode.size.width / 2 + pieceSize.width / 2,
-                                       y: CGFloat(2 - row) * pieceSize.height - gridNode.size.height / 2 + pieceSize.height / 2)
+                let frame: SKSpriteNode
+                
+                // Determine if this cell needs rounded corners
+                if (row == 0 && col == 0) { // Top-left corner
+                    frame = createRoundedCell(size: pieceSize, cornerRadius: cornerRadius, corners: [.topLeft])
+                } else if (row == 0 && col == 2) { // Top-right corner
+                    frame = createRoundedCell(size: pieceSize, cornerRadius: cornerRadius, corners: [.topRight])
+                } else if (row == 2 && col == 0) { // Bottom-left corner
+                    frame = createRoundedCell(size: pieceSize, cornerRadius: cornerRadius, corners: [.bottomLeft])
+                } else if (row == 2 && col == 2) { // Bottom-right corner
+                    frame = createRoundedCell(size: pieceSize, cornerRadius: cornerRadius, corners: [.bottomRight])
+                } else {
+                    // Center and edge cells don't need rounded corners
+                    frame = SKSpriteNode(color: .darkGray, size: CGSize(width: pieceSize.width - 2, height: pieceSize.height - 2))
+                }
+                
+                frame.position = CGPoint(
+                    x: CGFloat(col) * pieceSize.width - gridNode.size.width / 2 + pieceSize.width / 2,
+                    y: CGFloat(2 - row) * pieceSize.height - gridNode.size.height / 2 + pieceSize.height / 2
+                )
                 frame.name = "frame_\(row)_\(col)"
                 gridNode.addChild(frame)
             }
         }
     }
     
+    private func createRoundedCell(size: CGSize, cornerRadius: CGFloat, corners: UIRectCorner) -> SKSpriteNode {
+        let adjustedSize = CGSize(width: size.width - 2, height: size.height - 2)
+        let rect = CGRect(origin: .zero, size: adjustedSize)
+        
+        let path = UIBezierPath(
+            roundedRect: rect,
+            byRoundingCorners: corners,
+            cornerRadii: CGSize(width: cornerRadius, height: cornerRadius)
+        )
+        
+        let shape = CAShapeLayer()
+        shape.path = path.cgPath
+        shape.fillColor = UIColor.darkGray.cgColor
+        
+        UIGraphicsBeginImageContextWithOptions(adjustedSize, false, 0)
+        if let context = UIGraphicsGetCurrentContext() {
+            shape.render(in: context)
+        }
+        let image = UIGraphicsGetImageFromCurrentImageContext()
+        UIGraphicsEndImageContext()
+        
+        return SKSpriteNode(texture: SKTexture(image: image!))
+    }
+
     func tryPlacePiece(_ piece: SKSpriteNode, at point: CGPoint) -> Bool {
         guard let gameScene = gameScene,
               let gridNode = gameScene.childNode(withName: "grid") as? SKSpriteNode else { return false }

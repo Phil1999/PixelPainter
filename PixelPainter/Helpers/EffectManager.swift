@@ -84,6 +84,7 @@ class EffectManager {
             // Turn grey to indicate on cooldown
             node.alpha = 0.5
             circle.fillColor = .gray
+            circle.strokeColor = .darkGray
 
             // cooldown overlay
             let cooldownNode = SKShapeNode(
@@ -124,7 +125,7 @@ class EffectManager {
                 cooldown.path = newPath
             }
 
-            let reset = SKAction.run { [weak self] in
+            let reset = SKAction.run {
                 cooldownNode.removeFromParent()
                 node.alpha = originalAlpha
                 circle.fillColor = originalFillColor

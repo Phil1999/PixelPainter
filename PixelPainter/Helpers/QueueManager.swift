@@ -21,7 +21,14 @@ class QueueManager {
             return UIImage(named: name) != nil ? name : nil
         }
         
-        imageQueue = assetNames.shuffled()
+        // Save the last image before shuffling
+        let lastImage = imageQueue.last
+        
+        // Shuffle the queue and ensure the last image is not the first
+        repeat {
+            imageQueue = assetNames.shuffled()
+        } while imageQueue.first == lastImage
+        
         currentIndex = 0
         
         print("Image Queue refreshed: \(imageQueue)")

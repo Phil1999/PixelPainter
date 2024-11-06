@@ -47,8 +47,13 @@ struct GameInfo {
     var currentImage: UIImage?
     var pieces: [PuzzlePiece] = []
     var score: Int = 0
-    var timeRemaining: TimeInterval = 30
+    var timeRemaining: TimeInterval = 10
     var level: Int = 1
+    var powerUpUses: [PowerUpType: Int] = Dictionary(
+        uniqueKeysWithValues: PowerUpType.all.map { ($0, $0.initialUses )}
+    )
+    var boardSize = 3 //3x3, 4 = 4x4, so on...
+    
 }
 
 struct PuzzlePiece: Identifiable {
