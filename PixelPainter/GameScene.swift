@@ -19,12 +19,12 @@ class GameScene: SKScene {
     init(context: GameContext, size: CGSize) {
         self.context = context
         super.init(size: size)
+        SoundManager.shared.setGameScene(self)
     }
     
     required init?(coder aDecoder: NSCoder) { fatalError("init(coder:) has not been implemented") }
 
     override func didMove(to view: SKView) {
-        SoundManager.shared.setGameScene(self)
         context.stateMachine?.enter(MemorizeState.self)
         
         // Enable user interaction
