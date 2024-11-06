@@ -25,9 +25,6 @@ class PlayState: GKState {
         super.init()
         self.powerUpManager = PowerUpManager(
             gameScene: gameScene, playState: self)
-        
-        // Setup SoundManager
-        SoundManager.shared.setGameScene(gameScene)
     }
 
     func notifyPiecePlaced() {

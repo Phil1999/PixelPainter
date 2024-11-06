@@ -22,6 +22,7 @@
 		D4D2E6522CD4721000E713B5 /* GameConstants.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4D2E6512CD4721000E713B5 /* GameConstants.swift */; };
 		D4D2E6D32CDC100C00E713B5 /* piece_placed.wav in Resources */ = {isa = PBXBuildFile; fileRef = D4D2E6D22CDC100C00E713B5 /* piece_placed.wav */; };
 		D4D2E6D42CDC100C00E713B5 /* level_complete.wav in Resources */ = {isa = PBXBuildFile; fileRef = D4D2E6D12CDC100C00E713B5 /* level_complete.wav */; };
+		D4D2E6D62CDC155200E713B5 /* game_over.wav in Resources */ = {isa = PBXBuildFile; fileRef = D4D2E6D52CDC155200E713B5 /* game_over.wav */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -60,6 +61,7 @@
 		D4D2E6512CD4721000E713B5 /* GameConstants.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GameConstants.swift; sourceTree = "<group>"; };
 		D4D2E6D12CDC100C00E713B5 /* level_complete.wav */ = {isa = PBXFileReference; lastKnownFileType = audio.wav; path = level_complete.wav; sourceTree = "<group>"; };
 		D4D2E6D22CDC100C00E713B5 /* piece_placed.wav */ = {isa = PBXFileReference; lastKnownFileType = audio.wav; path = piece_placed.wav; sourceTree = "<group>"; };
+		D4D2E6D52CDC155200E713B5 /* game_over.wav */ = {isa = PBXFileReference; lastKnownFileType = audio.wav; path = game_over.wav; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
@@ -148,6 +150,7 @@
 		D4D2E6D02CDC0FA400E713B5 /* sounds */ = {
 			isa = PBXGroup;
 			children = (
+				D4D2E6D52CDC155200E713B5 /* game_over.wav */,
 				D4D2E6D12CDC100C00E713B5 /* level_complete.wav */,
 				D4D2E6D22CDC100C00E713B5 /* piece_placed.wav */,
 			);
@@ -266,6 +269,7 @@
 			files = (
 				D4AC0F9A2CBEF294004FF844 /* Assets.xcassets in Resources */,
 				D46D0FA32CCB1B6200E8D37C /* PPNeueMontreal-Bold.otf in Resources */,
+				D4D2E6D62CDC155200E713B5 /* game_over.wav in Resources */,
 				D46D0FA42CCB1B6200E8D37C /* PPNeueMontreal-Italic.otf in Resources */,
 				D4D2E6D32CDC100C00E713B5 /* piece_placed.wav in Resources */,
 				D4D2E6D42CDC100C00E713B5 /* level_complete.wav in Resources */,

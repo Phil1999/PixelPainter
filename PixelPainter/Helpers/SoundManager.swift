@@ -27,7 +27,8 @@ class SoundManager {
         // Sound file names and their key(filename)
         let soundFiles = [
             "piece_placed": "piece_placed.wav",
-            "level_complete": "level_complete.wav"
+            "level_complete": "level_complete.wav",
+            "game_over": "game_over.wav"
             
         ]
         
@@ -60,6 +61,7 @@ class SoundManager {
 enum GameSound: String {
     case piecePlaced = "piece_placed"
     case levelComplete = "level_complete"
+    case gameOver = "game_over"
 }
 
 
