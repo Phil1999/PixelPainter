@@ -30,7 +30,7 @@ class PlayState: GKState {
     override func didEnter(from previousState: GKState?) {
         print("Entering Play State")
         setupPlayScene()
-        startTimer()
+        startGame()
     }
 
     override func willExit(to nextState: GKState) {
@@ -90,15 +90,37 @@ class PlayState: GKState {
         effectManager.shakeNode(piece)
     }
 
+    private func startGame() {
+        // Start game timer here
+        if let timerNode = gameScene.childNode(withName: "//circularTimer")
+            as? CircularTimer
+        {
+            timerNode.startGameTimer(
+                duration: gameScene.context.gameInfo.timeRemaining)
+        }
+        // start update timer
+        startTimer()
+    }
+
     func startTimer() {
         let updateTimerAction = SKAction.sequence([
             SKAction.run { [weak self] in
-                self?.hudManager.updateTimer()
+                guard let self = self else { return }
+                self.gameScene.context.gameInfo.timeRemaining -= 1
+                
+                // Update the circular timer with new discrete time
+                if let timerNode = self.gameScene.childNode(withName: "//circularTimer") as? CircularTimer {
+                    timerNode.updateDiscreteTime(newTimeRemaining: self.gameScene.context.gameInfo.timeRemaining)
+                }
+                
+                // Game over check
+                if self.gameScene.context.gameInfo.timeRemaining <= 0 {
+                    self.gameScene.context.stateMachine?.enter(GameOverState.self)
+                }
             },
             SKAction.wait(forDuration: 1.0),
         ])
-        gameScene.run(
-            SKAction.repeatForever(updateTimerAction), withKey: "updateTimer")
+        gameScene.run(SKAction.repeatForever(updateTimerAction), withKey: "updateTimer")
     }
 
     func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
@@ -145,11 +167,11 @@ class PowerUpManager {
     init(gameScene: GameScene, playState: PlayState) {
         self.gameScene = gameScene
         self.playState = playState
-        
+
         powerUpUses = [
             .timeStop: 3,
             .place: 3,
-            .flash: 3
+            .flash: 3,
         ]
     }
 
@@ -180,14 +202,14 @@ class PowerUpManager {
             powerUps[type] = powerUp
         }
     }
-    
+
     func resetPowerUps() {
         powerUpUses = [
             .timeStop: 3,
             .place: 3,
-            .flash: 3
+            .flash: 3,
         ]
-        
+
         // Update visuals for all power-ups
         for type in PowerUpType.allCases {
             if let powerUpNode = powerUps[type] {
@@ -196,13 +218,14 @@ class PowerUpManager {
                     circle.strokeColor = .white
                 }
                 powerUpNode.alpha = 1.0
-                if let usesLabel = powerUpNode.childNode(withName: "uses") as? SKLabelNode {
+                if let usesLabel = powerUpNode.childNode(withName: "uses")
+                    as? SKLabelNode
+                {
                     usesLabel.text = "\(powerUpUses[type] ?? 0)"
                 }
             }
         }
     }
-    
 
     private func createPowerUpNode(type: PowerUpType) -> SKNode {
         let container = SKNode()
@@ -218,8 +241,7 @@ class PowerUpManager {
         label.fontSize = 20
         label.verticalAlignmentMode = .center
         container.addChild(label)
-        
-        
+
         // Uses counter
         let usesLabel = SKLabelNode(text: "\(powerUpUses[type] ?? 0)")
         usesLabel.fontName = "PPNeueMontreal-Bold"
@@ -231,17 +253,18 @@ class PowerUpManager {
         container.name = "powerup_\(type.rawValue)"
         return container
     }
-    
-    
+
     private func updatePowerUpVisual(type: PowerUpType) {
         guard let powerUpNode = powerUps[type] else { return }
-        
+
         let uses = powerUpUses[type] ?? 0
-        
-        if let usesLabel = powerUpNode.childNode(withName: "uses") as? SKLabelNode {
+
+        if let usesLabel = powerUpNode.childNode(withName: "uses")
+            as? SKLabelNode
+        {
             usesLabel.text = "\(uses)"
         }
-        
+
         if uses == 0 {
             if let circle = powerUpNode.children.first as? SKShapeNode {
                 circle.fillColor = .gray
@@ -283,34 +306,31 @@ class PowerUpManager {
         // Check power-up has uses remaining
         guard let uses = powerUpUses[type], uses > 0 else { return }
         guard let powerUpNode = powerUps[type] else { return }
-        
+
         // check if power-up is in cooldown
         if powerUpsInCooldown.contains(type) { return }
-        
+
         switch type {
         case .timeStop:
             powerUpUses[type] = uses - 1
             updatePowerUpVisual(type: type)
-            
+
             if uses > 1 {
                 powerUpsInCooldown.insert(type)
                 playState?.effectManager.cooldown(powerUpNode, duration: 5)
             }
-            
-            gameScene?.removeAction(forKey: "updateTimer")
 
-            if let timerLabel = gameScene?.childNode(withName: "//timerLabel")
-                as? SKLabelNode
+
+            if let timerNode = gameScene?.childNode(withName: "//circularTimer")
+                as? CircularTimer
             {
-                let originalColor = timerLabel.fontColor
-
-                timerLabel.fontColor = .cyan
-                
+                timerNode.setFrozenState(active: true)
+                gameScene?.removeAction(forKey: "updateTimer")
 
                 DispatchQueue.main.asyncAfter(deadline: .now() + 5) {
                     [weak self] in
-                    // restore the original timer label color
-                    timerLabel.fontColor = originalColor
+                    
+                    timerNode.setFrozenState(active: false)
                     self?.powerUpsInCooldown.remove(type)
                     self?.playState?.startTimer()
                 }
@@ -353,26 +373,25 @@ class PowerUpManager {
             // Show original image briefly
             powerUpUses[type] = uses - 1
             updatePowerUpVisual(type: type)
-            
+
             if uses > 1 {
                 powerUpsInCooldown.insert(type)
                 playState?.effectManager.cooldown(powerUpNode, duration: 1)
             }
-            
+
             if let image = gameScene?.context.gameInfo.currentImage {
                 let imageNode = SKSpriteNode(texture: SKTexture(image: image))
 
-                let gridTopY = (gameScene!.size.height / 2 + 50)
+                let gridTopY =
+                    (gameScene!.size.height / 2 + 50)
                     + (gameScene!.context.layoutInfo.gridSize.height / 2)
-                
+
                 imageNode.setScale(0.6)
-                
-                
+
                 imageNode.position = CGPoint(
                     x: gameScene!.size.width / 2,
                     y: gridTopY + 75
                 )
-
 
                 imageNode.zPosition = 9999
 

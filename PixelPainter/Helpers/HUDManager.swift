@@ -9,27 +9,31 @@ import SpriteKit
 
 class HUDManager {
     weak var gameScene: GameScene?
-    
+    private var circularTimer: CircularTimer?
+
     init(gameScene: GameScene) {
         self.gameScene = gameScene
     }
-    
+
     func createHUD() {
         guard let gameScene = gameScene else { return }
-        
+
         let hudNode = SKNode()
         hudNode.position = CGPoint(x: 0, y: gameScene.size.height - 100)
         gameScene.addChild(hudNode)
-        
-        let timerLabel = SKLabelNode(text: "Time: \(Int(gameScene.context.gameInfo.timeRemaining))")
-        timerLabel.fontName = "PPNeueMontreal-Bold"
-        timerLabel.fontSize = 24
-        timerLabel.horizontalAlignmentMode = .left
-        timerLabel.position = CGPoint(x: 20, y: 0)
-        timerLabel.name = "timerLabel"
-        hudNode.addChild(timerLabel)
-        
-        let scoreLabel = SKLabelNode(text: "Score: \(gameScene.context.gameInfo.score)")
+
+        // timer
+        let timerRadius: CGFloat = 30
+        circularTimer = CircularTimer(
+            radius: timerRadius,
+            gameScene: gameScene
+        )
+        circularTimer?.position = CGPoint(x: 50, y: 0)
+        circularTimer?.name = "circularTimer"
+        hudNode.addChild(circularTimer!)
+
+        let scoreLabel = SKLabelNode(
+            text: "Score: \(gameScene.context.gameInfo.score)")
         scoreLabel.fontName = "PPNeueMontreal-Bold"
         scoreLabel.fontSize = 24
         scoreLabel.horizontalAlignmentMode = .right
@@ -37,55 +41,13 @@ class HUDManager {
         scoreLabel.name = "scoreLabel"
         hudNode.addChild(scoreLabel)
     }
-    
-    func updateTimer() {
-        guard let gameScene = gameScene else { return }
-        
-        gameScene.context.gameInfo.timeRemaining -= 1
-        let timeRemaining = gameScene.context.gameInfo.timeRemaining
-        
-        // Update regular timer label
-        if let timerLabel = gameScene.childNode(withName: "//timerLabel") as? SKLabelNode {
-            timerLabel.text = "Time: \(Int(timeRemaining))"
-            
-            if timeRemaining > 0 && timeRemaining <= 5 {
-                triggerFiveSecondWarning(time: Int(timeRemaining))
-            }
-        }
-        
-        
-        // Game over check
-        if timeRemaining <= 0 {
-            gameScene.context.stateMachine?.enter(GameOverState.self)
-        }
-    }
 
-    private func triggerFiveSecondWarning(time: Int) {
-        guard let gameScene = gameScene else { return }
-        
-        if let timerLabel = gameScene.childNode(withName: "//timerLabel") as? SKLabelNode {
-            
-            timerLabel.fontColor = .red
-            
-            let minDuration: Double = 0.05
-            let maxDuration: Double = 0.6
-            // Using sinusoidal easing to make the animation smoother. Dividing by 5 to normalize values
-            let scaleDuration = minDuration + (maxDuration - minDuration) * sin(Double(time) / 5.0 * .pi / 2)
-            
-            let scaleUp = SKAction.scale(to: 1.25, duration: scaleDuration / 2)
-            let scaleDown = SKAction.scale(to: 1.0, duration: scaleDuration / 2)
-            let pulsate = SKAction.sequence([scaleUp, scaleDown])
-            
-            
-            timerLabel.run(pulsate)
-        }
-        
-    }
-    
     func updateScore() {
         guard let gameScene = gameScene else { return }
-        
-        if let scoreLabel = gameScene.childNode(withName: "//scoreLabel") as? SKLabelNode {
+
+        if let scoreLabel = gameScene.childNode(withName: "//scoreLabel")
+            as? SKLabelNode
+        {
             scoreLabel.text = "Score: \(gameScene.context.gameInfo.score)"
         }
     }
