@@ -188,14 +188,14 @@ class PowerUpManager {
         case .timeStop:
             if uses > 1 {
                 powerUpsInCooldown.insert(type)
-                playState?.effectManager.cooldown(powerUpNode, duration: 5)
+                playState?.effectManager.cooldown(powerUpNode, duration: GameConstants.PowerUpTimers.timeStopCooldown)
             }
 
             if let timerNode = gameScene?.childNode(withName: "//circularTimer") as? CircularTimer {
                 timerNode.setFrozenState(active: true)
                 gameScene?.removeAction(forKey: "updateTimer")
 
-                DispatchQueue.main.asyncAfter(deadline: .now() + 5) { [weak self] in
+                DispatchQueue.main.asyncAfter(deadline: .now() + GameConstants.PowerUpTimers.timeStopCooldown) { [weak self] in
                     timerNode.setFrozenState(active: false)
                     self?.powerUpsInCooldown.remove(type)
                     self?.playState?.startTimer()
@@ -238,7 +238,7 @@ class PowerUpManager {
 
             if uses > 1 {
                 powerUpsInCooldown.insert(type)
-                playState?.effectManager.cooldown(powerUpNode, duration: 1)
+                playState?.effectManager.cooldown(powerUpNode, duration: GameConstants.PowerUpTimers.flashCooldown)
             }
 
             if let image = gameScene?.context.gameInfo.currentImage {
@@ -259,7 +259,7 @@ class PowerUpManager {
 
                 gameScene?.addChild(imageNode)
 
-                DispatchQueue.main.asyncAfter(deadline: .now() + 1) {
+                DispatchQueue.main.asyncAfter(deadline: .now() + GameConstants.PowerUpTimers.flashCooldown) {
                     imageNode.removeFromParent()
                     self.powerUpsInCooldown.remove(type)
                 }

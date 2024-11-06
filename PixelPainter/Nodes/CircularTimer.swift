@@ -148,7 +148,6 @@ class CircularTimer: SKNode {
 
     private func updateTimer() {
         guard isRunning, !isFrozen else { return }
-
         let currentTime = CACurrentMediaTime()
         let deltaTime = currentTime - lastUpdateTime
 
@@ -173,8 +172,6 @@ class CircularTimer: SKNode {
     }
 
     private func scheduleNextUpdate() {
-        guard isRunning, !isFrozen else { return }
-
         let updateAction = SKAction.sequence([
             SKAction.wait(forDuration: 1.0 / 60.0),  // 60 fps
             SKAction.run { [weak self] in
@@ -213,12 +210,13 @@ class CircularTimer: SKNode {
     }
 
     func setFrozenState(active: Bool) {
+        print("Setting frozen state: \(active)")
         isFrozen = active
 
         if active {
             // Pause the timer update
             removeAction(forKey: "timerUpdate")
-
+            
             // Change visuals
             timeLabel.fontColor = frozenColor
             timerCircle.strokeColor = .clear
@@ -242,10 +240,10 @@ class CircularTimer: SKNode {
             addChild(cooldownNode)
 
             // Cooldown animation
-            let animate = SKAction.customAction(withDuration: 5.0) {
+            let animate = SKAction.customAction(withDuration: GameConstants.PowerUpTimers.timeStopCooldown) {
                 node, elapsedTime in
                 guard let cooldown = node as? SKShapeNode else { return }
-                let progress = elapsedTime / 5.0
+                let progress = elapsedTime / GameConstants.PowerUpTimers.timeStopCooldown
                 let endAngle = startAngle + (.pi * 2 * progress)
 
                 let newPath = CGMutablePath()
@@ -266,16 +264,14 @@ class CircularTimer: SKNode {
                 ]))
 
         } else {
-            updateTimer()  // Resumes the main timer update
+            // Resume the timer
+            updateTimer()
 
             if isOvertime {
                 // restart the overtime animations
                 setupOvertimeEffects()
-                timerCircle.strokeColor = overtimeColor
-                timeLabel.fontColor = overtimeColor
             } else {
-                timerCircle.strokeColor =
-                    isWarningActive ? warningColor : .white
+                timerCircle.strokeColor = isWarningActive ? warningColor : .white
                 timeLabel.fontColor = isWarningActive ? warningColor : .white
             }
 

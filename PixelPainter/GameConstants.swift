@@ -14,4 +14,8 @@ enum GameConstants {
         static let minUses = 2	
         static let maxShufflePieces = 3
     }
+    enum PowerUpTimers {
+        static let timeStopCooldown = 5.0
+        static let flashCooldown = 1.0
+    }
 }
