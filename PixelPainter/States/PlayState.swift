@@ -32,6 +32,8 @@ class PlayState: GKState {
     }
 
     private func didSuccessfullyPlacePiece() {
+        SoundManager.shared.playSound(.piecePlaced)
+        
         gameScene.context.gameInfo.timeRemaining += 2
         hudManager.updateScore()
         bankManager.clearSelection()
@@ -43,6 +45,8 @@ class PlayState: GKState {
     }
 
     private func handleLevelComplete() {
+        SoundManager.shared.playSound(.levelComplete)
+        
         let bonus = Int(gameScene.context.gameInfo.timeRemaining)
         print("current score: ", gameScene.context.gameInfo.score)
         print("gaining a bonus of: ", bonus)
@@ -122,6 +126,7 @@ class PlayState: GKState {
                 // Game over check
                 if self.gameScene.context.gameInfo.timeRemaining <= 0 {
                     self.gameScene.context.stateMachine?.enter(GameOverState.self)
+                    SoundManager.shared.playSound(.gameOver)
                 }
             },
             SKAction.wait(forDuration: 1.0),
