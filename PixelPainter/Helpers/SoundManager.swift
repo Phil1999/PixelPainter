@@ -9,6 +9,7 @@ import AVFoundation
 import SpriteKit
 
 class SoundManager {
+    // Implement as a singleton, use this shared SoundManager
     static let shared = SoundManager()
     
     private var soundEffects: [String: AVAudioPlayer] = [:]
