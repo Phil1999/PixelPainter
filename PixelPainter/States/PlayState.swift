@@ -44,10 +44,15 @@ class PlayState: GKState {
 
     private func handleLevelComplete() {
         let bonus = Int(gameScene.context.gameInfo.timeRemaining)
-        print("current score: ", gameScene.context.gameInfo.score)
-        print("gaining a bonus of: ", bonus)
+//        print("current score: ", gameScene.context.gameInfo.score)
+//        print("gaining a bonus of: ", bonus)
         gameScene.context.gameInfo.score += bonus
-        print("new score: ", gameScene.context.gameInfo.score)
+//        print("new score: ", gameScene.context.gameInfo.score)
+        gameScene.context.gameInfo.level += 1
+        if gameScene.context.gameInfo.level % 4 == 0 && gameScene.context.gameInfo.boardSize < 6{
+            gameScene.context.gameInfo.boardSize += 1
+            print("board size is now: ", gameScene.context.gameInfo.boardSize)
+        }
         gameScene.context.stateMachine?.enter(NextLevelState.self)
     }
 
