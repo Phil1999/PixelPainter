@@ -191,19 +191,12 @@ class PowerUpManager {
                 playState?.effectManager.cooldown(powerUpNode, duration: 5)
             }
 
-            gameScene?.removeAction(forKey: "updateTimer")
+            if let timerNode = gameScene?.childNode(withName: "//circularTimer") as? CircularTimer {
+                timerNode.setFrozenState(active: true)
+                gameScene?.removeAction(forKey: "updateTimer")
 
-            if let timerLabel = gameScene?.childNode(withName: "//timerLabel")
-                as? SKLabelNode
-            {
-                let originalColor = timerLabel.fontColor
-
-                timerLabel.fontColor = .cyan
-
-                DispatchQueue.main.asyncAfter(deadline: .now() + 5) {
-                    [weak self] in
-                    // restore the original timer label color
-                    timerLabel.fontColor = originalColor
+                DispatchQueue.main.asyncAfter(deadline: .now() + 5) { [weak self] in
+                    timerNode.setFrozenState(active: false)
                     self?.powerUpsInCooldown.remove(type)
                     self?.playState?.startTimer()
                 }

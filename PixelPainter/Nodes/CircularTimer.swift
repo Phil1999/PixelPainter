@@ -30,6 +30,9 @@ class CircularTimer: SKNode {
     private let overtimeColor: SKColor = .orange
     private let warningColor: SKColor = .red
 
+    private var pulseAction: SKAction?
+    private var glowNode: SKShapeNode?
+
     init(radius: CGFloat, gameScene: GameScene) {
         self.radius = radius
         self.gameScene = gameScene
@@ -54,6 +57,45 @@ class CircularTimer: SKNode {
         addChild(timeLabel)
     }
 
+    private func setupOvertimeEffects() {
+        // Remove existing effects
+        removeOvertimeEffects()
+
+        // glow effect
+        glowNode = SKShapeNode(circleOfRadius: radius + 2)
+        glowNode?.strokeColor = overtimeColor
+        glowNode?.lineWidth = 2
+        glowNode?.alpha = 0.5
+
+        if let glowNode = glowNode {
+            // insert behind timer circle
+            insertChild(glowNode, at: 0)
+        }
+
+        // pulsing animation
+        let pulseOut = SKAction.scale(to: 1.2, duration: 0.5)
+        let pulseIn = SKAction.scale(by: 1.0, duration: 0.5)
+
+        pulseAction = SKAction.repeatForever(
+            SKAction.sequence([pulseOut, pulseIn]))
+        glowNode?.run(pulseAction!)
+
+        // Animate the text
+        let scaleUp = SKAction.scale(to: 1.2, duration: 0.15)
+        let scaleDown = SKAction.scale(to: 1.0, duration: 0.15)
+        let wait = SKAction.wait(forDuration: 0.7)
+        timeLabel.run(
+            SKAction.repeatForever(
+                SKAction.sequence([scaleUp, scaleDown, wait])))
+
+    }
+
+    private func removeOvertimeEffects() {
+        glowNode?.removeFromParent()
+        glowNode = nil
+        timeLabel.removeAllActions()
+    }
+
     required init?(coder aDecoder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
     }
@@ -72,22 +114,32 @@ class CircularTimer: SKNode {
 
     // Call this when the game controller updates the time
     func updateDiscreteTime(newTimeRemaining: TimeInterval) {
+        let wasOvertime = isOvertime
+        isOvertime = newTimeRemaining > totalDuration
         discreteTimeRemaining = newTimeRemaining
         lastUpdateTime = CACurrentMediaTime()
 
-        // check if we're in overtime
-        isOvertime = newTimeRemaining > totalDuration
 
-        // Update colors based on state
+        // Update colors and effects based on state
         if !isFrozen {
             if isOvertime {
                 timerCircle.strokeColor = overtimeColor
                 timeLabel.fontColor = overtimeColor
-            } else if newTimeRemaining <= 5 && !isWarningActive {
-                triggerWarningAnimation(timeRemaining: newTimeRemaining)
+                if !wasOvertime {
+                    // Just entered overtime
+                    setupOvertimeEffects()
+                }
             } else {
-                timerCircle.strokeColor = .white
-                timeLabel.fontColor = .white
+                if wasOvertime {
+                    // Just exited overtime
+                    removeOvertimeEffects()
+                }
+                if newTimeRemaining <= 5 && !isWarningActive {
+                    triggerWarningAnimation(timeRemaining: newTimeRemaining)
+                } else {
+                    timerCircle.strokeColor = .white
+                    timeLabel.fontColor = .white
+                }
             }
         }
 
@@ -161,6 +213,10 @@ class CircularTimer: SKNode {
         isFrozen = active
 
         if active {
+            // Store current overtime state, but remove effects
+            if isOvertime {
+                removeOvertimeEffects()
+            }
             // remove the update action for our internal timer
             removeAction(forKey: "timerUpdate")
 
@@ -211,12 +267,18 @@ class CircularTimer: SKNode {
                 ]))
 
         } else {
+            // restore overtime effects if we were in overtime.
+            if isOvertime {
+                setupOvertimeEffects()
+                timerCircle.strokeColor = overtimeColor
+                timeLabel.fontColor = overtimeColor
+            } else {
+                timerCircle.strokeColor = isWarningActive ? warningColor : .white
+                timeLabel.fontColor = isWarningActive ? warningColor : .white
+            }
             // restart the update action
             updateTimer()
 
-            // Restore colors
-            timerCircle.strokeColor = isWarningActive ? warningColor : .white
-            timeLabel.fontColor = isWarningActive ? warningColor : .white
 
             // Remove frozen overlay
             childNode(withName: "frozen")?.removeFromParent()
