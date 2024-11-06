@@ -58,7 +58,7 @@ class PlayState: GKState {
     override func didEnter(from previousState: GKState?) {
         print("Entering Play State")
         setupPlayScene()
-        startTimer()
+        startGame()
     }
 
     override func willExit(to nextState: GKState) {
@@ -100,15 +100,37 @@ class PlayState: GKState {
         effectManager.shakeNode(piece)
     }
 
+    private func startGame() {
+        // Start game timer here
+        if let timerNode = gameScene.childNode(withName: "//circularTimer")
+            as? CircularTimer
+        {
+            timerNode.startGameTimer(
+                duration: gameScene.context.gameInfo.timeRemaining)
+        }
+        // start update timer
+        startTimer()
+    }
+
     func startTimer() {
         let updateTimerAction = SKAction.sequence([
             SKAction.run { [weak self] in
-                self?.hudManager.updateTimer()
+                guard let self = self else { return }
+                self.gameScene.context.gameInfo.timeRemaining -= 1
+                
+                // Update the circular timer with new discrete time
+                if let timerNode = self.gameScene.childNode(withName: "//circularTimer") as? CircularTimer {
+                    timerNode.updateDiscreteTime(newTimeRemaining: self.gameScene.context.gameInfo.timeRemaining)
+                }
+                
+                // Game over check
+                if self.gameScene.context.gameInfo.timeRemaining <= 0 {
+                    self.gameScene.context.stateMachine?.enter(GameOverState.self)
+                }
             },
             SKAction.wait(forDuration: 1.0),
         ])
-        gameScene.run(
-            SKAction.repeatForever(updateTimerAction), withKey: "updateTimer")
+        gameScene.run(SKAction.repeatForever(updateTimerAction), withKey: "updateTimer")
     }
 
     func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
