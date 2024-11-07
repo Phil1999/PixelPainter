@@ -34,7 +34,8 @@ class PlayState: GKState {
     private func didSuccessfullyPlacePiece() {
         SoundManager.shared.playSound(.piecePlaced)
         
-        gameScene.context.gameInfo.timeRemaining += 2
+        let currentTime = gameScene.context.gameInfo.timeRemaining
+        gameScene.context.gameInfo.timeRemaining = min(10, currentTime + 2)
         hudManager.updateScore()
         bankManager.clearSelection()
         bankManager.refreshBankIfNeeded()
@@ -121,7 +122,6 @@ class PlayState: GKState {
         let updateTimerAction = SKAction.sequence([
             SKAction.run { [weak self] in
                 guard let self = self else { return }
-                self.gameScene.context.gameInfo.timeRemaining -= 1
                 
                 // Update the circular timer with new discrete time
                 if let timerNode = self.gameScene.childNode(withName: "//circularTimer") as? CircularTimer {
@@ -133,6 +133,8 @@ class PlayState: GKState {
                     self.gameScene.context.stateMachine?.enter(GameOverState.self)
                     SoundManager.shared.playSound(.gameOver)
                 }
+                
+                self.gameScene.context.gameInfo.timeRemaining -= 1
             },
             SKAction.wait(forDuration: 1.0),
         ])
