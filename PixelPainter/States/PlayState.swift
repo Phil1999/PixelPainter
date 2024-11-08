@@ -36,6 +36,12 @@ class PlayState: GKState {
         
         let currentTime = gameScene.context.gameInfo.timeRemaining
         gameScene.context.gameInfo.timeRemaining = min(10, currentTime + 2)
+        
+        // Force update CircularTimer's display with new time, even when timer is frozen
+        if let timerNode = gameScene.childNode(withName: "//circularTimer") as? CircularTimer {
+            timerNode.updateDiscreteTime(newTimeRemaining: gameScene.context.gameInfo.timeRemaining)
+        }
+        
         hudManager.updateScore()
         bankManager.clearSelection()
         bankManager.refreshBankIfNeeded()
