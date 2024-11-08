@@ -17,20 +17,18 @@ class GridManager {
     func createGrid() {
         guard let gameScene = gameScene else { return }
         
-        // Create the main grid rectangle with rounded corners
         let gridSize = gameScene.context.layoutInfo.gridSize
+        let gridDimension = gameScene.context.layoutInfo.gridDimension
         let cornerRadius: CGFloat = 15
         
         // Create rounded rectangle path for the main grid
         let gridRect = CGRect(origin: .zero, size: gridSize)
         let path = UIBezierPath(roundedRect: gridRect, cornerRadius: cornerRadius)
         
-        // Create a shape layer and render it
         let shape = CAShapeLayer()
         shape.path = path.cgPath
         shape.fillColor = UIColor.lightGray.cgColor
         
-        // Convert to UIImage
         UIGraphicsBeginImageContextWithOptions(gridSize, false, 0)
         if let context = UIGraphicsGetCurrentContext() {
             shape.render(in: context)
@@ -38,35 +36,33 @@ class GridManager {
         let image = UIGraphicsGetImageFromCurrentImageContext()
         UIGraphicsEndImageContext()
         
-        // Create the main grid node with rounded corners
         let gridNode = SKSpriteNode(texture: SKTexture(image: image!))
         gridNode.position = CGPoint(x: gameScene.size.width / 2, y: gameScene.size.height / 2 + 50)
         gridNode.name = "grid"
         gameScene.addChild(gridNode)
         
         // Add the inner grid frames
-        let pieceSize = CGSize(width: gridNode.size.width / 3, height: gridNode.size.height / 3)
-        for row in 0..<3 {
-            for col in 0..<3 {
+        let pieceSize = gameScene.context.layoutInfo.pieceSize
+        for row in 0..<gridDimension {
+            for col in 0..<gridDimension {
                 let frame: SKSpriteNode
                 
                 // Determine if this cell needs rounded corners
                 if (row == 0 && col == 0) { // Top-left corner
                     frame = createRoundedCell(size: pieceSize, cornerRadius: cornerRadius, corners: [.topLeft])
-                } else if (row == 0 && col == 2) { // Top-right corner
+                } else if (row == 0 && col == gridDimension - 1) { // Top-right corner
                     frame = createRoundedCell(size: pieceSize, cornerRadius: cornerRadius, corners: [.topRight])
-                } else if (row == 2 && col == 0) { // Bottom-left corner
+                } else if (row == gridDimension - 1 && col == 0) { // Bottom-left corner
                     frame = createRoundedCell(size: pieceSize, cornerRadius: cornerRadius, corners: [.bottomLeft])
-                } else if (row == 2 && col == 2) { // Bottom-right corner
+                } else if (row == gridDimension - 1 && col == gridDimension - 1) { // Bottom-right corner
                     frame = createRoundedCell(size: pieceSize, cornerRadius: cornerRadius, corners: [.bottomRight])
                 } else {
-                    // Center and edge cells don't need rounded corners
                     frame = SKSpriteNode(color: .darkGray, size: CGSize(width: pieceSize.width - 2, height: pieceSize.height - 2))
                 }
                 
                 frame.position = CGPoint(
                     x: CGFloat(col) * pieceSize.width - gridNode.size.width / 2 + pieceSize.width / 2,
-                    y: CGFloat(2 - row) * pieceSize.height - gridNode.size.height / 2 + pieceSize.height / 2
+                    y: CGFloat(gridDimension - 1 - row) * pieceSize.height - gridNode.size.height / 2 + pieceSize.height / 2
                 )
                 frame.name = "frame_\(row)_\(col)"
                 gridNode.addChild(frame)
@@ -102,37 +98,37 @@ class GridManager {
         guard let gameScene = gameScene,
               let gridNode = gameScene.childNode(withName: "grid") as? SKSpriteNode else { return false }
         
-        let pieceSize = CGSize(width: gridNode.size.width / 3, height: gridNode.size.height / 3)
+        let gridDimension = gameScene.context.layoutInfo.gridDimension
+        let pieceSize = gameScene.context.layoutInfo.pieceSize
         let col = Int((point.x + gridNode.size.width / 2) / pieceSize.width)
-        let row = 2 - Int((point.y + gridNode.size.height / 2) / pieceSize.height)
+        let row = gridDimension - 1 - Int((point.y + gridNode.size.height / 2) / pieceSize.height)
         
-        if row < 0 || row > 2 || col < 0 || col > 2 {
+        if row < 0 || row >= gridDimension || col < 0 || col >= gridDimension {
             return false
         }
         
+        // Rest of the function remains similar, just use gridDimension where needed
         if let pieceName = piece.name,
            let pieceIndex = gameScene.context.gameInfo.pieces.firstIndex(where: { "piece_\(Int($0.correctPosition.y))_\(Int($0.correctPosition.x))" == pieceName }) {
             
             let puzzlePiece = gameScene.context.gameInfo.pieces[pieceIndex]
             
             if puzzlePiece.correctPosition == CGPoint(x: col, y: row) {
-                let targetPosition = CGPoint(x: CGFloat(col) * pieceSize.width - gridNode.size.width / 2 + pieceSize.width / 2,
-                                           y: CGFloat(2 - row) * pieceSize.height - gridNode.size.height / 2 + pieceSize.height / 2)
+                let targetPosition = CGPoint(
+                    x: CGFloat(col) * pieceSize.width - gridNode.size.width / 2 + pieceSize.width / 2,
+                    y: CGFloat(gridDimension - 1 - row) * pieceSize.height - gridNode.size.height / 2 + pieceSize.height / 2
+                )
                 
-                // Create a copy of the piece for the grid with exact size
                 let placedPiece = SKSpriteNode(texture: piece.texture)
                 placedPiece.size = pieceSize
                 placedPiece.name = piece.name
-                placedPiece.setScale(1.0) // Ensure proper scale
+                placedPiece.setScale(1.0)
                 
-                // Add the piece to the grid at the correct position
                 gridNode.addChild(placedPiece)
                 placedPiece.position = targetPosition
                 
-                // Remove the original piece from the bank
                 piece.removeFromParent()
                 
-                // Update the piece's status to placed
                 gameScene.context.gameInfo.pieces[pieceIndex].isPlaced = true
                 gameScene.context.gameInfo.score += 15
                 
