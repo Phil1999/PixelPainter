@@ -22,40 +22,8 @@ class NextLevelState: GKState {
         setupNextLvlScene()
         startNextLvlTimer()
         moveToNextImage()
+        updateGridSize()
         grantPowerUp()
-    }
-
-    private func grantPowerUp() {
-        if let powerUpManager =
-            (gameScene.context.stateMachine?.state(forClass: PlayState.self)
-            as? PlayState)?.powerUpManager
-        {
-            if let grantedPowerUp = powerUpManager.grantRandomPowerup() {
-                let powerUpName = grantedPowerUp.displayName
-                let powerUpMessage = "Granted the '\(powerUpName)' Power-Up!"
-                let powerUpLabel = SKLabelNode(text: powerUpMessage)
-                
-                powerUpLabel.fontName = "PPNeueMontreal-Bold"
-                powerUpLabel.fontSize = 20
-                powerUpLabel.position = CGPoint(
-                    x: gameScene.size.width / 2,
-                    y: gameScene.size.height / 2 - 100
-                )
-                powerUpLabel.name = "powerUpLabel"
-                gameScene.addChild(powerUpLabel)
-            } else {
-                // Notify user that all power-ups are maxed out
-                let powerUpLabel = SKLabelNode(text: "All Power-Ups are maxed!")
-                powerUpLabel.fontName = "PPNeueMontreal-Bold"
-                powerUpLabel.fontSize = 20
-                powerUpLabel.position = CGPoint(
-                    x: gameScene.size.width / 2,
-                    y: gameScene.size.height / 2 - 100
-                )
-                powerUpLabel.name = "powerUpLabel"
-                gameScene.addChild(powerUpLabel)
-            }
-        }
     }
 
     override func willExit(to nextState: GKState) {
@@ -94,6 +62,37 @@ class NextLevelState: GKState {
         gameScene.addChild(levelLabel)
     }
 
+    private func updateGridSize() {
+        let level = gameScene.context.gameInfo.level + 1 // Use next level's number
+        
+        // Define grid progression logic
+        let newGridDimension: Int
+        switch level {
+        case 1...2:
+            newGridDimension = 3
+        case 3...4:
+            newGridDimension = 4
+        case 5...6:
+            newGridDimension = 5
+        default:
+            newGridDimension = 6 // Maximum size
+        }
+        
+        // Update the grid dimension
+        gameScene.context.updateGridDimension(newGridDimension)
+        
+        // Add grid size information to the next level screen
+        let gridSizeLabel = SKLabelNode(text: "Grid Size: \(newGridDimension)×\(newGridDimension)")
+        gridSizeLabel.fontName = "PPNeueMontreal-Bold"
+        gridSizeLabel.fontSize = 20
+        gridSizeLabel.position = CGPoint(
+            x: gameScene.size.width / 2,
+            y: gameScene.size.height / 2 - 150
+        )
+        gridSizeLabel.name = "gridSizeLabel"
+        gameScene.addChild(gridSizeLabel)
+    }
+
     private func startNextLvlTimer() {
         var timeLeft = nextLevelTime
         nextLevelTimer = Timer.scheduledTimer(
@@ -119,8 +118,40 @@ class NextLevelState: GKState {
         gameScene.queueManager.printCurrentQueue()
         gameScene.context.gameInfo.level += 1
         print(
-            "Moving to next image for level \(gameScene.context.gameInfo.level)"
+            "Moving to next image for level \(gameScene.context.gameInfo.level), Grid Size: \(gameScene.context.layoutInfo.gridDimension)×\(gameScene.context.layoutInfo.gridDimension)"
         )
     }
 
+    private func grantPowerUp() {
+        if let powerUpManager =
+            (gameScene.context.stateMachine?.state(forClass: PlayState.self)
+            as? PlayState)?.powerUpManager
+        {
+            if let grantedPowerUp = powerUpManager.grantRandomPowerup() {
+                let powerUpName = grantedPowerUp.displayName
+                let powerUpMessage = "Granted the '\(powerUpName)' Power-Up!"
+                let powerUpLabel = SKLabelNode(text: powerUpMessage)
+                
+                powerUpLabel.fontName = "PPNeueMontreal-Bold"
+                powerUpLabel.fontSize = 20
+                powerUpLabel.position = CGPoint(
+                    x: gameScene.size.width / 2,
+                    y: gameScene.size.height / 2 - 200 // Moved down to accommodate grid size label
+                )
+                powerUpLabel.name = "powerUpLabel"
+                gameScene.addChild(powerUpLabel)
+            } else {
+                // Notify user that all power-ups are maxed out
+                let powerUpLabel = SKLabelNode(text: "All Power-Ups are maxed!")
+                powerUpLabel.fontName = "PPNeueMontreal-Bold"
+                powerUpLabel.fontSize = 20
+                powerUpLabel.position = CGPoint(
+                    x: gameScene.size.width / 2,
+                    y: gameScene.size.height / 2 - 200 // Moved down to accommodate grid size label
+                )
+                powerUpLabel.name = "powerUpLabel"
+                gameScene.addChild(powerUpLabel)
+            }
+        }
+    }
 }

@@ -13,13 +13,17 @@ class GameContext: ObservableObject {
     @Published private(set) var stateMachine: GKStateMachine?
     @Published var layoutInfo: LayoutInfo
     @Published var gameInfo: GameInfo
-
+    
     init() {
-        self.layoutInfo = LayoutInfo()
+        self.layoutInfo = LayoutInfo(gridDimension: 3) // Start with 3x3
         self.gameInfo = GameInfo()
         self.scene = GameScene(context: self, size: UIScreen.main.bounds.size)
         
         configureStates()
+    }
+    
+    func updateGridDimension(_ dimension: Int) {
+        layoutInfo = LayoutInfo(gridDimension: dimension)
     }
     
     func configureStates() {
@@ -38,9 +42,20 @@ class GameContext: ObservableObject {
 }
 
 struct LayoutInfo {
+    var gridDimension: Int // Number of rows/columns (3 for 3x3, 4 for 4x4, etc.)
     let gridSize = CGSize(width: 300, height: 300)
-    let pieceSize = CGSize(width: 100, height: 100)
     let bankHeight: CGFloat = 150
+    
+    init(gridDimension: Int = 3) { // Default to 3x3
+        self.gridDimension = gridDimension
+    }
+    
+    var pieceSize: CGSize {
+        return CGSize(
+            width: gridSize.width / CGFloat(gridDimension),
+            height: gridSize.height / CGFloat(gridDimension)
+        )
+    }
 }
 
 struct GameInfo {

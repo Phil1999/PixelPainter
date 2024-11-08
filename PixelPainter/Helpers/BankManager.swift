@@ -19,28 +19,24 @@ class BankManager {
         let bankHeight = gameScene.context.layoutInfo.bankHeight
         let bankWidth = gameScene.size.width
         
-        // Create bank container
         bankNode = SKSpriteNode(color: .darkGray, size: CGSize(width: bankWidth, height: bankHeight))
         bankNode?.position = CGPoint(x: gameScene.size.width / 2, y: bankHeight / 2)
         bankNode?.name = "bank"
         gameScene.addChild(bankNode!)
         
-        // Setup pieces array
         let gridSize = gameScene.context.layoutInfo.gridSize
-        let rows = 3 // This can be made dynamic later
-        let cols = 3 // This can be made dynamic later
-        let pieceSize = CGSize(width: gridSize.width / CGFloat(cols),
-                             height: gridSize.height / CGFloat(rows))
+        let gridDimension = gameScene.context.layoutInfo.gridDimension
+        let pieceSize = gameScene.context.layoutInfo.pieceSize
         var pieces: [PuzzlePiece] = []
         
-        // Create all pieces
-        for row in 0..<rows {
-            for col in 0..<cols {
+        // Create all pieces based on gridDimension
+        for row in 0..<gridDimension {
+            for col in 0..<gridDimension {
                 let pieceImage = cropImage(image, toRect: CGRect(
-                    x: CGFloat(col) / CGFloat(cols) * image.size.width,
-                    y: CGFloat(row) / CGFloat(rows) * image.size.height,
-                    width: image.size.width / CGFloat(cols),
-                    height: image.size.height / CGFloat(rows)
+                    x: CGFloat(col) / CGFloat(gridDimension) * image.size.width,
+                    y: CGFloat(row) / CGFloat(gridDimension) * image.size.height,
+                    width: image.size.width / CGFloat(gridDimension),
+                    height: image.size.height / CGFloat(gridDimension)
                 ))
                 let piece = PuzzlePiece(image: pieceImage,
                                       correctPosition: CGPoint(x: CGFloat(col), y: CGFloat(row)),
@@ -52,7 +48,6 @@ class BankManager {
         
         gameScene.context.gameInfo.pieces = pieces.shuffled()
         
-        // Initialize remaining pieces indices
         remainingPiecesIndices = Array(0..<pieces.count)
         currentBatchStartIndex = 0
         showNextThreePieces()
