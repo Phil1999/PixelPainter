@@ -37,6 +37,7 @@ class GameContext: ObservableObject {
     
     func resetGame() {
         gameInfo = GameInfo()
+        layoutInfo = LayoutInfo(gridDimension: 3)
         stateMachine?.enter(MemorizeState.self)
     }
 }
