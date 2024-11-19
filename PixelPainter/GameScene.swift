@@ -15,6 +15,7 @@ class GameScene: SKScene {
     
     var playState: PlayState?
     let queueManager = QueueManager()
+    let background = Background()
     
     init(context: GameContext, size: CGSize) {
         self.context = context
@@ -25,6 +26,9 @@ class GameScene: SKScene {
     required init?(coder aDecoder: NSCoder) { fatalError("init(coder:) has not been implemented") }
 
     override func didMove(to view: SKView) {
+        background.setup(screenSize: self.size)
+        addChild(background)
+        
         context.stateMachine?.enter(MemorizeState.self)
         
         // Enable user interaction

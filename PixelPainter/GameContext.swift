@@ -38,13 +38,14 @@ class GameContext: ObservableObject {
     func resetGame() {
         gameInfo = GameInfo()
         layoutInfo = LayoutInfo(gridDimension: 3)
+        scene.queueManager.refreshImageQueue(forGridSize: 3)
         stateMachine?.enter(MemorizeState.self)
     }
 }
 
 struct LayoutInfo {
     var gridDimension: Int // Number of rows/columns (3 for 3x3, 4 for 4x4, etc.)
-    let gridSize = CGSize(width: 300, height: 300)
+    let gridSize = CGSize(width: 350, height: 350)
     let bankHeight: CGFloat = 150
     
     init(gridDimension: Int = 3) { // Default to 3x3

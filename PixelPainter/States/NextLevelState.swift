@@ -78,6 +78,11 @@ class NextLevelState: GKState {
             newGridDimension = 6 // Maximum size
         }
         
+        // If grid size changed, reload images
+        if newGridDimension != gameScene.context.layoutInfo.gridDimension {
+            gameScene.queueManager.refreshImageQueue(forGridSize: newGridDimension)
+        }
+        
         // Update the grid dimension
         gameScene.context.updateGridDimension(newGridDimension)
         

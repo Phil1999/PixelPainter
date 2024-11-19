@@ -1,10 +1,3 @@
-//
-//  PowerUpManager.swift
-//  PixelPainter
-//
-//  Created by Jason Huang on 11/5/24.
-//
-
 import SpriteKit
 
 class PowerUpManager {
@@ -76,7 +69,7 @@ class PowerUpManager {
         let startX = centerX - (totalWidth / 2)
 
         // Position right above the pixel bank (150 is rough estimate of bank height)
-        let yPosition = 150 + powerUpSize
+        let yPosition = 210 + powerUpSize
 
         for (index, type) in PowerUpType.all.enumerated() {
             let powerUp = createPowerUpNode(type: type)
@@ -85,7 +78,6 @@ class PowerUpManager {
             gameScene.addChild(powerUp)
             powerUps[type] = powerUp
             updatePowerUpVisual(type: type)
-
         }
     }
 
@@ -102,31 +94,50 @@ class PowerUpManager {
 
     private func createPowerUpNode(type: PowerUpType) -> SKNode {
         let container = SKNode()
-
-        let circle = SKShapeNode(circleOfRadius: 25)
-        circle.fillColor = .blue
+        
+        // Increased circle size
+        let circle = SKShapeNode(circleOfRadius: 35)
+        circle.fillColor = UIColor(hex: "252525").withAlphaComponent(0.9)
         circle.strokeColor = .white
         circle.lineWidth = 2
         container.addChild(circle)
-
-        let label = SKLabelNode(text: type.shortName)
-        label.fontName = "PPNeueMontreal-Bold"
-        label.fontSize = 20
-        label.verticalAlignmentMode = .center
-        container.addChild(label)
-
-        // Uses counter
+        
+        // Try loading the icon directly by name
+        let iconName = getIconName(for: type)
+        print("Attempting to load icon: \(iconName)")
+        
+        let iconTexture = SKTexture(imageNamed: iconName)
+        let iconNode = SKSpriteNode(texture: iconTexture)
+        
+        // Increased icon size
+        iconNode.size = CGSize(width: 40, height: 40)
+        iconNode.position = CGPoint.zero
+        container.addChild(iconNode)
+        
+        // Moved uses counter further down and made it bigger
         let usesLabel = SKLabelNode(text: "\(powerUpUses[type] ?? 0)")
         usesLabel.fontName = "PPNeueMontreal-Bold"
-        usesLabel.fontSize = 14
-        usesLabel.position = CGPoint(x: 0, y: -20)
+        usesLabel.fontSize = 20
+        usesLabel.position = CGPoint(x: 0, y: -60)  // Moved further down
         usesLabel.name = "uses"
         container.addChild(usesLabel)
-
+        
         container.name = "powerup_\(type.rawValue)"
         return container
     }
-
+    
+    private func getIconName(for type: PowerUpType) -> String {
+        switch type {
+        case .timeStop:
+            return "snowflake"
+        case .shuffle:
+            return "shuffle"
+        case .flash:
+            return "flash"
+        case .place:
+            return "place"
+        }
+    }
     private func updatePowerUpVisual(type: PowerUpType) {
         guard let powerUpNode = powerUps[type] else { return }
 
@@ -180,6 +191,7 @@ class PowerUpManager {
         // Check power-up has uses remaining
         guard let uses = powerUpUses[type], uses > 0 else { return }
         guard let powerUpNode = powerUps[type] else { return }
+        guard let gameScene = gameScene else { return }
 
         // check if power-up is in cooldown
         if powerUpsInCooldown.contains(type) { return }
@@ -190,109 +202,101 @@ class PowerUpManager {
                 powerUpsInCooldown.insert(type)
                 playState?.effectManager.cooldown(powerUpNode, duration: GameConstants.PowerUpTimers.timeStopCooldown)
             }
-
-            if let timerNode = gameScene?.childNode(withName: "//circularTimer") as? CircularTimer {
+            
+            if let timerNode = gameScene.childNode(withName: "//circularTimer") as? CircularTimer {
                 timerNode.setFrozenState(active: true)
-                gameScene?.removeAction(forKey: "updateTimer")
-
+                gameScene.removeAction(forKey: "updateTimer")
+                
                 DispatchQueue.main.asyncAfter(deadline: .now() + GameConstants.PowerUpTimers.timeStopCooldown) { [weak self] in
                     timerNode.setFrozenState(active: false)
                     self?.powerUpsInCooldown.remove(type)
                     self?.playState?.startTimer()
                 }
             }
+            
         case .place:
-            // Auto-place next piece correctly
-            if let selectedPiece = gameScene?.context.gameInfo.pieces.first(
-                where: { !$0.isPlaced }),
-                let gridNode = gameScene?.childNode(withName: "grid")
-                    as? SKSpriteNode
-            {
+            if let selectedPiece = gameScene.context.gameInfo.pieces.first(where: { !$0.isPlaced }),
+               let gridNode = gameScene.childNode(withName: "grid") as? SKSpriteNode {
+                
                 let correctPosition = selectedPiece.correctPosition
-
-                // Calculate the appropriate grid position
+                let gridDimension = CGFloat(gameScene.context.layoutInfo.gridDimension)
+                
+                // Calculate correct position based on grid dimension
                 let gridPosition = CGPoint(
-                    x: CGFloat(Int(correctPosition.x)) * gridNode.size.width / 3
-                        - gridNode.size.width / 2 + gridNode.size.width / 6,
-                    y: CGFloat(2 - Int(correctPosition.y))
-                        * gridNode.size.height / 3 - gridNode.size.height / 2
-                        + gridNode.size.height / 6
+                    x: CGFloat(Int(correctPosition.x)) * gridNode.size.width / gridDimension
+                    - gridNode.size.width / 2 + gridNode.size.width / (2 * gridDimension),
+                    y: CGFloat(Int(gridDimension - 1 - correctPosition.y))
+                    * gridNode.size.height / gridDimension - gridNode.size.height / 2
+                    + gridNode.size.height / (2 * gridDimension)
                 )
-
+                
                 if let bankNode = playState?.bankManager.bankNode,
-                    let pieceInBank = bankNode.childNode(
-                        withName:
-                            "piece_\(Int(correctPosition.y))_\(Int(correctPosition.x))"
-                    ) as? SKSpriteNode
-                {
-                    if playState?.gridManager.tryPlacePiece(
-                        pieceInBank, at: gridPosition) == true
-                    {
-                        // Handle successful placement same as manual placement
+                   let pieceInBank = bankNode.childNode(
+                    withName: "piece_\(Int(correctPosition.y))_\(Int(correctPosition.x))"
+                   ) as? SKSpriteNode {
+                    if playState?.gridManager.tryPlacePiece(pieceInBank, at: gridPosition) == true {
                         playState?.notifyPiecePlaced()
                     }
                 }
             }
+            
         case .flash:
-            // Show original image briefly
-
             if uses > 1 {
                 powerUpsInCooldown.insert(type)
                 playState?.effectManager.cooldown(powerUpNode, duration: GameConstants.PowerUpTimers.flashCooldown)
             }
-
-            if let image = gameScene?.context.gameInfo.currentImage {
+            
+            if let image = gameScene.context.gameInfo.currentImage {
                 let imageNode = SKSpriteNode(texture: SKTexture(image: image))
-
-                let gridTopY =
-                    (gameScene!.size.height / 2 + 50)
-                    + (gameScene!.context.layoutInfo.gridSize.height / 2)
-
-                imageNode.setScale(0.6)
-
+                
+                let gridTopY = (gameScene.size.height / 2 + 50) +
+                (gameScene.context.layoutInfo.gridSize.height / 2)
+                
+                // Calculate scale based on grid size
+                let gridDimension = gameScene.context.layoutInfo.gridDimension
+                let baseScale: CGFloat = 0.6
+                let scaleAdjustment: CGFloat = baseScale * (3.0 / CGFloat(gridDimension))
+                
+                imageNode.setScale(scaleAdjustment)
+                
+                // Adjust vertical spacing based on grid size
+                let verticalSpacing: CGFloat = 75 * (3.0 / CGFloat(gridDimension))
                 imageNode.position = CGPoint(
-                    x: gameScene!.size.width / 2,
-                    y: gridTopY + 75
+                    x: gameScene.size.width / 2,
+                    y: gridTopY + verticalSpacing
                 )
-
+                
                 imageNode.zPosition = 9999
-
-                gameScene?.addChild(imageNode)
-
+                gameScene.addChild(imageNode)
+                
                 DispatchQueue.main.asyncAfter(deadline: .now() + GameConstants.PowerUpTimers.flashCooldown) {
                     imageNode.removeFromParent()
                     self.powerUpsInCooldown.remove(type)
                 }
             }
-
+            
         case .shuffle:
             if uses > 1 {
                 powerUpsInCooldown.insert(type)
                 playState?.effectManager.cooldown(powerUpNode, duration: 0.5)
             }
-
+            
             if let bankManager = playState?.bankManager {
-                // Remove current visible pieces
                 bankManager.clearSelection()
-
-                // shuffle the remaining unplaced pieces
-                if var pieces = gameScene?.context.gameInfo.pieces {
-                    let placedPieces = pieces.filter { $0.isPlaced }
-                    var unplacedPieces = pieces.filter { !$0.isPlaced }
-                    unplacedPieces.shuffle()
-
-                    // Now combine placed and shuffled unplaced pieces
-                    pieces = placedPieces + unplacedPieces
-                    gameScene?.context.gameInfo.pieces = pieces
-
-                    // Show the new arrangement.
-                    bankManager.showNextThreePieces()
-                }
-
+                
+                // Safely access the pieces array
+                let pieces = gameScene.context.gameInfo.pieces
+                let placedPieces = pieces.filter { $0.isPlaced }
+                var unplacedPieces = pieces.filter { !$0.isPlaced }
+                unplacedPieces.shuffle()
+                
+                // Combine and update
+                gameScene.context.gameInfo.pieces = placedPieces + unplacedPieces
+                bankManager.showNextThreePieces()
+                
                 DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
                     self.powerUpsInCooldown.remove(type)
                 }
-
             }
         }
         powerUpUses[type] = uses - 1
