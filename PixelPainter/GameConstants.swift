@@ -16,6 +16,6 @@ enum GameConstants {
     }
     enum PowerUpTimers {
         static let timeStopCooldown = 5.0
-        static let flashCooldown = 1.0
+        static let flashCooldown = 3.0
     }
 }
