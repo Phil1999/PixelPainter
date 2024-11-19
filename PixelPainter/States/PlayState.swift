@@ -35,7 +35,7 @@ class PlayState: GKState {
         SoundManager.shared.playSound(.piecePlaced)
         
         let currentTime = gameScene.context.gameInfo.timeRemaining
-        gameScene.context.gameInfo.timeRemaining = min(10000, currentTime + 2)
+        gameScene.context.gameInfo.timeRemaining = min(10, currentTime + 2)
         hudManager.updateScore()
         bankManager.clearSelection()
         bankManager.refreshBankIfNeeded()
@@ -84,7 +84,7 @@ class PlayState: GKState {
         bankManager.createPictureBank()
         hudManager.createHUD()
         powerUpManager.setupPowerUps()
-        gameScene.context.gameInfo.timeRemaining = 1000 // adjust according to board size
+        gameScene.context.gameInfo.timeRemaining = 10 // adjust according to board size
     }
 
     func handleGridPlacement(at location: CGPoint) {
