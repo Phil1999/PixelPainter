@@ -79,6 +79,12 @@ class PlayState: GKState {
     }
 
     private func setupPlayScene() {
+        // Create and add background first
+        let background = Background()
+        background.setup(screenSize: gameScene.size)
+        gameScene.addChild(background)
+        
+        // Then add game elements
         gridManager.createGrid()
         bankManager.clearSelection()
         bankManager.createPictureBank()

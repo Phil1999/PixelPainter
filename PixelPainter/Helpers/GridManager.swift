@@ -43,21 +43,42 @@ class GridManager {
         
         // Add the inner grid frames
         let pieceSize = gameScene.context.layoutInfo.pieceSize
+        let cellColor = UIColor(red: 51/255, green: 51/255, blue: 51/255, alpha: 1.0) // #333333
+        
         for row in 0..<gridDimension {
             for col in 0..<gridDimension {
                 let frame: SKSpriteNode
                 
                 // Determine if this cell needs rounded corners
                 if (row == 0 && col == 0) { // Top-left corner
-                    frame = createRoundedCell(size: pieceSize, cornerRadius: cornerRadius, corners: [.topLeft])
+                    frame = createRoundedCell(size: pieceSize, cornerRadius: cornerRadius, corners: [.topLeft], cellColor: cellColor)
                 } else if (row == 0 && col == gridDimension - 1) { // Top-right corner
-                    frame = createRoundedCell(size: pieceSize, cornerRadius: cornerRadius, corners: [.topRight])
+                    frame = createRoundedCell(size: pieceSize, cornerRadius: cornerRadius, corners: [.topRight], cellColor: cellColor)
                 } else if (row == gridDimension - 1 && col == 0) { // Bottom-left corner
-                    frame = createRoundedCell(size: pieceSize, cornerRadius: cornerRadius, corners: [.bottomLeft])
+                    frame = createRoundedCell(size: pieceSize, cornerRadius: cornerRadius, corners: [.bottomLeft], cellColor: cellColor)
                 } else if (row == gridDimension - 1 && col == gridDimension - 1) { // Bottom-right corner
-                    frame = createRoundedCell(size: pieceSize, cornerRadius: cornerRadius, corners: [.bottomRight])
+                    frame = createRoundedCell(size: pieceSize, cornerRadius: cornerRadius, corners: [.bottomRight], cellColor: cellColor)
                 } else {
-                    frame = SKSpriteNode(color: .darkGray, size: CGSize(width: pieceSize.width - 2, height: pieceSize.height - 2))
+                    // Create regular cell with outline
+                    let adjustedSize = CGSize(width: pieceSize.width, height: pieceSize.height) // Removed the -1.5 spacing
+                    let rect = CGRect(origin: .zero, size: adjustedSize)
+                    
+                    let path = UIBezierPath(rect: rect)
+                    
+                    let shape = CAShapeLayer()
+                    shape.path = path.cgPath
+                    shape.fillColor = cellColor.cgColor
+                    shape.strokeColor = UIColor.white.cgColor
+                    shape.lineWidth = 1.5
+                    
+                    UIGraphicsBeginImageContextWithOptions(adjustedSize, false, 0)
+                    if let context = UIGraphicsGetCurrentContext() {
+                        shape.render(in: context)
+                    }
+                    let image = UIGraphicsGetImageFromCurrentImageContext()
+                    UIGraphicsEndImageContext()
+                    
+                    frame = SKSpriteNode(texture: SKTexture(image: image!))
                 }
                 
                 frame.position = CGPoint(
@@ -70,8 +91,8 @@ class GridManager {
         }
     }
     
-    private func createRoundedCell(size: CGSize, cornerRadius: CGFloat, corners: UIRectCorner) -> SKSpriteNode {
-        let adjustedSize = CGSize(width: size.width - 2, height: size.height - 2)
+    private func createRoundedCell(size: CGSize, cornerRadius: CGFloat, corners: UIRectCorner, cellColor: UIColor) -> SKSpriteNode {
+        let adjustedSize = CGSize(width: size.width, height: size.height) // Removed the -1.5 spacing
         let rect = CGRect(origin: .zero, size: adjustedSize)
         
         let path = UIBezierPath(
@@ -82,7 +103,9 @@ class GridManager {
         
         let shape = CAShapeLayer()
         shape.path = path.cgPath
-        shape.fillColor = UIColor.darkGray.cgColor
+        shape.fillColor = cellColor.cgColor
+        shape.strokeColor = UIColor.white.cgColor
+        shape.lineWidth = 1.5
         
         UIGraphicsBeginImageContextWithOptions(adjustedSize, false, 0)
         if let context = UIGraphicsGetCurrentContext() {
@@ -107,7 +130,6 @@ class GridManager {
             return false
         }
         
-        // Rest of the function remains similar, just use gridDimension where needed
         if let pieceName = piece.name,
            let pieceIndex = gameScene.context.gameInfo.pieces.firstIndex(where: { "piece_\(Int($0.correctPosition.y))_\(Int($0.correctPosition.x))" == pieceName }) {
             
@@ -119,13 +141,15 @@ class GridManager {
                     y: CGFloat(gridDimension - 1 - row) * pieceSize.height - gridNode.size.height / 2 + pieceSize.height / 2
                 )
                 
-                let placedPiece = SKSpriteNode(texture: piece.texture)
-                placedPiece.size = pieceSize
-                placedPiece.name = piece.name
-                placedPiece.setScale(1.0)
-                
-                gridNode.addChild(placedPiece)
-                placedPiece.position = targetPosition
+                // Extract the original image texture from the piece's crop node structure
+                if let cropNode = piece.children.first as? SKCropNode,
+                   let pieceSprite = cropNode.children.first as? SKSpriteNode {
+                    let placedPiece = SKSpriteNode(texture: pieceSprite.texture)
+                    placedPiece.size = pieceSize  // This will make it larger to fit the grid
+                    placedPiece.position = targetPosition
+                    placedPiece.name = piece.name
+                    gridNode.addChild(placedPiece)
+                }
                 
                 piece.removeFromParent()
                 
