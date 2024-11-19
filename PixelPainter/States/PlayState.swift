@@ -15,7 +15,7 @@ class PlayState: GKState {
     let hudManager: HUDManager
     var powerUpManager: PowerUpManager!
     var effectManager: EffectManager!
-
+    
     init(gameScene: GameScene) {
         self.gameScene = gameScene
         self.gridManager = GridManager(gameScene: gameScene)
@@ -67,7 +67,7 @@ class PlayState: GKState {
         startGame()
     }
 
-    override func willExit(to nextState: GKState) {
+    override func willExit(to nextState: GKState) {  
         gameScene.removeAllChildren()
         gameScene.removeAction(forKey: "updateTimer")
     }
@@ -76,6 +76,7 @@ class PlayState: GKState {
         // Create and add background first
         let background = Background()
         background.setup(screenSize: gameScene.size)
+        background.zPosition = -2
         gameScene.addChild(background)
         
         // Then add game elements

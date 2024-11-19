@@ -19,17 +19,19 @@ class GridManager {
         
         let gridSize = gameScene.context.layoutInfo.gridSize
         let gridDimension = gameScene.context.layoutInfo.gridDimension
-        let cornerRadius: CGFloat = 15
+        let cornerRadius: CGFloat = 30
         
-        // Create rounded rectangle path for the main grid
+        // Create the background grid first
         let gridRect = CGRect(origin: .zero, size: gridSize)
         let path = UIBezierPath(roundedRect: gridRect, cornerRadius: cornerRadius)
         
         let shape = CAShapeLayer()
         shape.path = path.cgPath
         shape.fillColor = UIColor.lightGray.cgColor
+        shape.strokeColor = UIColor.white.cgColor
+        shape.lineWidth = 3
         
-        UIGraphicsBeginImageContextWithOptions(gridSize, false, 0)
+        UIGraphicsBeginImageContextWithOptions(gridSize, false, UIScreen.main.scale)
         if let context = UIGraphicsGetCurrentContext() {
             shape.render(in: context)
         }
@@ -41,45 +43,18 @@ class GridManager {
         gridNode.name = "grid"
         gameScene.addChild(gridNode)
         
-        // Add the inner grid frames
+        // Add the grid cells with consistent line width
         let pieceSize = gameScene.context.layoutInfo.pieceSize
-        let cellColor = UIColor(red: 51/255, green: 51/255, blue: 51/255, alpha: 1.0) // #333333
+        let cellColor = UIColor(red: 51/255, green: 51/255, blue: 51/255, alpha: 1.0)
         
         for row in 0..<gridDimension {
             for col in 0..<gridDimension {
-                let frame: SKSpriteNode
-                
-                // Determine if this cell needs rounded corners
-                if (row == 0 && col == 0) { // Top-left corner
-                    frame = createRoundedCell(size: pieceSize, cornerRadius: cornerRadius, corners: [.topLeft], cellColor: cellColor)
-                } else if (row == 0 && col == gridDimension - 1) { // Top-right corner
-                    frame = createRoundedCell(size: pieceSize, cornerRadius: cornerRadius, corners: [.topRight], cellColor: cellColor)
-                } else if (row == gridDimension - 1 && col == 0) { // Bottom-left corner
-                    frame = createRoundedCell(size: pieceSize, cornerRadius: cornerRadius, corners: [.bottomLeft], cellColor: cellColor)
-                } else if (row == gridDimension - 1 && col == gridDimension - 1) { // Bottom-right corner
-                    frame = createRoundedCell(size: pieceSize, cornerRadius: cornerRadius, corners: [.bottomRight], cellColor: cellColor)
-                } else {
-                    // Create regular cell with outline
-                    let adjustedSize = CGSize(width: pieceSize.width, height: pieceSize.height) // Removed the -1.5 spacing
-                    let rect = CGRect(origin: .zero, size: adjustedSize)
-                    
-                    let path = UIBezierPath(rect: rect)
-                    
-                    let shape = CAShapeLayer()
-                    shape.path = path.cgPath
-                    shape.fillColor = cellColor.cgColor
-                    shape.strokeColor = UIColor.white.cgColor
-                    shape.lineWidth = 1.5
-                    
-                    UIGraphicsBeginImageContextWithOptions(adjustedSize, false, 0)
-                    if let context = UIGraphicsGetCurrentContext() {
-                        shape.render(in: context)
-                    }
-                    let image = UIGraphicsGetImageFromCurrentImageContext()
-                    UIGraphicsEndImageContext()
-                    
-                    frame = SKSpriteNode(texture: SKTexture(image: image!))
-                }
+                let frame = createRoundedCell(
+                    size: pieceSize,
+                    cornerRadius: cornerRadius,
+                    corners: getRoundedCorners(row: row, col: col, dimension: gridDimension),
+                    cellColor: cellColor
+                )
                 
                 frame.position = CGPoint(
                     x: CGFloat(col) * pieceSize.width - gridNode.size.width / 2 + pieceSize.width / 2,
@@ -89,6 +64,15 @@ class GridManager {
                 gridNode.addChild(frame)
             }
         }
+    }
+
+    private func getRoundedCorners(row: Int, col: Int, dimension: Int) -> UIRectCorner {
+        var corners: UIRectCorner = []
+        if row == 0 && col == 0 { corners.insert(.topLeft) }
+        if row == 0 && col == dimension - 1 { corners.insert(.topRight) }
+        if row == dimension - 1 && col == 0 { corners.insert(.bottomLeft) }
+        if row == dimension - 1 && col == dimension - 1 { corners.insert(.bottomRight) }
+        return corners
     }
     
     private func createRoundedCell(size: CGSize, cornerRadius: CGFloat, corners: UIRectCorner, cellColor: UIColor) -> SKSpriteNode {
@@ -105,7 +89,7 @@ class GridManager {
         shape.path = path.cgPath
         shape.fillColor = cellColor.cgColor
         shape.strokeColor = UIColor.white.cgColor
-        shape.lineWidth = 1.5
+        shape.lineWidth = 3
         
         UIGraphicsBeginImageContextWithOptions(adjustedSize, false, 0)
         if let context = UIGraphicsGetCurrentContext() {

@@ -62,7 +62,7 @@ class PowerUpManager {
         let centerX = gameScene.size.width / 2
 
         // calculate total width
-        let totalSpacing: CGFloat = powerUpSize * 2
+        let totalSpacing: CGFloat = powerUpSize * 2.3
         let totalWidth = CGFloat(PowerUpType.all.count - 1) * totalSpacing
 
         // Center horizontally
@@ -96,10 +96,10 @@ class PowerUpManager {
         let container = SKNode()
         
         // Increased circle size
-        let circle = SKShapeNode(circleOfRadius: 35)
+        let circle = SKShapeNode(circleOfRadius: 33)
         circle.fillColor = UIColor(hex: "252525").withAlphaComponent(0.9)
         circle.strokeColor = .white
-        circle.lineWidth = 2
+        circle.lineWidth = 3
         container.addChild(circle)
         
         // Try loading the icon directly by name

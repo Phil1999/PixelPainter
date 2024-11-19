@@ -23,7 +23,7 @@ class HUDManager {
         gameScene.addChild(hudNode)
 
         // timer
-        let timerRadius: CGFloat = 30
+        let timerRadius: CGFloat = 35
         circularTimer = CircularTimer(
             radius: timerRadius,
             gameScene: gameScene
