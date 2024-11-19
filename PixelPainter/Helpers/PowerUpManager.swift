@@ -251,7 +251,7 @@ class PowerUpManager {
                 imageNode.size = gameScene.context.layoutInfo.gridSize
                 imageNode.position = CGPoint(x: gameScene.size.width / 2, y: gameScene.size.height / 2 + 50)
                 imageNode.zPosition = 9999
-                imageNode.alpha = 0.7
+                imageNode.alpha = 0.6
                 gameScene.addChild(imageNode)
                 
                 DispatchQueue.main.asyncAfter(deadline: .now() + GameConstants.PowerUpTimers.flashCooldown) {

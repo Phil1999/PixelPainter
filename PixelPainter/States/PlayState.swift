@@ -35,7 +35,7 @@ class PlayState: GKState {
         SoundManager.shared.playSound(.piecePlaced)
         
         let currentTime = gameScene.context.gameInfo.timeRemaining
-        gameScene.context.gameInfo.timeRemaining = min(10, currentTime + 2)
+        gameScene.context.gameInfo.timeRemaining = min(100, currentTime + 2) // allow player to go overtime
         hudManager.updateScore()
         bankManager.clearSelection()
         bankManager.refreshBankIfNeeded()
@@ -67,7 +67,7 @@ class PlayState: GKState {
         startGame()
     }
 
-    override func willExit(to nextState: GKState) {  
+    override func willExit(to nextState: GKState) {
         gameScene.removeAllChildren()
         gameScene.removeAction(forKey: "updateTimer")
     }
