@@ -1,9 +1,9 @@
 import SpriteKit
 
 class Background: SKNode {
-    
     private var mainBackground: SKSpriteNode!
-    private var gradientLayer: SKShapeNode!
+    private var gradientLayer: SKSpriteNode!
+    private var fogEffect: SKSpriteNode!
     private var screenSize: CGSize = .zero
     
     override init() {
@@ -16,89 +16,99 @@ class Background: SKNode {
     
     func setup(screenSize: CGSize) {
         self.screenSize = screenSize
-        setupMainBackground()
+        setupLayers()
     }
 }
 
 extension Background {
-    private func setupMainBackground() {
-        // Create gradient layer
-        gradientLayer = SKShapeNode(rect: CGRect(origin: .zero, size: screenSize))
+    private func setupLayers() {
+        setupGradient()
+        setupMainBackground()
+        setupFog()
+    }
+    
+    private func setupGradient() {
+        let gradientSize = CGSize(width: screenSize.width, height: screenSize.height)
+        gradientLayer = SKSpriteNode(color: .white, size: gradientSize)
         
-        // Create gradient with specified colors
-        let bottomColor = UIColor(hex: "171717")
         let topColor = UIColor(hex: "BAB3B9")
+        let bottomColor = UIColor(hex: "171717")
+        let gradientTexture = createGradientTexture(colors: [topColor, bottomColor], size: gradientSize)
         
+        gradientLayer.texture = gradientTexture
+        gradientLayer.position = CGPoint(x: screenSize.width / 2, y: screenSize.height / 2)
+        gradientLayer.zPosition = -3
+        addChild(gradientLayer)
+    }
+    
+    private func setupMainBackground() {
+        guard let backgroundImage = UIImage(named: "background") else { return }
+        
+        let texture = SKTexture(image: backgroundImage)
+        mainBackground = SKSpriteNode(texture: texture)
+        
+        let figmaAspect = 626.0 / 913.0
+        let scale = 1.15
+        let targetHeight = screenSize.height * scale
+        let targetWidth = targetHeight * figmaAspect
+        
+        mainBackground.size = CGSize(width: targetWidth, height: targetHeight)
+        let xOffset = -110 * (screenSize.width / 626)
+        mainBackground.position = CGPoint(x: screenSize.width / 2 + xOffset, y: screenSize.height / 2)
+        mainBackground.zPosition = -2
+        addChild(mainBackground)
+    }
+    
+    private func setupFog() {
+        let scale = 1.15
+        if let fogImage = UIImage(named: "Fog") {
+           let texture = SKTexture(image: fogImage)
+           fogEffect = SKSpriteNode(texture: texture)
+           
+           // Calculate aspect ratio to maintain proportions
+           let imageAspect = fogImage.size.width / fogImage.size.height
+           let screenAspect = screenSize.width / screenSize.height
+           
+           if imageAspect > screenAspect {
+               // Image is wider - fit to height
+               let height = screenSize.height * scale
+               let width = height * imageAspect
+               fogEffect.size = CGSize(width: width, height: height)
+           } else {
+               // Image is taller - fit to width
+               let width = screenSize.width
+               let height = width / imageAspect
+               fogEffect.size = CGSize(width: width, height: height)
+           }
+           
+            fogEffect.position = CGPoint(x: screenSize.width / 3 + 20, y: screenSize.height / 3 + 30)
+            fogEffect.zPosition = -1
+            fogEffect.alpha = 0.8
+            addChild(fogEffect)
+       }
+    }
+    
+    private func createGradientTexture(colors: [UIColor], size: CGSize) -> SKTexture {
         let gradientLayer = CAGradientLayer()
-        gradientLayer.colors = [bottomColor.cgColor, topColor.cgColor]
+        gradientLayer.colors = colors.map { $0.cgColor }
         gradientLayer.locations = [0.0, 1.0]
-        gradientLayer.startPoint = CGPoint(x: 0.5, y: 1.0)
-        gradientLayer.endPoint = CGPoint(x: 0.5, y: 0.0)
-        gradientLayer.frame = CGRect(origin: .zero, size: screenSize)
+        gradientLayer.startPoint = CGPoint(x: 0.5, y: 0.0)
+        gradientLayer.endPoint = CGPoint(x: 0.5, y: 1.0)
+        gradientLayer.frame = CGRect(origin: .zero, size: size)
         
-        // Convert CAGradientLayer to UIImage
-        UIGraphicsBeginImageContext(screenSize)
+        let scale = UIScreen.main.scale
+        UIGraphicsBeginImageContextWithOptions(size, false, scale)
         if let context = UIGraphicsGetCurrentContext() {
             gradientLayer.render(in: context)
             if let image = UIGraphicsGetImageFromCurrentImageContext() {
-                gradientLayer.removeFromSuperlayer()
                 UIGraphicsEndImageContext()
-                
-                // Create sprite node with gradient
-                let gradientNode = SKSpriteNode(texture: SKTexture(image: image))
-                gradientNode.position = CGPoint(x: screenSize.width/2, y: screenSize.height/2)
-                gradientNode.zPosition = -2
-                addChild(gradientNode)
-                
-                // Create inner shadow based on Figma CSS values
-                createInnerShadow()
+                return SKTexture(image: image)
             }
         }
-        
-        // Load background image with Figma positioning
-        if let backgroundImage = UIImage(named: "background") {
-            let texture = SKTexture(image: backgroundImage)
-            mainBackground = SKSpriteNode(texture: texture)
-            
-            // Calculate the aspect ratio based on Figma dimensions (626x913)
-            let figmaAspect = 626.0 / 913.0
-            let targetHeight = screenSize.height
-            let targetWidth = targetHeight * figmaAspect
-            
-            mainBackground.size = CGSize(width: targetWidth, height: targetHeight)
-            
-            // Position based on Figma CSS (left: -69px)
-            // Convert the -69px to a relative position
-            let xOffset = -69 * (screenSize.width / 626) // Scale offset based on screen width
-            mainBackground.position = CGPoint(x: screenSize.width/2 + xOffset, y: screenSize.height/2)
-            mainBackground.zPosition = -1
-            mainBackground.alpha = 0.25
-            addChild(mainBackground)
-        }
-    }
-    
-    private func createInnerShadow() {
-        // Create inner shadow using Figma values (0px 4px 4px rgba(0, 0, 0, 0.25))
-        let effectNode = SKEffectNode()
-        effectNode.shouldRasterize = true
-        
-        let shadowNode = SKSpriteNode(color: .black, size: screenSize)
-        shadowNode.alpha = 0.5 // Figma's 0.25 opacity
-        effectNode.addChild(shadowNode)
-        
-        // Position shadow based on Figma values (4px down)
-        effectNode.position = CGPoint(x: screenSize.width/2, y: screenSize.height/2 - 4)
-        effectNode.zPosition = -1.5
-        
-        // Apply 4px blur
-        let blur = CIFilter(name: "CIGaussianBlur")
-        blur?.setValue(4, forKey: kCIInputRadiusKey)
-        effectNode.filter = blur
-        
-        addChild(effectNode)
+        UIGraphicsEndImageContext()
+        return SKTexture()
     }
 }
-
 // Helper extension to create UIColor from hex
 extension UIColor {
     convenience init(hex: String) {

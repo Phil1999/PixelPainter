@@ -62,7 +62,7 @@ class PowerUpManager {
         let centerX = gameScene.size.width / 2
 
         // calculate total width
-        let totalSpacing: CGFloat = powerUpSize * 2
+        let totalSpacing: CGFloat = powerUpSize * 2.3
         let totalWidth = CGFloat(PowerUpType.all.count - 1) * totalSpacing
 
         // Center horizontally
@@ -96,10 +96,10 @@ class PowerUpManager {
         let container = SKNode()
         
         // Increased circle size
-        let circle = SKShapeNode(circleOfRadius: 35)
+        let circle = SKShapeNode(circleOfRadius: 33)
         circle.fillColor = UIColor(hex: "252525").withAlphaComponent(0.9)
         circle.strokeColor = .white
-        circle.lineWidth = 2
+        circle.lineWidth = 3
         container.addChild(circle)
         
         // Try loading the icon directly by name
@@ -248,25 +248,10 @@ class PowerUpManager {
             
             if let image = gameScene.context.gameInfo.currentImage {
                 let imageNode = SKSpriteNode(texture: SKTexture(image: image))
-                
-                let gridTopY = (gameScene.size.height / 2 + 50) +
-                (gameScene.context.layoutInfo.gridSize.height / 2)
-                
-                // Calculate scale based on grid size
-                let gridDimension = gameScene.context.layoutInfo.gridDimension
-                let baseScale: CGFloat = 0.6
-                let scaleAdjustment: CGFloat = baseScale * (3.0 / CGFloat(gridDimension))
-                
-                imageNode.setScale(scaleAdjustment)
-                
-                // Adjust vertical spacing based on grid size
-                let verticalSpacing: CGFloat = 75 * (3.0 / CGFloat(gridDimension))
-                imageNode.position = CGPoint(
-                    x: gameScene.size.width / 2,
-                    y: gridTopY + verticalSpacing
-                )
-                
+                imageNode.size = gameScene.context.layoutInfo.gridSize
+                imageNode.position = CGPoint(x: gameScene.size.width / 2, y: gameScene.size.height / 2 + 50)
                 imageNode.zPosition = 9999
+                imageNode.alpha = 0.6
                 gameScene.addChild(imageNode)
                 
                 DispatchQueue.main.asyncAfter(deadline: .now() + GameConstants.PowerUpTimers.flashCooldown) {

@@ -33,6 +33,11 @@ class MemorizeState: GKState {
     }
     
     private func setupMemorizeScene() {
+        let background = Background()
+        background.setup(screenSize: gameScene.size)
+        background.zPosition = -2
+        gameScene.addChild(background)
+        
         guard let image = gameScene.queueManager.getCurrentImage() else { return }
         gameScene.context.gameInfo.currentImage = image
         

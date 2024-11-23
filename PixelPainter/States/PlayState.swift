@@ -15,7 +15,7 @@ class PlayState: GKState {
     let hudManager: HUDManager
     var powerUpManager: PowerUpManager!
     var effectManager: EffectManager!
-
+    
     init(gameScene: GameScene) {
         self.gameScene = gameScene
         self.gridManager = GridManager(gameScene: gameScene)
@@ -35,13 +35,13 @@ class PlayState: GKState {
         SoundManager.shared.playSound(.piecePlaced)
         
         let currentTime = gameScene.context.gameInfo.timeRemaining
-        gameScene.context.gameInfo.timeRemaining = min(10, currentTime + 2)
+        gameScene.context.gameInfo.timeRemaining = min(100, currentTime + 2) // allow player to go overtime
         
         // Force update CircularTimer's display with new time, even when timer is frozen
         if let timerNode = gameScene.childNode(withName: "//circularTimer") as? CircularTimer {
             timerNode.updateDiscreteTime(newTimeRemaining: gameScene.context.gameInfo.timeRemaining)
         }
-        
+
         hudManager.updateScore()
         bankManager.clearSelection()
         bankManager.refreshBankIfNeeded()
@@ -82,6 +82,7 @@ class PlayState: GKState {
         // Create and add background first
         let background = Background()
         background.setup(screenSize: gameScene.size)
+        background.zPosition = -2
         gameScene.addChild(background)
         
         // Then add game elements

@@ -38,16 +38,17 @@ class CircularTimer: SKNode {
         self.gameScene = gameScene
 
         backgroundCircle = SKShapeNode(circleOfRadius: radius)
-        backgroundCircle.fillColor = .darkGray
-        backgroundCircle.strokeColor = .gray
-        backgroundCircle.lineWidth = 2
+        backgroundCircle.fillColor = .black
+        backgroundCircle.strokeColor = .darkGray
+        backgroundCircle.lineWidth = 4
+        backgroundCircle.alpha = 0.65
 
         timerCircle = SKShapeNode()
         timerCircle.strokeColor = .white
         timerCircle.lineWidth = 4
 
         timeLabel = SKLabelNode(fontNamed: "PPNeueMontreal-Bold")
-        timeLabel.fontSize = radius * 0.6
+        timeLabel.fontSize = radius * 0.7
         timeLabel.verticalAlignmentMode = .center
 
         super.init()
