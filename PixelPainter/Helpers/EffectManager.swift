@@ -74,67 +74,122 @@ class EffectManager {
     
     // Note that the duration should match with the actual expected duration.
     func cooldown(_ node: SKNode, duration: TimeInterval) {
-        if let circle = node.children.first as? SKShapeNode {
+            // Save original states recursively
+            let originalStates = storeNodeStates(node)
             
-            // store original props
-            let originalFillColor = circle.fillColor
-            let originalStrokeColor = circle.strokeColor
-            let originalAlpha = node.alpha
+            // Apply cooldown effect to all nodes
+            greyOutNode(node)
             
-            // Turn grey to indicate on cooldown
-            node.alpha = 0.5
-            circle.fillColor = .gray
-            circle.strokeColor = .darkGray
-
-            // cooldown overlay
-            let cooldownNode = SKShapeNode(
-                circleOfRadius: circle.frame.width / 2)
-            cooldownNode.strokeColor = .white
+            // Create cooldown overlay
+            let cooldownNode = SKShapeNode(circleOfRadius: 33) // Standard size for power-ups
+            cooldownNode.strokeColor = UIColor.white.withAlphaComponent(0.3)
             cooldownNode.lineWidth = 3
             cooldownNode.name = "cooldown"
-
+            
             let startAngle = CGFloat.pi / 2
-
             let path = CGMutablePath()
             path.addArc(
                 center: .zero,
-                radius: circle.frame.width / 2,
+                radius: 33,
                 startAngle: startAngle,
                 endAngle: startAngle + CGFloat.pi * 2,
                 clockwise: true
             )
-
             cooldownNode.path = path
-
             node.addChild(cooldownNode)
-
-            let animate = SKAction.customAction(withDuration: duration) {
-                node, elapsedTime in
+            
+            // Animate cooldown
+            let animate = SKAction.customAction(withDuration: duration) { node, elapsedTime in
                 guard let cooldown = node as? SKShapeNode else { return }
-
                 let progress = elapsedTime / CGFloat(duration)
                 let endAngle = startAngle + (.pi * 2 * progress)
-
+                
                 let newPath = CGMutablePath()
                 newPath.addArc(
                     center: .zero,
-                    radius: circle.frame.width / 2,
+                    radius: 33,
                     startAngle: startAngle,
                     endAngle: endAngle,
-                    clockwise: true)
+                    clockwise: true
+                )
                 cooldown.path = newPath
             }
-
-            let reset = SKAction.run {
+            
+            // Reset everything back to original state
+            let reset = SKAction.run { [weak self] in
                 cooldownNode.removeFromParent()
-                node.alpha = originalAlpha
-                circle.fillColor = originalFillColor
-                circle.strokeColor = originalStrokeColor
+                self?.restoreNodeStates(node, states: originalStates)
             }
-
-            let sequence = SKAction.sequence([animate, reset])
-            cooldownNode.run(sequence)
+            
+            cooldownNode.run(SKAction.sequence([animate, reset]))
         }
-    }
+        
+        private struct NodeState {
+            let alpha: CGFloat
+            let color: UIColor?                 // For colored nodes
+            let fillColor: UIColor?             // For shape nodes
+            let strokeColor: UIColor?           // For shape nodes
+            let colorBlendFactor: CGFloat       // For sprite nodes
+        }
+        
+        private func storeNodeStates(_ node: SKNode) -> [SKNode: NodeState] {
+            var states: [SKNode: NodeState] = [:]
+            
+            // Store state for current node
+            states[node] = NodeState(
+                alpha: node.alpha,
+                color: (node as? SKSpriteNode)?.color,
+                fillColor: (node as? SKShapeNode)?.fillColor,
+                strokeColor: (node as? SKShapeNode)?.strokeColor,
+                colorBlendFactor: (node as? SKSpriteNode)?.colorBlendFactor ?? 0
+            )
+            
+            // Recursively store states for all children
+            node.children.forEach { child in
+                states.merge(storeNodeStates(child)) { current, _ in current }
+            }
+            
+            return states
+        }
+        
+        private func greyOutNode(_ node: SKNode) {
+            // Set alpha for all nodes
+            node.alpha = 0.5
+            
+            // Handle specific node types
+            if let shapeNode = node as? SKShapeNode {
+                shapeNode.fillColor = .gray
+                shapeNode.strokeColor = .darkGray
+            }
+            
+            if let spriteNode = node as? SKSpriteNode {
+                spriteNode.color = .gray
+                spriteNode.colorBlendFactor = 0.8
+            }
+            
+            // Recursively grey out children
+            node.children.forEach { greyOutNode($0) }
+        }
+        
+        private func restoreNodeStates(_ node: SKNode, states: [SKNode: NodeState]) {
+            if let state = states[node] {
+                // Restore alpha
+                node.alpha = state.alpha
+                
+                // Restore specific node properties
+                if let shapeNode = node as? SKShapeNode {
+                    shapeNode.fillColor = state.fillColor ?? .clear
+                    shapeNode.strokeColor = state.strokeColor ?? .clear
+                }
+                
+                if let spriteNode = node as? SKSpriteNode {
+                    spriteNode.color = state.color ?? .white
+                    spriteNode.colorBlendFactor = state.colorBlendFactor
+                }
+            }
+            
+            // Recursively restore children
+            node.children.forEach { restoreNodeStates($0, states: states) }
+        }
 
 }

@@ -27,9 +27,9 @@ class GridManager {
         
         let shape = CAShapeLayer()
         shape.path = path.cgPath
-        shape.fillColor = UIColor.lightGray.cgColor
-        shape.strokeColor = UIColor.white.cgColor
-        shape.lineWidth = 3
+        shape.fillColor = UIColor.clear.cgColor
+        shape.strokeColor = UIColor.clear.cgColor
+        shape.lineWidth = 0
         
         UIGraphicsBeginImageContextWithOptions(gridSize, false, UIScreen.main.scale)
         if let context = UIGraphicsGetCurrentContext() {
@@ -45,7 +45,7 @@ class GridManager {
         
         // Add the grid cells with consistent line width
         let pieceSize = gameScene.context.layoutInfo.pieceSize
-        let cellColor = UIColor(red: 51/255, green: 51/255, blue: 51/255, alpha: 1.0)
+        let cellColor = UIColor(red: 51/255, green: 51/255, blue: 51/255, alpha: 0.95)
         
         for row in 0..<gridDimension {
             for col in 0..<gridDimension {
@@ -88,8 +88,8 @@ class GridManager {
         let shape = CAShapeLayer()
         shape.path = path.cgPath
         shape.fillColor = cellColor.cgColor
-        shape.strokeColor = UIColor.white.cgColor
-        shape.lineWidth = 3
+        shape.strokeColor = UIColor.gray.cgColor
+        shape.lineWidth = 2
         
         UIGraphicsBeginImageContextWithOptions(adjustedSize, false, 0)
         if let context = UIGraphicsGetCurrentContext() {
