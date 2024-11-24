@@ -73,23 +73,6 @@ class NextLevelState: GKState {
         let completeSequence = SKAction.sequence([fadeIn, scaleUp, scaleDown])
         levelCompleteLabel.run(completeSequence)
 
-        // Add grid size information
-        let gridSizeLabel = SKLabelNode(
-            text:
-                "Next Grid: \(gameScene.context.layoutInfo.gridDimension + 1)×\(gameScene.context.layoutInfo.gridDimension + 1)"
-        )
-        gridSizeLabel.fontName = "PPNeueMontreal-Bold"
-        gridSizeLabel.fontSize = 24
-        gridSizeLabel.fontColor = .white
-        gridSizeLabel.position = CGPoint(
-            x: gameScene.size.width / 2, y: gameScene.size.height - 150)
-        gridSizeLabel.alpha = 0
-        gameScene.addChild(gridSizeLabel)
-
-        // Animate grid size label
-        let fadeGridIn = SKAction.fadeIn(withDuration: 0.3)
-        let wait = SKAction.wait(forDuration: 0.6)
-        gridSizeLabel.run(SKAction.sequence([wait, fadeGridIn]))
 
         let scoreCounter = ScoreCounter(
             text: "\(gameScene.context.gameInfo.score)")
