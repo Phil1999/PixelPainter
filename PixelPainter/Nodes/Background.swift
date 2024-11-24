@@ -153,9 +153,9 @@ extension Background {
         let size = CGSize(width: screenSize.width, height: screenSize.height)
         let gradientLayer = CAGradientLayer()
 
-        let topColor = UIColor(hex: "#A02628")
+        let topColor = UIColor(hex: "#280909")
         let middleColor = UIColor(hex: "#781012")
-        let bottomColor = UIColor(hex: "#280909")
+        let bottomColor = UIColor(hex: "#A02628")
 
         gradientLayer.colors = [
             topColor.cgColor,

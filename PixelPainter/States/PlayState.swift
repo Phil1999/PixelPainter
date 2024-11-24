@@ -141,9 +141,7 @@ class PlayState: GKState {
         let updateTimerAction = SKAction.sequence([
             SKAction.run { [weak self] in
                 guard let self = self else { return }
-                
-                let timeRemaining = self.gameScene.context.gameInfo.timeRemaining
-                
+                 
                 // Update the circular timer with new discrete time
                 if let timerNode = self.gameScene.childNode(withName: "//circularTimer") as? CircularTimer {
                     timerNode.updateDiscreteTime(newTimeRemaining: self.gameScene.context.gameInfo.timeRemaining)
