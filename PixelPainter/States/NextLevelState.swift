@@ -2,16 +2,14 @@
 //  NextLevelState.swift
 //  PixelPainter
 //
-//  Created by Jason Huang on 10/25/24.
-//
 
 import GameplayKit
 import SpriteKit
 
 class NextLevelState: GKState {
     unowned let gameScene: GameScene
-    var nextLevelTimer: Timer?
-    let nextLevelTime: TimeInterval = 3
+    private var nextLevelTimer: Timer?
+    private let nextLevelTime: TimeInterval = 3
 
     init(gameScene: GameScene) {
         self.gameScene = gameScene
@@ -19,8 +17,8 @@ class NextLevelState: GKState {
     }
 
     override func didEnter(from previousState: GKState?) {
-        setupNextLvlScene()
-        startNextLvlTimer()
+        setupNextLevelScene()
+        startNextLevelTimer()
         moveToNextImage()
         updateGridSize()
         grantPowerUp()
@@ -35,31 +33,84 @@ class NextLevelState: GKState {
         return stateClass is MemorizeState.Type
     }
 
-    private func setupNextLvlScene() {
-        let timerLabel = SKLabelNode(text: "Time: \(Int(nextLevelTime))")
+    private func setupNextLevelScene() {
+        // Setup background
+        let background = Background()
+        background.setup(screenSize: gameScene.size)
+        background.zPosition = -2
+        gameScene.addChild(background)
+
+        // We show the previous image that the user cleared
+        if let image = gameScene.queueManager.getCurrentImage() {
+            gameScene.context.gameInfo.currentImage = image
+            let imageNode = SKSpriteNode(texture: SKTexture(image: image))
+            imageNode.size = gameScene.context.layoutInfo.gridSize
+            imageNode.position = CGPoint(
+                x: gameScene.size.width / 2, y: gameScene.size.height / 2)
+            imageNode.zPosition = 1
+            gameScene.addChild(imageNode)
+        }
+        
+        // Level complete container - moved up
+            let completeContainer = SKNode()
+            completeContainer.position = CGPoint(
+                x: gameScene.size.width / 2, y: gameScene.size.height - 100)  // Moved up from -150
+            completeContainer.zPosition = 2
+            gameScene.addChild(completeContainer)
+
+            // Level Complete Text
+            let levelCompleteLabel = SKLabelNode(text: "LEVEL COMPLETED!")
+            levelCompleteLabel.fontName = "PPNeueMontreal-Bold"
+            levelCompleteLabel.fontSize = 32
+            levelCompleteLabel.fontColor = .yellow
+            levelCompleteLabel.alpha = 0
+            completeContainer.addChild(levelCompleteLabel)
+
+        // Animate level complete text
+        let fadeIn = SKAction.fadeIn(withDuration: 0.5)
+        let scaleUp = SKAction.scale(to: 1.2, duration: 0.3)
+        let scaleDown = SKAction.scale(to: 1.0, duration: 0.3)
+        let completeSequence = SKAction.sequence([fadeIn, scaleUp, scaleDown])
+        levelCompleteLabel.run(completeSequence)
+        
+        
+        // Add grid size information
+        let gridSizeLabel = SKLabelNode(
+            text: "Next Grid: \(gameScene.context.layoutInfo.gridDimension + 1)×\(gameScene.context.layoutInfo.gridDimension + 1)")
+        gridSizeLabel.fontName = "PPNeueMontreal-Bold"
+        gridSizeLabel.fontSize = 24
+        gridSizeLabel.fontColor = .white
+        gridSizeLabel.position = CGPoint(
+            x: gameScene.size.width / 2, y: gameScene.size.height - 150)
+        gridSizeLabel.alpha = 0
+        gameScene.addChild(gridSizeLabel)
+
+        // Animate grid size label
+        let fadeGridIn = SKAction.fadeIn(withDuration: 0.3)
+        let wait = SKAction.wait(forDuration: 0.6)
+        gridSizeLabel.run(SKAction.sequence([wait, fadeGridIn]))
+        
+        let scoreCounter = ScoreCounter(text: "\(gameScene.context.gameInfo.score)")
+        scoreCounter.position = CGPoint(
+        x: gameScene.size.width / 2, y: gameScene.size.height - 210)
+        gameScene.addChild(scoreCounter)
+
+        // Timer label at bottom
+        let timerLabel = SKLabelNode(
+            text: "Next Level in: \(Int(nextLevelTime))")
         timerLabel.fontName = "PPNeueMontreal-Bold"
         timerLabel.fontSize = 24
-        timerLabel.position = CGPoint(
-            x: gameScene.size.width / 2, y: gameScene.size.height - 100)
+        timerLabel.position = CGPoint(x: gameScene.size.width / 2, y: 100)
         timerLabel.name = "timerLabel"
         gameScene.addChild(timerLabel)
+    }
 
-        let nextLevelLabel = SKLabelNode(text: "NEXT LEVEL")
-        nextLevelLabel.fontName = "PPNeueMontreal-Bold"
-        nextLevelLabel.fontSize = 24
-        nextLevelLabel.position = CGPoint(
-            x: gameScene.size.width / 2, y: gameScene.size.height / 2)
-        nextLevelLabel.name = "nextLevelLabel"
-        gameScene.addChild(nextLevelLabel)
-
-        let levelLabel = SKLabelNode(
-            text: "Level: \(gameScene.context.gameInfo.level)")
-        levelLabel.fontName = "PPNeueMontreal-Bold"
-        levelLabel.fontSize = 24
-        levelLabel.position = CGPoint(
-            x: gameScene.size.width / 2, y: gameScene.size.height / 2 - 50)
-        levelLabel.name = "levelLabel"
-        gameScene.addChild(levelLabel)
+    private func moveToNextImage() {
+        gameScene.queueManager.moveToNextImage()
+        gameScene.queueManager.printCurrentQueue()
+        print(
+            "Moving to next image for level \(gameScene.context.gameInfo.level), Grid Size: \(gameScene.context.layoutInfo.gridDimension)×\(gameScene.context.layoutInfo.gridDimension)"
+        )
     }
 
     private func updateGridSize() {
@@ -85,6 +136,7 @@ class NextLevelState: GKState {
         
         // Update the grid dimension
         gameScene.context.updateGridDimension(newGridDimension)
+<<<<<<< Updated upstream
         
         // Add grid size information to the next level screen
         let gridSizeLabel = SKLabelNode(text: "Grid Size: \(newGridDimension)×\(newGridDimension)")
@@ -96,9 +148,71 @@ class NextLevelState: GKState {
         )
         gridSizeLabel.name = "gridSizeLabel"
         gameScene.addChild(gridSizeLabel)
+=======
+>>>>>>> Stashed changes
     }
 
-    private func startNextLvlTimer() {
+    private func grantPowerUp() {
+        if let powerUpManager =
+            (gameScene.context.stateMachine?.state(forClass: PlayState.self)
+            as? PlayState)?.powerUpManager,
+            let grantedPowerUp = powerUpManager.grantRandomPowerup()
+        {
+
+            let containerNode = SKNode()
+            containerNode.position = CGPoint(
+                x: gameScene.size.width / 2,
+                y: gameScene.size.height / 2 - 240
+            )
+            containerNode.alpha = 0
+            gameScene.addChild(containerNode)
+
+            // Create the icon node
+            let iconNode = SKSpriteNode(imageNamed: grantedPowerUp.iconName)
+            iconNode.size = CGSize(width: 40, height: 40)
+
+            // Create the label node
+            let plusOneLabel = SKLabelNode(text: "+1")
+            plusOneLabel.fontName = "PPNeueMontreal-Bold"
+            plusOneLabel.fontSize = 30
+            plusOneLabel.verticalAlignmentMode = .center
+
+            // Create the circle node
+            let padding: CGFloat = 10
+            let dynamicRadius =
+                max(iconNode.size.width, iconNode.size.height) / 2 + padding
+
+            let circleNode = SKShapeNode(circleOfRadius: dynamicRadius)
+            circleNode.strokeColor = .white
+            circleNode.lineWidth = 4
+            circleNode.fillColor = UIColor(hex: "252525").withAlphaComponent(
+                0.9)
+
+            // Position the icon inside the circle
+            circleNode.addChild(iconNode)
+            iconNode.position = CGPoint.zero  // Center the icon inside the circle
+
+            let spacing: CGFloat = 15
+            let totalWidth =
+                circleNode.frame.width + plusOneLabel.frame.width + spacing
+
+            // Position the label and circle node
+            plusOneLabel.position = CGPoint(
+                x: -totalWidth / 2 + plusOneLabel.frame.width / 2, y: 0)
+            circleNode.position = CGPoint(
+                x: totalWidth / 2 - circleNode.frame.width / 2, y: 0)
+            
+            containerNode.addChild(plusOneLabel)
+            containerNode.addChild(circleNode)
+            
+            // Animate the reward appearance
+            let fadeIn = SKAction.fadeIn(withDuration: 0.5)
+            let wait = SKAction.wait(forDuration: 0.9)
+            containerNode.run(SKAction.sequence([wait, fadeIn]))
+        }
+    }
+
+    private func startNextLevelTimer() {
         var timeLeft = nextLevelTime
         nextLevelTimer = Timer.scheduledTimer(
             withTimeInterval: 1, repeats: true
@@ -108,15 +222,15 @@ class NextLevelState: GKState {
             if let timerLabel = self.gameScene.childNode(withName: "timerLabel")
                 as? SKLabelNode
             {
-                timerLabel.text = "Time: \(Int(timeLeft))"
+                timerLabel.text = "Next Level in: \(Int(timeLeft))"
             }
             if timeLeft <= 0 {
                 timer.invalidate()
-                print("Changing to memorize state")
                 self.gameScene.context.stateMachine?.enter(MemorizeState.self)
             }
         }
     }
+<<<<<<< Updated upstream
 
     private func moveToNextImage() {
         gameScene.queueManager.moveToNextImage()
@@ -158,4 +272,6 @@ class NextLevelState: GKState {
             }
         }
     }
+=======
+>>>>>>> Stashed changes
 }
