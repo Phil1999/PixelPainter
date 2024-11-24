@@ -134,7 +134,7 @@ class CircularTimer: SKNode {
                     // Just exited overtime
                     removeOvertimeEffects()
                 }
-                if newTimeRemaining <= 5 && !isWarningActive {
+                if newTimeRemaining <= GameConstants.GeneralGamePlay.timeWarningThreshold && !isWarningActive {
                     triggerWarningAnimation(timeRemaining: newTimeRemaining)
                 } else {
                     timerCircle.strokeColor = .white
@@ -168,6 +168,11 @@ class CircularTimer: SKNode {
             progress = 1.0 - (interpolatedTimeRemaining / totalDuration)
         }
         updateTimerCircle(progress: CGFloat(progress))
+        
+        // Update the red overlay in the background
+            if let background = gameScene?.childNode(withName: "//backgroundNode") as? Background {
+                background.updateRedOverlay(for: CGFloat(interpolatedTimeRemaining), maxTime: CGFloat(totalDuration))
+            }
 
         scheduleNextUpdate()
     }
