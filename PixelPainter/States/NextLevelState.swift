@@ -50,21 +50,21 @@ class NextLevelState: GKState {
             imageNode.zPosition = 1
             gameScene.addChild(imageNode)
         }
-        
-        // Level complete container - moved up
-            let completeContainer = SKNode()
-            completeContainer.position = CGPoint(
-                x: gameScene.size.width / 2, y: gameScene.size.height - 100)  // Moved up from -150
-            completeContainer.zPosition = 2
-            gameScene.addChild(completeContainer)
 
-            // Level Complete Text
-            let levelCompleteLabel = SKLabelNode(text: "LEVEL COMPLETED!")
-            levelCompleteLabel.fontName = "PPNeueMontreal-Bold"
-            levelCompleteLabel.fontSize = 32
-            levelCompleteLabel.fontColor = .yellow
-            levelCompleteLabel.alpha = 0
-            completeContainer.addChild(levelCompleteLabel)
+        // Level complete container - moved up
+        let completeContainer = SKNode()
+        completeContainer.position = CGPoint(
+            x: gameScene.size.width / 2, y: gameScene.size.height - 100)  // Moved up from -150
+        completeContainer.zPosition = 2
+        gameScene.addChild(completeContainer)
+
+        // Level Complete Text
+        let levelCompleteLabel = SKLabelNode(text: "LEVEL COMPLETED!")
+        levelCompleteLabel.fontName = "PPNeueMontreal-Bold"
+        levelCompleteLabel.fontSize = 32
+        levelCompleteLabel.fontColor = .yellow
+        levelCompleteLabel.alpha = 0
+        completeContainer.addChild(levelCompleteLabel)
 
         // Animate level complete text
         let fadeIn = SKAction.fadeIn(withDuration: 0.5)
@@ -72,11 +72,12 @@ class NextLevelState: GKState {
         let scaleDown = SKAction.scale(to: 1.0, duration: 0.3)
         let completeSequence = SKAction.sequence([fadeIn, scaleUp, scaleDown])
         levelCompleteLabel.run(completeSequence)
-        
-        
+
         // Add grid size information
         let gridSizeLabel = SKLabelNode(
-            text: "Next Grid: \(gameScene.context.layoutInfo.gridDimension + 1)×\(gameScene.context.layoutInfo.gridDimension + 1)")
+            text:
+                "Next Grid: \(gameScene.context.layoutInfo.gridDimension + 1)×\(gameScene.context.layoutInfo.gridDimension + 1)"
+        )
         gridSizeLabel.fontName = "PPNeueMontreal-Bold"
         gridSizeLabel.fontSize = 24
         gridSizeLabel.fontColor = .white
@@ -89,10 +90,11 @@ class NextLevelState: GKState {
         let fadeGridIn = SKAction.fadeIn(withDuration: 0.3)
         let wait = SKAction.wait(forDuration: 0.6)
         gridSizeLabel.run(SKAction.sequence([wait, fadeGridIn]))
-        
-        let scoreCounter = ScoreCounter(text: "\(gameScene.context.gameInfo.score)")
+
+        let scoreCounter = ScoreCounter(
+            text: "\(gameScene.context.gameInfo.score)")
         scoreCounter.position = CGPoint(
-        x: gameScene.size.width / 2, y: gameScene.size.height - 210)
+            x: gameScene.size.width / 2, y: gameScene.size.height - 210)
         gameScene.addChild(scoreCounter)
 
         // Timer label at bottom
@@ -114,8 +116,8 @@ class NextLevelState: GKState {
     }
 
     private func updateGridSize() {
-        let level = gameScene.context.gameInfo.level + 1 // Use next level's number
-        
+        let level = gameScene.context.gameInfo.level + 1  // Use next level's number
+
         // Define grid progression logic
         let newGridDimension: Int
         switch level {
@@ -126,20 +128,21 @@ class NextLevelState: GKState {
         case 5...6:
             newGridDimension = 5
         default:
-            newGridDimension = 6 // Maximum size
+            newGridDimension = 6  // Maximum size
         }
-        
+
         // If grid size changed, reload images
         if newGridDimension != gameScene.context.layoutInfo.gridDimension {
-            gameScene.queueManager.refreshImageQueue(forGridSize: newGridDimension)
+            gameScene.queueManager.refreshImageQueue(
+                forGridSize: newGridDimension)
         }
-        
+
         // Update the grid dimension
         gameScene.context.updateGridDimension(newGridDimension)
-<<<<<<< Updated upstream
-        
+
         // Add grid size information to the next level screen
-        let gridSizeLabel = SKLabelNode(text: "Grid Size: \(newGridDimension)×\(newGridDimension)")
+        let gridSizeLabel = SKLabelNode(
+            text: "Grid Size: \(newGridDimension)×\(newGridDimension)")
         gridSizeLabel.fontName = "PPNeueMontreal-Bold"
         gridSizeLabel.fontSize = 20
         gridSizeLabel.position = CGPoint(
@@ -148,8 +151,7 @@ class NextLevelState: GKState {
         )
         gridSizeLabel.name = "gridSizeLabel"
         gameScene.addChild(gridSizeLabel)
-=======
->>>>>>> Stashed changes
+
     }
 
     private func grantPowerUp() {
@@ -201,10 +203,10 @@ class NextLevelState: GKState {
                 x: -totalWidth / 2 + plusOneLabel.frame.width / 2, y: 0)
             circleNode.position = CGPoint(
                 x: totalWidth / 2 - circleNode.frame.width / 2, y: 0)
-            
+
             containerNode.addChild(plusOneLabel)
             containerNode.addChild(circleNode)
-            
+
             // Animate the reward appearance
             let fadeIn = SKAction.fadeIn(withDuration: 0.5)
             let wait = SKAction.wait(forDuration: 0.9)
@@ -230,7 +232,6 @@ class NextLevelState: GKState {
             }
         }
     }
-<<<<<<< Updated upstream
 
     private func moveToNextImage() {
         gameScene.queueManager.moveToNextImage()
@@ -249,12 +250,12 @@ class NextLevelState: GKState {
                 let powerUpName = grantedPowerUp.displayName
                 let powerUpMessage = "Granted the '\(powerUpName)' Power-Up!"
                 let powerUpLabel = SKLabelNode(text: powerUpMessage)
-                
+
                 powerUpLabel.fontName = "PPNeueMontreal-Bold"
                 powerUpLabel.fontSize = 20
                 powerUpLabel.position = CGPoint(
                     x: gameScene.size.width / 2,
-                    y: gameScene.size.height / 2 - 200 // Moved down to accommodate grid size label
+                    y: gameScene.size.height / 2 - 200  // Moved down to accommodate grid size label
                 )
                 powerUpLabel.name = "powerUpLabel"
                 gameScene.addChild(powerUpLabel)
@@ -265,13 +266,11 @@ class NextLevelState: GKState {
                 powerUpLabel.fontSize = 20
                 powerUpLabel.position = CGPoint(
                     x: gameScene.size.width / 2,
-                    y: gameScene.size.height / 2 - 200 // Moved down to accommodate grid size label
+                    y: gameScene.size.height / 2 - 200  // Moved down to accommodate grid size label
                 )
                 powerUpLabel.name = "powerUpLabel"
                 gameScene.addChild(powerUpLabel)
             }
         }
     }
-=======
->>>>>>> Stashed changes
 }
