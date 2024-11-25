@@ -168,11 +168,6 @@ class CircularTimer: SKNode {
             progress = 1.0 - (interpolatedTimeRemaining / totalDuration)
         }
         updateTimerCircle(progress: CGFloat(progress))
-        
-        // Update the red overlay in the background
-            if let background = gameScene?.childNode(withName: "//backgroundNode") as? Background {
-                background.updateRedOverlay(for: CGFloat(interpolatedTimeRemaining), maxTime: CGFloat(totalDuration))
-            }
 
         scheduleNextUpdate()
     }

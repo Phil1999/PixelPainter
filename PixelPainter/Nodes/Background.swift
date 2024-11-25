@@ -4,7 +4,6 @@ class Background: SKNode {
     private var mainBackground: SKSpriteNode!
     private var gradientLayer: SKSpriteNode!
     private var fogEffect: SKSpriteNode!
-    private var redOverlay: SKSpriteNode!
     private var screenSize: CGSize = .zero
 
     override init() {
@@ -26,7 +25,6 @@ extension Background {
         setupGradient()
         setupMainBackground()
         setupFog()
-        setupRedOverlay()
     }
 
     private func setupGradient() {
@@ -133,74 +131,5 @@ extension UIColor {
         let blue = CGFloat(rgb & 0x0000FF) / 255.0
 
         self.init(red: red, green: green, blue: blue, alpha: 1.0)
-    }
-}
-
-extension Background {
-    private func setupRedOverlay() {
-        redOverlay = SKSpriteNode(
-            color: UIColor.red.withAlphaComponent(0.6),
-            size: CGSize(width: screenSize.width, height: 0))
-        redOverlay.anchorPoint = CGPoint(x: 0.5, y: 0)  // Anchor at the bottom-center
-        redOverlay.position = CGPoint(x: screenSize.width / 2, y: 0)
-        redOverlay.zPosition = 0  // Above gradient but below all game elements
-        redOverlay.name = "redOverlay"
-        addChild(redOverlay)
-    }
-    private func createDynamicRedGradient(for heightFraction: CGFloat)
-        -> SKTexture
-    {
-        let size = CGSize(width: screenSize.width, height: screenSize.height)
-        let gradientLayer = CAGradientLayer()
-
-        let topColor = UIColor(hex: "#280909")
-        let middleColor = UIColor(hex: "#781012")
-        let bottomColor = UIColor(hex: "#A02628")
-
-        gradientLayer.colors = [
-            topColor.cgColor,
-            middleColor.cgColor,
-            bottomColor.cgColor,
-        ]
-        gradientLayer.locations = [0.0, 0.7, 1.0]
-        gradientLayer.startPoint = CGPoint(x: 0.5, y: 1.0)
-        gradientLayer.endPoint = CGPoint(x: 0.5, y: 0.0)
-        gradientLayer.frame = CGRect(origin: .zero, size: size)
-
-        // Render the gradient layer to a texture
-        UIGraphicsBeginImageContextWithOptions(size, false, UIScreen.main.scale)
-        if let context = UIGraphicsGetCurrentContext() {
-            gradientLayer.render(in: context)
-            if let image = UIGraphicsGetImageFromCurrentImageContext() {
-                UIGraphicsEndImageContext()
-                return SKTexture(image: image)
-            }
-        }
-        UIGraphicsEndImageContext()
-        return SKTexture()
-    }
-
-    func updateRedOverlay(for interpolatedTime: CGFloat, maxTime: CGFloat) {
-        let threshold = GameConstants.GeneralGamePlay.timeWarningThreshold
-
-        if interpolatedTime <= threshold {
-            // Calculate the fraction of time below the threshold
-            let heightFraction = 1.0 - (interpolatedTime / threshold)
-            let newHeight = screenSize.height * heightFraction
-
-            let opacity = min(0.4 + (0.6 * heightFraction), 0.8)
-
-            // Create a gradient texture dynamically
-            let gradientTexture = createDynamicRedGradient(for: heightFraction)
-
-            // Update red overlay texture and size
-            redOverlay.texture = gradientTexture
-            redOverlay.size = CGSize(width: screenSize.width, height: newHeight)
-            redOverlay.alpha = opacity
-        } else {
-            // Hide the red overlay if time is above the threshold
-            redOverlay.size = CGSize(width: screenSize.width, height: 0)
-            redOverlay.alpha = 0
-        }
     }
 }
