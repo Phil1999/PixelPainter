@@ -15,7 +15,7 @@ class PlayState: GKState {
     let hudManager: HUDManager
     var powerUpManager: PowerUpManager!
     var effectManager: EffectManager!
-
+    
     init(gameScene: GameScene) {
         self.gameScene = gameScene
         self.gridManager = GridManager(gameScene: gameScene)
@@ -32,7 +32,16 @@ class PlayState: GKState {
     }
 
     private func didSuccessfullyPlacePiece() {
-        gameScene.context.gameInfo.timeRemaining += 2
+        SoundManager.shared.playSound(.piecePlaced)
+        
+        let currentTime = gameScene.context.gameInfo.timeRemaining
+        gameScene.context.gameInfo.timeRemaining = min(100, currentTime + 2) // allow player to go overtime
+        
+        // Force update CircularTimer's display with new time, even when timer is frozen
+        if let timerNode = gameScene.childNode(withName: "//circularTimer") as? CircularTimer {
+            timerNode.updateDiscreteTime(newTimeRemaining: gameScene.context.gameInfo.timeRemaining)
+        }
+
         hudManager.updateScore()
         bankManager.clearSelection()
         bankManager.refreshBankIfNeeded()
@@ -43,6 +52,8 @@ class PlayState: GKState {
     }
 
     private func handleLevelComplete() {
+        SoundManager.shared.playSound(.levelComplete)
+        
         let bonus = Int(gameScene.context.gameInfo.timeRemaining)
 //        print("current score: ", gameScene.context.gameInfo.score)
 //        print("gaining a bonus of: ", bonus)
@@ -59,7 +70,7 @@ class PlayState: GKState {
     override func didEnter(from previousState: GKState?) {
         print("Entering Play State")
         setupPlayScene()
-        startTimer()
+        startGame()
     }
 
     override func willExit(to nextState: GKState) {
@@ -68,6 +79,13 @@ class PlayState: GKState {
     }
 
     private func setupPlayScene() {
+        // Create and add background first
+        let background = Background()
+        background.setup(screenSize: gameScene.size)
+        background.zPosition = -2
+        gameScene.addChild(background)
+        
+        // Then add game elements
         gridManager.createGrid()
         bankManager.clearSelection()
         bankManager.createPictureBank()
@@ -101,15 +119,39 @@ class PlayState: GKState {
         effectManager.shakeNode(piece)
     }
 
+    private func startGame() {
+        // Start game timer here
+        if let timerNode = gameScene.childNode(withName: "//circularTimer")
+            as? CircularTimer
+        {
+            timerNode.startGameTimer(
+                duration: gameScene.context.gameInfo.timeRemaining)
+        }
+        // start update timer
+        startTimer()
+    }
+
     func startTimer() {
         let updateTimerAction = SKAction.sequence([
             SKAction.run { [weak self] in
-                self?.hudManager.updateTimer()
+                guard let self = self else { return }
+                
+                // Update the circular timer with new discrete time
+                if let timerNode = self.gameScene.childNode(withName: "//circularTimer") as? CircularTimer {
+                    timerNode.updateDiscreteTime(newTimeRemaining: self.gameScene.context.gameInfo.timeRemaining)
+                }
+                
+                // Game over check
+                if self.gameScene.context.gameInfo.timeRemaining <= 0 {
+                    self.gameScene.context.stateMachine?.enter(GameOverState.self)
+                    SoundManager.shared.playSound(.gameOver)
+                }
+                
+                self.gameScene.context.gameInfo.timeRemaining -= 1
             },
             SKAction.wait(forDuration: 1.0),
         ])
-        gameScene.run(
-            SKAction.repeatForever(updateTimerAction), withKey: "updateTimer")
+        gameScene.run(SKAction.repeatForever(updateTimerAction), withKey: "updateTimer")
     }
 
     func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {

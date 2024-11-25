@@ -16,31 +16,27 @@ class BankManager {
         guard let gameScene = gameScene,
               let image = gameScene.queueManager.getCurrentImage() else { return }
         
-        let bankHeight = gameScene.context.layoutInfo.bankHeight
+        let bankHeight = gameScene.context.layoutInfo.bankHeight + 30
         let bankWidth = gameScene.size.width
         
-        // Create bank container
-        bankNode = SKSpriteNode(color: .darkGray, size: CGSize(width: bankWidth, height: bankHeight))
-        bankNode?.position = CGPoint(x: gameScene.size.width / 2, y: bankHeight / 2)
+        let bankColor = UIColor(red: 30/255, green: 30/255, blue: 30/255, alpha: 0.75)
+        bankNode = SKSpriteNode(color: bankColor, size: CGSize(width: bankWidth, height: bankHeight))
+        
+        // Moved the bank position up by increasing the y value
+        bankNode?.position = CGPoint(x: gameScene.size.width / 2, y: bankHeight/2)
         bankNode?.name = "bank"
         gameScene.addChild(bankNode!)
         
-        // Setup pieces array
-        let gridSize = gameScene.context.layoutInfo.gridSize
-        let rows = 3 // This can be made dynamic later
-        let cols = 3 // This can be made dynamic later
-        let pieceSize = CGSize(width: gridSize.width / CGFloat(cols),
-                             height: gridSize.height / CGFloat(rows))
+        let gridDimension = gameScene.context.layoutInfo.gridDimension
         var pieces: [PuzzlePiece] = []
         
-        // Create all pieces
-        for row in 0..<rows {
-            for col in 0..<cols {
+        for row in 0..<gridDimension {
+            for col in 0..<gridDimension {
                 let pieceImage = cropImage(image, toRect: CGRect(
-                    x: CGFloat(col) / CGFloat(cols) * image.size.width,
-                    y: CGFloat(row) / CGFloat(rows) * image.size.height,
-                    width: image.size.width / CGFloat(cols),
-                    height: image.size.height / CGFloat(rows)
+                    x: CGFloat(col) / CGFloat(gridDimension) * image.size.width,
+                    y: CGFloat(row) / CGFloat(gridDimension) * image.size.height,
+                    width: image.size.width / CGFloat(gridDimension),
+                    height: image.size.height / CGFloat(gridDimension)
                 ))
                 let piece = PuzzlePiece(image: pieceImage,
                                       correctPosition: CGPoint(x: CGFloat(col), y: CGFloat(row)),
@@ -52,7 +48,6 @@ class BankManager {
         
         gameScene.context.gameInfo.pieces = pieces.shuffled()
         
-        // Initialize remaining pieces indices
         remainingPiecesIndices = Array(0..<pieces.count)
         currentBatchStartIndex = 0
         showNextThreePieces()
@@ -69,11 +64,9 @@ class BankManager {
         guard let bankNode = bankNode,
               let gameScene = gameScene else { return }
         
-        // Clear current pieces
         visiblePieces.forEach { $0.removeFromParent() }
         visiblePieces.removeAll()
         
-        // Update remaining pieces indices
         let unplacedPieces = gameScene.context.gameInfo.pieces.enumerated().filter { !$0.element.isPlaced }
         remainingPiecesIndices = unplacedPieces.map { $0.offset }
         
@@ -83,12 +76,12 @@ class BankManager {
             return
         }
         
-        let pieceSize = gameScene.context.layoutInfo.gridSize.width / 3 // This will be updated when grid size is dynamic
+        // Use a smaller size for bank pieces (300 instead of the grid's 350)
+        let bankPieceSize = gameScene.context.layoutInfo.gridSize.width * (300/350) / 3
         let spacing: CGFloat = 20
-        let totalWidth = (pieceSize + spacing) * 2
+        let totalWidth = (bankPieceSize + spacing) * 2
         let startX = -totalWidth / 2
         
-        // Show up to 3 pieces from remaining pieces
         let piecesToShow = min(3, remainingPiecesIndices.count)
         
         print("Showing \(piecesToShow) pieces")
@@ -97,20 +90,37 @@ class BankManager {
             let pieceIndex = remainingPiecesIndices[i]
             let piece = gameScene.context.gameInfo.pieces[pieceIndex]
             
+            // Create the main container sprite node with smaller size
+            let containerNode = SKSpriteNode(color: .clear, size: CGSize(width: bankPieceSize, height: bankPieceSize))
+            containerNode.position = CGPoint(x: startX + CGFloat(i) * (bankPieceSize + spacing), y: 15)
+            containerNode.name = "piece_\(Int(piece.correctPosition.y))_\(Int(piece.correctPosition.x))"
+            
+            // Create rounded rectangle shape for clipping
+            let roundedRect = CGRect(x: -bankPieceSize/2, y: -bankPieceSize/2,
+                                   width: bankPieceSize, height: bankPieceSize)
+            let roundedRectPath = UIBezierPath(roundedRect: roundedRect, cornerRadius: 15)
+            
+            // Create a shape node for the border
+            let shapeNode = SKShapeNode(path: roundedRectPath.cgPath)
+            shapeNode.strokeColor = .white
+            shapeNode.lineWidth = 2
+            
+            // Create the piece sprite with the texture
             let pieceNode = SKSpriteNode(texture: SKTexture(image: piece.image))
-            pieceNode.size = CGSize(width: pieceSize, height: pieceSize)
-            pieceNode.position = CGPoint(x: startX + CGFloat(i) * (pieceSize + spacing),
-                                       y: 0)
-            pieceNode.name = "piece_\(Int(piece.correctPosition.y))_\(Int(piece.correctPosition.x))"
-            pieceNode.setScale(1.0)
+            pieceNode.size = CGSize(width: bankPieceSize, height: bankPieceSize)
             
-            let border = SKShapeNode(rectOf: pieceNode.size)
-            border.strokeColor = .white
-            border.lineWidth = 2
-            pieceNode.addChild(border)
+            // Create crop node for rounded corners
+            let cropNode = SKCropNode()
+            let maskNode = SKShapeNode(path: roundedRectPath.cgPath)
+            maskNode.fillColor = .white
+            cropNode.maskNode = maskNode
+            cropNode.addChild(pieceNode)
             
-            bankNode.addChild(pieceNode)
-            visiblePieces.append(pieceNode)
+            containerNode.addChild(cropNode)
+            containerNode.addChild(shapeNode)
+            
+            bankNode.addChild(containerNode)
+            visiblePieces.append(containerNode)
         }
     }
     
@@ -120,7 +130,6 @@ class BankManager {
         selectedPiece = piece
         piece.alpha = 0.7
         
-        // Add pulsing animation
         let pulseAction = SKAction.sequence([
             SKAction.scale(to: 1.1, duration: 0.5),
             SKAction.scale(to: 1.0, duration: 0.5)
@@ -136,17 +145,15 @@ class BankManager {
         if let selectedPiece = selectedPiece {
             selectedPiece.alpha = 1.0
             selectedPiece.removeAllActions()
-            selectedPiece.setScale(1.0)  // Reset scale explicitly
+            selectedPiece.setScale(1.0)
         }
         selectedPiece = nil
     }
     
     func refreshBankIfNeeded() {
-        // Check if all visible pieces have been placed
         let visiblePiecesPlaced = visiblePieces.allSatisfy { $0.parent == nil }
         
         if visiblePiecesPlaced {
-            // Update remaining pieces indices before showing next batch
             remainingPiecesIndices = gameScene?.context.gameInfo.pieces.enumerated()
                 .filter { !$0.element.isPlaced }
                 .map { $0.offset } ?? []

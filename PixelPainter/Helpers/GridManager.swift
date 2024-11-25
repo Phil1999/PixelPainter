@@ -17,32 +17,100 @@ class GridManager {
     func createGrid() {
         guard let gameScene = gameScene else { return }
         
-        let gridNode = SKSpriteNode(color: .lightGray, size: gameScene.context.layoutInfo.gridSize)
+        let gridSize = gameScene.context.layoutInfo.gridSize
+        let gridDimension = gameScene.context.layoutInfo.gridDimension
+        let cornerRadius: CGFloat = 30
+        
+        // Create the background grid first
+        let gridRect = CGRect(origin: .zero, size: gridSize)
+        let path = UIBezierPath(roundedRect: gridRect, cornerRadius: cornerRadius)
+        
+        let shape = CAShapeLayer()
+        shape.path = path.cgPath
+        shape.fillColor = UIColor.lightGray.cgColor
+        shape.strokeColor = UIColor.white.cgColor
+        shape.lineWidth = 3
+        
+        UIGraphicsBeginImageContextWithOptions(gridSize, false, UIScreen.main.scale)
+        if let context = UIGraphicsGetCurrentContext() {
+            shape.render(in: context)
+        }
+        let image = UIGraphicsGetImageFromCurrentImageContext()
+        UIGraphicsEndImageContext()
+        
+        let gridNode = SKSpriteNode(texture: SKTexture(image: image!))
         gridNode.position = CGPoint(x: gameScene.size.width / 2, y: gameScene.size.height / 2 + 50)
         gridNode.name = "grid"
         gameScene.addChild(gridNode)
         
-        let pieceSize = CGSize(width: gridNode.size.width / 3, height: gridNode.size.height / 3)
-        for row in 0..<3 {
-            for col in 0..<3 {
-                let frame = SKSpriteNode(color: .darkGray, size: CGSize(width: pieceSize.width - 2, height: pieceSize.height - 2))
-                frame.position = CGPoint(x: CGFloat(col) * pieceSize.width - gridNode.size.width / 2 + pieceSize.width / 2,
-                                       y: CGFloat(2 - row) * pieceSize.height - gridNode.size.height / 2 + pieceSize.height / 2)
+        // Add the grid cells with consistent line width
+        let pieceSize = gameScene.context.layoutInfo.pieceSize
+        let cellColor = UIColor(red: 51/255, green: 51/255, blue: 51/255, alpha: 1.0)
+        
+        for row in 0..<gridDimension {
+            for col in 0..<gridDimension {
+                let frame = createRoundedCell(
+                    size: pieceSize,
+                    cornerRadius: cornerRadius,
+                    corners: getRoundedCorners(row: row, col: col, dimension: gridDimension),
+                    cellColor: cellColor
+                )
+                
+                frame.position = CGPoint(
+                    x: CGFloat(col) * pieceSize.width - gridNode.size.width / 2 + pieceSize.width / 2,
+                    y: CGFloat(gridDimension - 1 - row) * pieceSize.height - gridNode.size.height / 2 + pieceSize.height / 2
+                )
                 frame.name = "frame_\(row)_\(col)"
                 gridNode.addChild(frame)
             }
         }
     }
+
+    private func getRoundedCorners(row: Int, col: Int, dimension: Int) -> UIRectCorner {
+        var corners: UIRectCorner = []
+        if row == 0 && col == 0 { corners.insert(.topLeft) }
+        if row == 0 && col == dimension - 1 { corners.insert(.topRight) }
+        if row == dimension - 1 && col == 0 { corners.insert(.bottomLeft) }
+        if row == dimension - 1 && col == dimension - 1 { corners.insert(.bottomRight) }
+        return corners
+    }
     
+    private func createRoundedCell(size: CGSize, cornerRadius: CGFloat, corners: UIRectCorner, cellColor: UIColor) -> SKSpriteNode {
+        let adjustedSize = CGSize(width: size.width, height: size.height) // Removed the -1.5 spacing
+        let rect = CGRect(origin: .zero, size: adjustedSize)
+        
+        let path = UIBezierPath(
+            roundedRect: rect,
+            byRoundingCorners: corners,
+            cornerRadii: CGSize(width: cornerRadius, height: cornerRadius)
+        )
+        
+        let shape = CAShapeLayer()
+        shape.path = path.cgPath
+        shape.fillColor = cellColor.cgColor
+        shape.strokeColor = UIColor.white.cgColor
+        shape.lineWidth = 3
+        
+        UIGraphicsBeginImageContextWithOptions(adjustedSize, false, 0)
+        if let context = UIGraphicsGetCurrentContext() {
+            shape.render(in: context)
+        }
+        let image = UIGraphicsGetImageFromCurrentImageContext()
+        UIGraphicsEndImageContext()
+        
+        return SKSpriteNode(texture: SKTexture(image: image!))
+    }
+
     func tryPlacePiece(_ piece: SKSpriteNode, at point: CGPoint) -> Bool {
         guard let gameScene = gameScene,
               let gridNode = gameScene.childNode(withName: "grid") as? SKSpriteNode else { return false }
         
-        let pieceSize = CGSize(width: gridNode.size.width / 3, height: gridNode.size.height / 3)
+        let gridDimension = gameScene.context.layoutInfo.gridDimension
+        let pieceSize = gameScene.context.layoutInfo.pieceSize
         let col = Int((point.x + gridNode.size.width / 2) / pieceSize.width)
-        let row = 2 - Int((point.y + gridNode.size.height / 2) / pieceSize.height)
+        let row = gridDimension - 1 - Int((point.y + gridNode.size.height / 2) / pieceSize.height)
         
-        if row < 0 || row > 2 || col < 0 || col > 2 {
+        if row < 0 || row >= gridDimension || col < 0 || col >= gridDimension {
             return false
         }
         
@@ -52,23 +120,23 @@ class GridManager {
             let puzzlePiece = gameScene.context.gameInfo.pieces[pieceIndex]
             
             if puzzlePiece.correctPosition == CGPoint(x: col, y: row) {
-                let targetPosition = CGPoint(x: CGFloat(col) * pieceSize.width - gridNode.size.width / 2 + pieceSize.width / 2,
-                                           y: CGFloat(2 - row) * pieceSize.height - gridNode.size.height / 2 + pieceSize.height / 2)
+                let targetPosition = CGPoint(
+                    x: CGFloat(col) * pieceSize.width - gridNode.size.width / 2 + pieceSize.width / 2,
+                    y: CGFloat(gridDimension - 1 - row) * pieceSize.height - gridNode.size.height / 2 + pieceSize.height / 2
+                )
                 
-                // Create a copy of the piece for the grid with exact size
-                let placedPiece = SKSpriteNode(texture: piece.texture)
-                placedPiece.size = pieceSize
-                placedPiece.name = piece.name
-                placedPiece.setScale(1.0) // Ensure proper scale
+                // Extract the original image texture from the piece's crop node structure
+                if let cropNode = piece.children.first as? SKCropNode,
+                   let pieceSprite = cropNode.children.first as? SKSpriteNode {
+                    let placedPiece = SKSpriteNode(texture: pieceSprite.texture)
+                    placedPiece.size = pieceSize  // This will make it larger to fit the grid
+                    placedPiece.position = targetPosition
+                    placedPiece.name = piece.name
+                    gridNode.addChild(placedPiece)
+                }
                 
-                // Add the piece to the grid at the correct position
-                gridNode.addChild(placedPiece)
-                placedPiece.position = targetPosition
-                
-                // Remove the original piece from the bank
                 piece.removeFromParent()
                 
-                // Update the piece's status to placed
                 gameScene.context.gameInfo.pieces[pieceIndex].isPlaced = true
                 gameScene.context.gameInfo.score += 15
                 
