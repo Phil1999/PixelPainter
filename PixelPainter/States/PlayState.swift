@@ -30,17 +30,22 @@ class PlayState: GKState {
     func notifyPiecePlaced() {
         didSuccessfullyPlacePiece()
     }
+    
+    private func notifyTimerUpdate() {
+        guard let timerNode = gameScene.childNode(withName: "//circularTimer") as? CircularTimer else { return }
+        timerNode.updateDiscreteTime(newTimeRemaining: gameScene.context.gameInfo.timeRemaining)
+    }
+    
+    func updateTime(by seconds: Double) {
+        gameScene.context.gameInfo.timeRemaining = min(100, max(0, gameScene.context.gameInfo.timeRemaining + seconds))
+        
+        notifyTimerUpdate()
+    }
 
     private func didSuccessfullyPlacePiece() {
         SoundManager.shared.playSound(.piecePlaced)
         
-        let currentTime = gameScene.context.gameInfo.timeRemaining
-        gameScene.context.gameInfo.timeRemaining = min(100, currentTime + 2) // allow player to go overtime
-        
-        // Force update CircularTimer's display with new time, even when timer is frozen
-        if let timerNode = gameScene.childNode(withName: "//circularTimer") as? CircularTimer {
-            timerNode.updateDiscreteTime(newTimeRemaining: gameScene.context.gameInfo.timeRemaining)
-        }
+        updateTime(by: 2)
 
         hudManager.updateScore()
         bankManager.clearSelection()
@@ -83,6 +88,7 @@ class PlayState: GKState {
         let background = Background()
         background.setup(screenSize: gameScene.size)
         background.zPosition = -2
+        background.name = "backgroundNode"
         gameScene.addChild(background)
         
         // Then add game elements
@@ -135,7 +141,7 @@ class PlayState: GKState {
         let updateTimerAction = SKAction.sequence([
             SKAction.run { [weak self] in
                 guard let self = self else { return }
-                
+                 
                 // Update the circular timer with new discrete time
                 if let timerNode = self.gameScene.childNode(withName: "//circularTimer") as? CircularTimer {
                     timerNode.updateDiscreteTime(newTimeRemaining: self.gameScene.context.gameInfo.timeRemaining)

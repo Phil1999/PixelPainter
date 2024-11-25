@@ -18,4 +18,7 @@ enum GameConstants {
         static let timeStopCooldown = 5.0
         static let flashCooldown = 5.0
     }
+    enum GeneralGamePlay {
+        static let timeWarningThreshold = 5.0
+    }
 }
