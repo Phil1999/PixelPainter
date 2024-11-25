@@ -38,6 +38,15 @@ extension PowerUpType {
     var shortName: String {
         return self.rawValue.prefix(1).uppercased()
     }
+    
+    var iconName: String {
+        switch self {
+        case .timeStop: return "time_stop"
+        case .place: return "place"
+        case .flash: return "flash"
+        case .shuffle: return "shuffle"
+        }
+    }
 }
 
 class PowerUpIndicator: SKNode {

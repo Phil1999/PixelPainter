@@ -230,30 +230,52 @@ class NextLevelState: GKState {
             as? PlayState)?.powerUpManager
         {
             if let grantedPowerUp = powerUpManager.grantRandomPowerup() {
-                let powerUpName = grantedPowerUp.displayName
-                let powerUpMessage = "Granted the '\(powerUpName)' Power-Up!"
-                let powerUpLabel = SKLabelNode(text: powerUpMessage)
+                print(grantedPowerUp.iconName)
+                // Container to group the label and icon
+                let containerNode = SKNode()
+                containerNode.position = CGPoint(
+                    x: gameScene.size.width / 2,
+                    y: gameScene.size.height / 2 - 200
+                )
+                
+                // Create the icon node
+                let iconNode = SKSpriteNode(imageNamed: grantedPowerUp.iconName)
+                iconNode.size = CGSize(width: 40, height: 40)
 
-                powerUpLabel.fontName = "PPNeueMontreal-Bold"
-                powerUpLabel.fontSize = 20
-                powerUpLabel.position = CGPoint(
-                    x: gameScene.size.width / 2,
-                    y: gameScene.size.height / 2 - 200  // Moved down to accommodate grid size label
-                )
-                powerUpLabel.name = "powerUpLabel"
-                gameScene.addChild(powerUpLabel)
-            } else {
-                // Notify user that all power-ups are maxed out
-                let powerUpLabel = SKLabelNode(text: "All Power-Ups are maxed!")
-                powerUpLabel.fontName = "PPNeueMontreal-Bold"
-                powerUpLabel.fontSize = 20
-                powerUpLabel.position = CGPoint(
-                    x: gameScene.size.width / 2,
-                    y: gameScene.size.height / 2 - 200  // Moved down to accommodate grid size label
-                )
-                powerUpLabel.name = "powerUpLabel"
-                gameScene.addChild(powerUpLabel)
+                // Create the label node
+                let plusOneLabel = SKLabelNode(text: "+1")
+                plusOneLabel.fontName = "PPNeueMontreal-Bold"
+                plusOneLabel.fontSize = 30
+                plusOneLabel.verticalAlignmentMode = .center
+
+                // Create the circle node
+                let padding: CGFloat = 10
+                let dynamicRadius = max(iconNode.size.width, iconNode.size.height) / 2 + padding
+                
+                let circleNode = SKShapeNode(circleOfRadius: dynamicRadius)
+                circleNode.strokeColor = .white
+                circleNode.lineWidth = 4
+                circleNode.fillColor = UIColor(hex: "252525").withAlphaComponent(0.9)
+
+
+                // Position the icon inside the circle
+                circleNode.addChild(iconNode)
+                iconNode.position = CGPoint.zero // Center the icon inside the circle
+
+                let spacing: CGFloat = 15
+                let totalWidth = circleNode.frame.width + plusOneLabel.frame.width + spacing
+
+                // Position the label and circle node
+                plusOneLabel.position = CGPoint(x: -totalWidth / 2 + plusOneLabel.frame.width / 2, y: 0)
+                circleNode.position = CGPoint(x: totalWidth / 2 - circleNode.frame.width / 2, y: 0)
+
+                // Add children to the container node
+                containerNode.addChild(plusOneLabel)
+                containerNode.addChild(circleNode)
+
+                gameScene.addChild(containerNode)
             }
         }
     }
+
 }

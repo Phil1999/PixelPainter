@@ -134,7 +134,7 @@ class CircularTimer: SKNode {
                     // Just exited overtime
                     removeOvertimeEffects()
                 }
-                if newTimeRemaining <= 5 && !isWarningActive {
+                if newTimeRemaining <= GameConstants.GeneralGamePlay.timeWarningThreshold && !isWarningActive {
                     triggerWarningAnimation(timeRemaining: newTimeRemaining)
                 } else {
                     timerCircle.strokeColor = .white
