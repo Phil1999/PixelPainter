@@ -23,6 +23,7 @@ class NextLevelState: GKState {
         startNextLvlTimer()
         moveToNextImage()
         updateGridSize()
+        updateGameTimer()
         grantPowerUp()
     }
 
@@ -63,16 +64,16 @@ class NextLevelState: GKState {
     }
 
     private func updateGridSize() {
-        let level = gameScene.context.gameInfo.level + 1 // Use next level's number
+        let level = gameScene.context.gameInfo.level // Use next level's number
         
         // Define grid progression logic
         let newGridDimension: Int
         switch level {
         case 1...2:
             newGridDimension = 3
-        case 3...4:
+        case 3...5:
             newGridDimension = 4
-        case 5...6:
+        case 6...8:
             newGridDimension = 5
         default:
             newGridDimension = 6 // Maximum size
@@ -96,6 +97,26 @@ class NextLevelState: GKState {
         )
         gridSizeLabel.name = "gridSizeLabel"
         gameScene.addChild(gridSizeLabel)
+    }
+    
+    private func updateGameTimer() {
+        let level = gameScene.context.gameInfo.level
+        
+        let newGameTimer: Double
+        switch level {
+        case 1...2:
+            newGameTimer = 10
+        case 3...5:
+            newGameTimer = 15
+        case 6...8:
+            newGameTimer = 20
+        default:
+            newGameTimer = 25
+        }
+        
+        if newGameTimer != gameScene.context.gameInfo.timeRemaining {
+            gameScene.context.gameInfo.timeRemaining = newGameTimer
+        }
     }
 
     private func startNextLvlTimer() {

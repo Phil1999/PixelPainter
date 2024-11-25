@@ -35,7 +35,7 @@ class PlayState: GKState {
         SoundManager.shared.playSound(.piecePlaced)
         
         let currentTime = gameScene.context.gameInfo.timeRemaining
-        gameScene.context.gameInfo.timeRemaining = min(100, currentTime + 2) // allow player to go overtime
+        gameScene.context.gameInfo.timeRemaining = currentTime + 2 // allow player to go overtime
         
         // Force update CircularTimer's display with new time, even when timer is frozen
         if let timerNode = gameScene.childNode(withName: "//circularTimer") as? CircularTimer {
@@ -91,7 +91,6 @@ class PlayState: GKState {
         bankManager.createPictureBank()
         hudManager.createHUD()
         powerUpManager.setupPowerUps()
-        gameScene.context.gameInfo.timeRemaining = 10 // adjust according to board size
     }
 
     func handleGridPlacement(at location: CGPoint) {
