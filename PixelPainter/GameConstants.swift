@@ -10,8 +10,8 @@ import Foundation
 enum GameConstants {
     enum PowerUp {
         // NOTE: minUses should be less than maxUses. But will work anyways if not (for testing).
-        static let maxUses = 20
-        static let minUses = 2
+        static let maxUses = 2000
+        static let minUses = 1000
         static let maxShufflePieces = 3
     }
     enum PowerUpTimers {
