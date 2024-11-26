@@ -69,7 +69,7 @@ class PlayState: GKState {
             gameScene.context.gameInfo.boardSize += 1
             print("board size is now: ", gameScene.context.gameInfo.boardSize)
         }
-        gameScene.context.stateMachine?.enter(NextLevelState.self)
+        gameScene.context.stateMachine?.enter(MemorizeState.self)
     }
 
     override func didEnter(from previousState: GKState?) {

@@ -50,10 +50,7 @@ class GameScene: SKScene {
                 
             case is MemorizeState:
                 break
-                
-            case is NextLevelState:
-                break
-                
+
             default:
                 break
             }
