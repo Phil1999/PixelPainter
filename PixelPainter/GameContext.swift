@@ -31,7 +31,6 @@ class GameContext: ObservableObject {
             MemorizeState(gameScene: scene),
             PlayState(gameScene: scene),
             GameOverState(gameScene: scene),
-            NextLevelState(gameScene: scene)
         ])
     }
     
