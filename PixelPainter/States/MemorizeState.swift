@@ -129,7 +129,6 @@ class MemorizeState: GKState {
     }
 
     private func transitionToPlayState() {
-        gameScene.queueManager.moveToNextImage()
         gameScene.queueManager.printCurrentQueue()
         gameScene.context.stateMachine?.enter(PlayState.self)
     }
