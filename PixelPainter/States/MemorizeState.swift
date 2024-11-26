@@ -10,7 +10,7 @@ import SpriteKit
 
 class MemorizeState: GKState {
     unowned let gameScene: GameScene
-    private let memorizeTime: TimeInterval = 3
+    private let memorizeTime: TimeInterval = GameConstants.DevSandBox.sceneTransitionTime
     private var isFirstLevel: Bool = false
 
     init(gameScene: GameScene) {

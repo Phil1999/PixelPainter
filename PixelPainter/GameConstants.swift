@@ -21,4 +21,9 @@ enum GameConstants {
     enum GeneralGamePlay {
         static let timeWarningThreshold = 5.0
     }
+    
+    enum DevSandBox {
+        static let timerTime = 1000.0
+        static let sceneTransitionTime = 3.0
+    }
 }

@@ -37,7 +37,7 @@ class PlayState: GKState {
     }
     
     func updateTime(by seconds: Double) {
-        gameScene.context.gameInfo.timeRemaining = min(100, max(0, gameScene.context.gameInfo.timeRemaining + seconds))
+        gameScene.context.gameInfo.timeRemaining = gameScene.context.gameInfo.timeRemaining + seconds
         
         notifyTimerUpdate()
     }
@@ -97,7 +97,7 @@ class PlayState: GKState {
         bankManager.createPictureBank()
         hudManager.createHUD()
         powerUpManager.setupPowerUps()
-        gameScene.context.gameInfo.timeRemaining = 1000 // adjust according to board size
+        gameScene.context.gameInfo.timeRemaining = GameConstants.DevSandBox.timerTime // adjust according to board size
     }
 
     func handleGridPlacement(at location: CGPoint) {
