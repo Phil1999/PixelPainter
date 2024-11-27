@@ -69,3 +69,42 @@ class ScoreCounter: SKNode {
         container.path = path
     }
 }
+// MARK: - Score bonus animation
+extension ScoreCounter {
+    func showScoreBonus(points: Int) {
+        let bonusLabel = SKLabelNode(fontNamed: "PPNeueMontreal-Bold")
+        bonusLabel.text = "+\(points)"
+        bonusLabel.fontSize = 24
+        bonusLabel.fontColor = .yellow
+        bonusLabel.position = CGPoint(x: 35, y: 0)
+        bonusLabel.alpha = 0
+        addChild(bonusLabel)
+        
+        let fadeIn = SKAction.fadeIn(withDuration: 0.2)
+        let moveUp = SKAction.moveBy(x: 0, y: 30, duration: 0.8)
+        let fadeOut = SKAction.fadeOut(withDuration: 0.3)
+        let group = SKAction.group([
+            moveUp,
+            SKAction.sequence([fadeIn, SKAction.wait(forDuration: 0.5), fadeOut])
+        ])
+        
+        bonusLabel.run(SKAction.sequence([
+            group,
+            SKAction.removeFromParent()
+        ]))
+    }
+    
+    func updateScore(_ newScore: Int, withAnimation: Bool = false) {
+        if withAnimation {
+            // Only show animation if score increased
+            let oldScore = Int(label.text ?? "0") ?? 0
+            let difference = newScore - oldScore
+            if difference > 0 {
+                showScoreBonus(points: difference)
+            }
+        }
+        
+        // Update the actual score text
+        updateText("\(newScore)")
+    }
+}

@@ -43,9 +43,11 @@ class HUDManager {
         
     }
     
-    func updateScore() {
+    func updateScore(withAnimation: Bool = false) {
         guard let gameScene = gameScene,
         let scoreCounter = self.scoreCounter else { return }
+        
+        scoreCounter.updateScore(gameScene.context.gameInfo.score, withAnimation: withAnimation)
         
         let newScoreText = "\(gameScene.context.gameInfo.score)"
         scoreCounter.updateText(newScoreText)

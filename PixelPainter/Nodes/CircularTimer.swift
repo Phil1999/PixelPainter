@@ -334,7 +334,6 @@ class CircularTimer: SKNode {
 // MARK: - Time Bonus
 extension CircularTimer {
     func showTimeBonus(seconds: Double) {
-            // Create bonus text
             let bonusLabel = SKLabelNode(fontNamed: "PPNeueMontreal-Bold")
             bonusLabel.text = "+\(Int(seconds))s"
             bonusLabel.fontSize = 24
@@ -343,7 +342,6 @@ extension CircularTimer {
             bonusLabel.alpha = 0
             addChild(bonusLabel)
             
-            // Animate the bonus text
             let fadeIn = SKAction.fadeIn(withDuration: 0.2)
             let moveUp = SKAction.moveBy(x: 0, y: 30, duration: 0.8)
             let fadeOut = SKAction.fadeOut(withDuration: 0.3)

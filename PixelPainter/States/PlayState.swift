@@ -72,7 +72,9 @@ class PlayState: GKState {
         stopIdleHintTimer()
         gridManager.hideHint()
 
-        hudManager.updateScore()
+        gameScene.context.gameInfo.score += 15
+        hudManager.updateScore(withAnimation: true)
+        
         bankManager.clearSelection()
         bankManager.refreshBankIfNeeded()
         
@@ -84,23 +86,20 @@ class PlayState: GKState {
     }
 
     private func handleLevelComplete() {
-        SoundManager.shared.playSound(.levelComplete)
+            SoundManager.shared.playSound(.levelComplete)
 
-        let bonus = Int(gameScene.context.gameInfo.timeRemaining)
-        //        print("current score: ", gameScene.context.gameInfo.score)
-        //        print("gaining a bonus of: ", bonus)
-        gameScene.context.gameInfo.score += bonus
-        //        print("new score: ", gameScene.context.gameInfo.score)
-        gameScene.context.gameInfo.level += 1
-        if gameScene.context.gameInfo.level % 4 == 0
-            && gameScene.context.gameInfo.boardSize < 6
-        {
-            gameScene.context.gameInfo.boardSize += 1
-            print("board size is now: ", gameScene.context.gameInfo.boardSize)
+            let timeBonus = Int(gameScene.context.gameInfo.timeRemaining)
+            gameScene.context.gameInfo.score += timeBonus
+            hudManager.updateScore(withAnimation: true)
+            
+            gameScene.context.gameInfo.level += 1
+            if gameScene.context.gameInfo.level % 4 == 0 && gameScene.context.gameInfo.boardSize < 6 {
+                gameScene.context.gameInfo.boardSize += 1
+                print("board size is now: ", gameScene.context.gameInfo.boardSize)
+            }
+            
+            gameScene.context.stateMachine?.enter(MemorizeState.self)
         }
-        
-        gameScene.context.stateMachine?.enter(MemorizeState.self)
-    }
 
     override func didEnter(from previousState: GKState?) {
         print("Entering Play State")
