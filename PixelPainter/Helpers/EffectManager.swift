@@ -75,11 +75,15 @@ class EffectManager {
         gameScene?.run(sequence)
     }
 
+    private(set) var isPlayingGameOver = false
+    
     func playGameOverEffect(completion: @escaping () -> Void) {
         guard let gameScene = gameScene,
             let gridNode = gameScene.childNode(withName: "grid")
                 as? SKSpriteNode
         else { return }
+
+        isPlayingGameOver = true // Set flag when starting animation
 
         // Step 1: Shake effect (left-right only)
         let shakeSequence = createShakeSequence()
@@ -92,6 +96,7 @@ class EffectManager {
         // Step 3: Combine animations
         gridNode.run(shakeSequence) { [weak self] in
             self?.ejectPieces(pieces: pieces) {
+                self?.isPlayingGameOver = false // Reset flag when animation is complete
                 completion()
             }
         }
