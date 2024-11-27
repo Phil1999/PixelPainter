@@ -103,8 +103,10 @@ class CircularTimer: SKNode {
 
     func startGameTimer(duration: TimeInterval) {
         guard !isRunning else { return }
-        isRunning = true
 
+        removeAction(forKey: "timerUpdate")
+
+        isRunning = true
         totalDuration = duration
         discreteTimeRemaining = duration
         interpolatedTimeRemaining = duration
@@ -113,42 +115,15 @@ class CircularTimer: SKNode {
         updateTimer()
     }
 
-    // Call this when the game controller updates the time
-    func updateDiscreteTime(newTimeRemaining: TimeInterval) {
-        let wasOvertime = isOvertime
-        isOvertime = newTimeRemaining > totalDuration
-        discreteTimeRemaining = newTimeRemaining
-        lastUpdateTime = CACurrentMediaTime()
-
-        // Update colors and effects based on state
-        if !isFrozen {
-            if isOvertime {
-                timerCircle.strokeColor = overtimeColor
-                timeLabel.fontColor = overtimeColor
-                if !wasOvertime {
-                    // Just entered overtime
-                    setupOvertimeEffects()
-                }
-            } else {
-                if wasOvertime {
-                    // Just exited overtime
-                    removeOvertimeEffects()
-                }
-                if newTimeRemaining <= GameConstants.GeneralGamePlay.timeWarningThreshold && !isWarningActive {
-                    triggerWarningAnimation(timeRemaining: newTimeRemaining)
-                } else {
-                    timerCircle.strokeColor = .white
-                    timeLabel.fontColor = .white
-                }
-            }
-        }
-
-        // Update the label with the discrete time
-        timeLabel.text = "\(Int(ceil(discreteTimeRemaining)))"
+    func stopGameTimer() {
+        isRunning = false
+        removeAction(forKey: "timerUpdate")
+        timerCircle.path = nil
     }
 
     private func updateTimer() {
         guard isRunning, !isFrozen else { return }
+
         let currentTime = CACurrentMediaTime()
         let deltaTime = currentTime - lastUpdateTime
 
@@ -167,12 +142,66 @@ class CircularTimer: SKNode {
         } else {
             progress = 1.0 - (interpolatedTimeRemaining / totalDuration)
         }
+
         updateTimerCircle(progress: CGFloat(progress))
 
         scheduleNextUpdate()
     }
 
+    // Call this when the game controller updates the time
+    func updateDiscreteTime(newTimeRemaining: TimeInterval) {
+        let wasOvertime = isOvertime
+        isOvertime = newTimeRemaining > totalDuration
+
+        discreteTimeRemaining = newTimeRemaining
+        interpolatedTimeRemaining = newTimeRemaining
+        lastUpdateTime = CACurrentMediaTime()
+
+        // Update colors and effects based on state
+        if !isFrozen {
+            if isOvertime {
+                timerCircle.strokeColor = overtimeColor
+                timeLabel.fontColor = overtimeColor
+                if !wasOvertime {
+                    // Just entered overtime
+                    setupOvertimeEffects()
+                }
+            } else {
+                if wasOvertime {
+                    // Just exited overtime
+                    removeOvertimeEffects()
+                }
+                if newTimeRemaining
+                    <= GameConstants.GeneralGamePlay.timeWarningThreshold
+                    && !isWarningActive
+                {
+                    triggerWarningAnimation(timeRemaining: newTimeRemaining)
+                } else {
+                    timerCircle.strokeColor = .white
+                    timeLabel.fontColor = .white
+                }
+            }
+
+            // Update the circle immediately to avoid visual stuttering
+            let progress: CGFloat
+            if isOvertime {
+                let overtimeProgress =
+                    (discreteTimeRemaining - totalDuration) / totalDuration
+                progress = 1.0 + overtimeProgress
+            } else {
+                progress = 1.0 - (discreteTimeRemaining / totalDuration)
+            }
+            updateTimerCircle(progress: CGFloat(progress))
+        }
+
+        // Update the label with the discrete time
+        timeLabel.text = "\(Int(ceil(discreteTimeRemaining)))"
+    }
+
     private func scheduleNextUpdate() {
+        // Remove any existing update action before scheduling a new one
+        removeAction(forKey: "timerUpdate")
+
         let updateAction = SKAction.sequence([
             SKAction.wait(forDuration: 1.0 / 60.0),  // 60 fps
             SKAction.run { [weak self] in
@@ -204,12 +233,6 @@ class CircularTimer: SKNode {
         timerCircle.path = newPath
     }
 
-    func stopGameTimer() {
-        isRunning = false
-        removeAction(forKey: "timerUpdate")
-        timerCircle.path = nil
-    }
-
     func setFrozenState(active: Bool) {
         print("Setting frozen state: \(active)")
         isFrozen = active
@@ -217,7 +240,7 @@ class CircularTimer: SKNode {
         if active {
             // Pause the timer update
             removeAction(forKey: "timerUpdate")
-            
+
             // Change visuals
             timeLabel.fontColor = frozenColor
             timerCircle.strokeColor = .clear
@@ -241,10 +264,13 @@ class CircularTimer: SKNode {
             addChild(cooldownNode)
 
             // Cooldown animation
-            let animate = SKAction.customAction(withDuration: GameConstants.PowerUpTimers.timeStopCooldown) {
+            let animate = SKAction.customAction(
+                withDuration: GameConstants.PowerUpTimers.timeStopCooldown
+            ) {
                 node, elapsedTime in
                 guard let cooldown = node as? SKShapeNode else { return }
-                let progress = elapsedTime / GameConstants.PowerUpTimers.timeStopCooldown
+                let progress =
+                    elapsedTime / GameConstants.PowerUpTimers.timeStopCooldown
                 let endAngle = startAngle + (.pi * 2 * progress)
 
                 let newPath = CGMutablePath()
@@ -272,7 +298,8 @@ class CircularTimer: SKNode {
                 // restart the overtime animations
                 setupOvertimeEffects()
             } else {
-                timerCircle.strokeColor = isWarningActive ? warningColor : .white
+                timerCircle.strokeColor =
+                    isWarningActive ? warningColor : .white
                 timeLabel.fontColor = isWarningActive ? warningColor : .white
             }
 
@@ -302,4 +329,29 @@ class CircularTimer: SKNode {
         }
         timeLabel.run(SKAction.sequence([scaleUp, scaleDown, resetState]))
     }
+}
+
+// MARK: - Time Bonus
+extension CircularTimer {
+    func showTimeBonus(seconds: Double) {
+            // Create bonus text
+            let bonusLabel = SKLabelNode(fontNamed: "PPNeueMontreal-Bold")
+            bonusLabel.text = "+\(Int(seconds))s"
+            bonusLabel.fontSize = 24
+            bonusLabel.fontColor = .green
+            bonusLabel.position = CGPoint(x: 0, y: radius - 25)
+            bonusLabel.alpha = 0
+            addChild(bonusLabel)
+            
+            // Animate the bonus text
+            let fadeIn = SKAction.fadeIn(withDuration: 0.2)
+            let moveUp = SKAction.moveBy(x: 0, y: 30, duration: 0.8)
+            let fadeOut = SKAction.fadeOut(withDuration: 0.3)
+            let group = SKAction.group([moveUp, SKAction.sequence([fadeIn, SKAction.wait(forDuration: 0.5), fadeOut])])
+            
+            bonusLabel.run(SKAction.sequence([
+                group,
+                SKAction.removeFromParent()
+            ]))
+        }
 }

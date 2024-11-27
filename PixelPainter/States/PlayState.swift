@@ -17,6 +17,9 @@ class PlayState: GKState {
 
     private var hintTimer: Timer?
     private var idleHintTimer: Timer?
+    
+    private var isTimeUpdatePending = false
+    private var pendingTimeUpdate: Double = 0
 
     init(gameScene: GameScene) {
         self.gameScene = gameScene
@@ -42,16 +45,22 @@ class PlayState: GKState {
     }
 
     func updateTime(by seconds: Double) {
+            if gameScene.context.gameInfo.timeRemaining <= 0 {
+                gameScene.context.gameInfo.timeRemaining = 0
+                return
+            }
+            
+            // Schedule the time update for the next timer tick
+            isTimeUpdatePending = true
+            pendingTimeUpdate = seconds
+            
+            // Update the time remaining but don't notify timer yet
+            gameScene.context.gameInfo.timeRemaining = max(0, gameScene.context.gameInfo.timeRemaining + seconds)
         
-        if gameScene.context.gameInfo.timeRemaining <= 0 {
-            gameScene.context.gameInfo.timeRemaining = 0
-            return
+        if let timerNode = gameScene.childNode(withName: "//circularTimer") as? CircularTimer {
+                    timerNode.showTimeBonus(seconds: seconds)
+                }
         }
-        
-        gameScene.context.gameInfo.timeRemaining = max(0, gameScene.context.gameInfo.timeRemaining + seconds)
-
-        notifyTimerUpdate()
-    }
 
     private func didSuccessfullyPlacePiece() {
         SoundManager.shared.playSound(.piecePlaced)
@@ -100,11 +109,6 @@ class PlayState: GKState {
     }
 
     override func willExit(to nextState: GKState) {
-        // Cleanup hint system related assets.
-        stopHintTimer()
-        stopIdleHintTimer()
-        gridManager.hideHint()
-        
         gameScene.removeAllChildren()
         gameScene.removeAction(forKey: "updateTimer")
     }
@@ -187,29 +191,31 @@ class PlayState: GKState {
         let updateTimerAction = SKAction.sequence([
             SKAction.run { [weak self] in
                 guard let self = self else { return }
-
-                // Update the circular timer with new discrete time
-                if let timerNode = self.gameScene.childNode(
-                    withName: "//circularTimer") as? CircularTimer
-                {
-                    timerNode.updateDiscreteTime(
-                        newTimeRemaining: self.gameScene.context.gameInfo
-                            .timeRemaining)
+                
+                // Handle any pending time updates first
+                if self.isTimeUpdatePending {
+                    self.isTimeUpdatePending = false
+                    self.pendingTimeUpdate = 0
                 }
-
+                
+                // Update the circular timer with new discrete time
+                if let timerNode = self.gameScene.childNode(withName: "//circularTimer") as? CircularTimer {
+                    timerNode.updateDiscreteTime(newTimeRemaining: self.gameScene.context.gameInfo.timeRemaining)
+                }
+                
                 // Game over check
                 if self.gameScene.context.gameInfo.timeRemaining <= 0 {
-                    handleGameOver()
+                    self.handleGameOver()
                     return
                 }
-
+                
                 self.gameScene.context.gameInfo.timeRemaining -= 1
             },
             SKAction.wait(forDuration: 1.0),
         ])
-        gameScene.run(
-            SKAction.repeatForever(updateTimerAction), withKey: "updateTimer")
+        gameScene.run(SKAction.repeatForever(updateTimerAction), withKey: "updateTimer")
     }
+
 
     func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
         guard let touch = touches.first else { return }
