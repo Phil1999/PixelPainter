@@ -44,6 +44,12 @@ class PlayState: GKState {
     }
 
     func updateTime(by seconds: Double) {
+        
+        if gameScene.context.gameInfo.timeRemaining <= 0 {
+            gameScene.context.gameInfo.timeRemaining = 0
+            return
+        }
+        
         gameScene.context.gameInfo.timeRemaining = min(
             100, max(0, gameScene.context.gameInfo.timeRemaining + seconds))
 
@@ -170,9 +176,24 @@ class PlayState: GKState {
 
                 // Game over check
                 if self.gameScene.context.gameInfo.timeRemaining <= 0 {
-                    self.gameScene.context.stateMachine?.enter(
-                        GameOverState.self)
-                    SoundManager.shared.playSound(.gameOver)
+                    self.effectManager.disableInteraction()
+                    self.stopHintTimer()
+                    self.stopIdleHintTimer()
+                    
+                    if let gridNode = self.gameScene.childNode(withName: "grid") as? SKSpriteNode,
+                       !gridNode.children.filter({ $0.name?.starts(with: "piece_") ?? false }).isEmpty {
+                        // Only play animation if there are pieces
+                        self.effectManager.playGameOverEffect { [weak self] in
+                            guard let self = self else { return }
+                            self.gameScene.context.stateMachine?.enter(GameOverState.self)
+                            SoundManager.shared.playSound(.gameOver)
+                        }
+                    } else {
+                        // Go directly to game over if no pieces
+                        self.gameScene.context.stateMachine?.enter(GameOverState.self)
+                        SoundManager.shared.playSound(.gameOver)
+                    }
+                    return
                 }
 
                 self.gameScene.context.gameInfo.timeRemaining -= 1

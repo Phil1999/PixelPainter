@@ -191,5 +191,85 @@ class EffectManager {
             // Recursively restore children
             node.children.forEach { restoreNodeStates($0, states: states) }
         }
+    
+    func playGameOverEffect(completion: @escaping () -> Void) {
+        guard let gameScene = gameScene,
+              let gridNode = gameScene.childNode(withName: "grid") as? SKSpriteNode else { return }
+        
+        // Step 1: Shake effect (left-right only)
+        let shakeSequence = createShakeSequence()
+        
+        // Step 2: Prepare pieces for ejection
+        let pieces = gridNode.children.filter { $0.name?.starts(with: "piece_") ?? false }
+        
+        // Step 3: Combine animations
+        gridNode.run(shakeSequence) { [weak self] in
+            self?.ejectPieces(pieces: pieces) {
+                completion()
+            }
+        }
+    }
+    
+    private func createShakeSequence() -> SKAction {
+        let shakeRight = SKAction.moveBy(x: 15, y: 0, duration: 0.05)
+        let shakeLeft = SKAction.moveBy(x: -15, y: 0, duration: 0.05)
+        
+        let doubleShake = SKAction.sequence([
+            shakeLeft, shakeRight, shakeRight, shakeLeft
+        ])
+        
+        return SKAction.sequence([
+            SKAction.repeat(doubleShake, count: 4),
+            SKAction.moveBy(x: 0, y: 0, duration: 0.1) // Reset position
+        ])
+    }
+    
+    private func ejectPieces(pieces: [SKNode], completion: @escaping () -> Void) {
+        let group = DispatchGroup()
+        
+        for piece in pieces {
+            group.enter()
+            
+            // Random horizontal offset for both jump and fall
+            let jumpOffsetX = CGFloat.random(in: -100...100)
+            let fallOffsetX = CGFloat.random(in: -200...200)
+            
+            // Random jump height
+            let jumpHeight = CGFloat.random(in: 100...200)
+            
+            // Random slight delay for each piece
+            let initialDelay = SKAction.wait(forDuration: Double.random(in: 0...0.2))
+            
+            // Jump up with random x offset
+            let jumpUpAction = SKAction.moveBy(x: jumpOffsetX, y: jumpHeight, duration: 0.3)
+            jumpUpAction.timingMode = .easeOut
+            
+            // Fall down with different random x offset
+            let fallDownAction = SKAction.moveBy(x: fallOffsetX, y: -800, duration: 1.0)
+            fallDownAction.timingMode = .easeIn
+            
+            let fadeOutAction = SKAction.fadeOut(withDuration: 0.5)
+            
+            // Combine the actions with initial random delay
+            let jumpAndFallSequence = SKAction.sequence([
+                initialDelay,
+                jumpUpAction,
+                SKAction.group([fallDownAction, fadeOutAction])
+            ])
+            
+            piece.run(jumpAndFallSequence) {
+                piece.removeFromParent()
+                group.leave()
+            }
+        }
+        
+        // Wait for all pieces to complete their animations
+        DispatchQueue.global().async {
+            group.wait()
+            DispatchQueue.main.async {
+                completion()
+            }
+        }
+    }
 
 }

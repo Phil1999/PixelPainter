@@ -116,7 +116,7 @@ class MemorizeState: GKState {
 
         let readyLabel = SKLabelNode(text: "Ready?")
         readyLabel.fontName = "PPNeueMontreal-Bold"
-        readyLabel.fontSize = 40
+        readyLabel.fontSize = 48
         readyLabel.fontColor = .white
         readyLabel.position = CGPoint(
             x: gameScene.size.width / 2, y: gameScene.size.height - 200)
@@ -167,7 +167,7 @@ class MemorizeState: GKState {
 
             let circleNode = SKShapeNode(circleOfRadius: dynamicRadius)
             circleNode.strokeColor = .white
-            circleNode.lineWidth = 4
+            circleNode.lineWidth = 0 // changed to 0 to match current theme
             circleNode.fillColor = UIColor(hex: "252525").withAlphaComponent(
                 0.9)
 
@@ -189,7 +189,7 @@ class MemorizeState: GKState {
             containerNode.addChild(circleNode)
 
             // Animate the reward appearance
-            let fadeIn = SKAction.fadeIn(withDuration: 0.5)
+            let fadeIn = SKAction.fadeIn(withDuration: 0.2)
             let wait = SKAction.wait(forDuration: 0.9)
             containerNode.run(SKAction.sequence([wait, fadeIn]))
         }
@@ -198,8 +198,8 @@ class MemorizeState: GKState {
     private func blinkReadyLabel(readyLabel: SKLabelNode, blinkCount: Int) {
         var remainingBlinks = blinkCount
         
-        let blinkIn = SKAction.fadeIn(withDuration: 0.5)
-        let blinkOut = SKAction.fadeOut(withDuration: 0.5)
+        let blinkIn = SKAction.fadeIn(withDuration: 0.2)
+        let blinkOut = SKAction.fadeOut(withDuration: 0.8)
         let blinkSequence = SKAction.sequence([blinkOut, blinkIn])
 
         let blinkAction = SKAction.run { [weak self] in

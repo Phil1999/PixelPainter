@@ -118,6 +118,9 @@ class GridManager {
     }
 
     func tryPlacePiece(_ piece: SKSpriteNode, at point: CGPoint) -> Bool {
+        if gameScene?.context.gameInfo.timeRemaining ?? 0 <= 0 {
+            return false
+        }
         guard let gameScene = gameScene,
             let gridNode = gameScene.childNode(withName: "grid")
                 as? SKSpriteNode
