@@ -60,6 +60,7 @@ class PlayState: GKState {
 
         // Clear hint effects on successful placement
         stopHintTimer()
+        stopIdleHintTimer()
         gridManager.hideHint()
 
         hudManager.updateScore()
@@ -88,6 +89,7 @@ class PlayState: GKState {
             gameScene.context.gameInfo.boardSize += 1
             print("board size is now: ", gameScene.context.gameInfo.boardSize)
         }
+        
         gameScene.context.stateMachine?.enter(MemorizeState.self)
     }
 
@@ -98,6 +100,11 @@ class PlayState: GKState {
     }
 
     override func willExit(to nextState: GKState) {
+        // Cleanup hint system related assets.
+        stopHintTimer()
+        stopIdleHintTimer()
+        gridManager.hideHint()
+        
         gameScene.removeAllChildren()
         gameScene.removeAction(forKey: "updateTimer")
     }
@@ -154,6 +161,27 @@ class PlayState: GKState {
         startTimer()
         startIdleHintTimer()
     }
+    
+    private func handleGameOver() {
+        EffectManager.shared.disableInteraction()
+        stopHintTimer()
+        stopIdleHintTimer()
+        gridManager.hideHint()
+        
+        if let gridNode = gameScene.childNode(withName: "grid") as? SKSpriteNode,
+           !gridNode.children.filter({ $0.name?.starts(with: "piece_") ?? false }).isEmpty {
+            // Only play animation if there are pieces
+            EffectManager.shared.playGameOverEffect { [weak self] in
+                guard let self = self else { return }
+                self.gameScene.context.stateMachine?.enter(GameOverState.self)
+                SoundManager.shared.playSound(.gameOver)
+            }
+        } else {
+            // Go directly to game over if no pieces
+            self.gameScene.context.stateMachine?.enter(GameOverState.self)
+            SoundManager.shared.playSound(.gameOver)
+        }
+    }
 
     func startTimer() {
         let updateTimerAction = SKAction.sequence([
@@ -171,23 +199,7 @@ class PlayState: GKState {
 
                 // Game over check
                 if self.gameScene.context.gameInfo.timeRemaining <= 0 {
-                    EffectManager.shared.disableInteraction()
-                    self.stopHintTimer()
-                    self.stopIdleHintTimer()
-                    
-                    if let gridNode = self.gameScene.childNode(withName: "grid") as? SKSpriteNode,
-                       !gridNode.children.filter({ $0.name?.starts(with: "piece_") ?? false }).isEmpty {
-                        // Only play animation if there are pieces
-                        EffectManager.shared.playGameOverEffect { [weak self] in
-                            guard let self = self else { return }
-                            self.gameScene.context.stateMachine?.enter(GameOverState.self)
-                            SoundManager.shared.playSound(.gameOver)
-                        }
-                    } else {
-                        // Go directly to game over if no pieces
-                        self.gameScene.context.stateMachine?.enter(GameOverState.self)
-                        SoundManager.shared.playSound(.gameOver)
-                    }
+                    handleGameOver()
                     return
                 }
 
