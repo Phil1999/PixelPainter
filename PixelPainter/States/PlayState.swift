@@ -15,7 +15,9 @@ class PlayState: GKState {
     let hudManager: HUDManager
     var powerUpManager: PowerUpManager!
     var effectManager: EffectManager!
-    
+
+    private var hintTimer: Timer?
+
     init(gameScene: GameScene) {
         self.gameScene = gameScene
         self.gridManager = GridManager(gameScene: gameScene)
@@ -30,22 +32,31 @@ class PlayState: GKState {
     func notifyPiecePlaced() {
         didSuccessfullyPlacePiece()
     }
-    
+
     private func notifyTimerUpdate() {
-        guard let timerNode = gameScene.childNode(withName: "//circularTimer") as? CircularTimer else { return }
-        timerNode.updateDiscreteTime(newTimeRemaining: gameScene.context.gameInfo.timeRemaining)
+        guard
+            let timerNode = gameScene.childNode(withName: "//circularTimer")
+                as? CircularTimer
+        else { return }
+        timerNode.updateDiscreteTime(
+            newTimeRemaining: gameScene.context.gameInfo.timeRemaining)
     }
-    
+
     func updateTime(by seconds: Double) {
-        gameScene.context.gameInfo.timeRemaining = min(100, max(0, gameScene.context.gameInfo.timeRemaining + seconds))
-        
+        gameScene.context.gameInfo.timeRemaining = min(
+            100, max(0, gameScene.context.gameInfo.timeRemaining + seconds))
+
         notifyTimerUpdate()
     }
 
     private func didSuccessfullyPlacePiece() {
         SoundManager.shared.playSound(.piecePlaced)
-        
+
         updateTime(by: 2)
+
+        // Clear hint effects on successful placement
+        stopHintTimer()
+        gridManager.hideHint()
 
         hudManager.updateScore()
         bankManager.clearSelection()
@@ -58,14 +69,16 @@ class PlayState: GKState {
 
     private func handleLevelComplete() {
         SoundManager.shared.playSound(.levelComplete)
-        
+
         let bonus = Int(gameScene.context.gameInfo.timeRemaining)
-//        print("current score: ", gameScene.context.gameInfo.score)
-//        print("gaining a bonus of: ", bonus)
+        //        print("current score: ", gameScene.context.gameInfo.score)
+        //        print("gaining a bonus of: ", bonus)
         gameScene.context.gameInfo.score += bonus
-//        print("new score: ", gameScene.context.gameInfo.score)
+        //        print("new score: ", gameScene.context.gameInfo.score)
         gameScene.context.gameInfo.level += 1
-        if gameScene.context.gameInfo.level % 4 == 0 && gameScene.context.gameInfo.boardSize < 6{
+        if gameScene.context.gameInfo.level % 4 == 0
+            && gameScene.context.gameInfo.boardSize < 6
+        {
             gameScene.context.gameInfo.boardSize += 1
             print("board size is now: ", gameScene.context.gameInfo.boardSize)
         }
@@ -90,14 +103,14 @@ class PlayState: GKState {
         background.zPosition = -2
         background.name = "backgroundNode"
         gameScene.addChild(background)
-        
+
         // Then add game elements
         gridManager.createGrid()
         bankManager.clearSelection()
         bankManager.createPictureBank()
         hudManager.createHUD()
         powerUpManager.setupPowerUps()
-        gameScene.context.gameInfo.timeRemaining = 10 // adjust according to board size
+        gameScene.context.gameInfo.timeRemaining = 10  // adjust according to board size
     }
 
     func handleGridPlacement(at location: CGPoint) {
@@ -141,23 +154,29 @@ class PlayState: GKState {
         let updateTimerAction = SKAction.sequence([
             SKAction.run { [weak self] in
                 guard let self = self else { return }
-                 
+
                 // Update the circular timer with new discrete time
-                if let timerNode = self.gameScene.childNode(withName: "//circularTimer") as? CircularTimer {
-                    timerNode.updateDiscreteTime(newTimeRemaining: self.gameScene.context.gameInfo.timeRemaining)
+                if let timerNode = self.gameScene.childNode(
+                    withName: "//circularTimer") as? CircularTimer
+                {
+                    timerNode.updateDiscreteTime(
+                        newTimeRemaining: self.gameScene.context.gameInfo
+                            .timeRemaining)
                 }
-                
+
                 // Game over check
                 if self.gameScene.context.gameInfo.timeRemaining <= 0 {
-                    self.gameScene.context.stateMachine?.enter(GameOverState.self)
+                    self.gameScene.context.stateMachine?.enter(
+                        GameOverState.self)
                     SoundManager.shared.playSound(.gameOver)
                 }
-                
+
                 self.gameScene.context.gameInfo.timeRemaining -= 1
             },
             SKAction.wait(forDuration: 1.0),
         ])
-        gameScene.run(SKAction.repeatForever(updateTimerAction), withKey: "updateTimer")
+        gameScene.run(
+            SKAction.repeatForever(updateTimerAction), withKey: "updateTimer")
     }
 
     func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
@@ -178,13 +197,37 @@ class PlayState: GKState {
                 .first(where: { $0.name?.starts(with: "piece_") == true })
                 as? SKSpriteNode
             {
-                bankManager.selectPiece(touchedPiece)
+                
+                if touchedPiece != bankManager.getSelectedPiece() {
+                    stopHintTimer()
+                    gridManager.hideHint()
+                    bankManager.selectPiece(touchedPiece)
+                    startHintTimer()
+                }
             }
             return
         }
 
         // Handle grid placement
         handleGridPlacement(at: location)
+    }
+
+    private func startHintTimer() {
+        hintTimer = Timer.scheduledTimer(
+            withTimeInterval: GameConstants.GeneralGamePlay.hintWaitTime,
+            repeats: false
+        ) { [weak self] _ in
+            guard let self = self,
+                let selectedPiece = self.bankManager.getSelectedPiece()
+            else { return }
+
+            self.gridManager.showHintForPiece(selectedPiece)
+        }
+    }
+
+    private func stopHintTimer() {
+        hintTimer?.invalidate()
+        hintTimer = nil
     }
 
     func touchesMoved(_ touches: Set<UITouch>, with event: UIEvent?) {
