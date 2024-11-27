@@ -225,7 +225,7 @@ class PlayState: GKState {
         }
     }
 
-    private func stopHintTimer() {
+    func stopHintTimer() {
         hintTimer?.invalidate()
         hintTimer = nil
     }

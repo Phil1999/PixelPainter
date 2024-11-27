@@ -229,6 +229,8 @@ class PowerUpManager {
 
             if let bankManager = playState?.bankManager {
                 bankManager.clearSelection()
+                playState?.stopHintTimer()
+                playState?.gridManager.hideHint()
 
                 // Safely access the pieces array
                 let pieces = gameScene.context.gameInfo.pieces
@@ -240,7 +242,6 @@ class PowerUpManager {
                 gameScene.context.gameInfo.pieces =
                     placedPieces + unplacedPieces
                 bankManager.showNextThreePieces()
-
                 DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
                     self.powerUpsInCooldown.remove(type)
                 }
