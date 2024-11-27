@@ -113,7 +113,7 @@ class PlayState: GKState {
         bankManager.createPictureBank()
         hudManager.createHUD()
         powerUpManager.setupPowerUps()
-        gameScene.context.gameInfo.timeRemaining = 1000  // adjust according to board size
+        gameScene.context.gameInfo.timeRemaining = 10  // adjust according to board size
     }
 
     func handleGridPlacement(at location: CGPoint) {
