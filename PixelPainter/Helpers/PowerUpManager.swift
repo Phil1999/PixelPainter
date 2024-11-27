@@ -125,6 +125,10 @@ class PowerUpManager {
     }
 
     private func activatePowerUp(_ type: PowerUpType) {
+        // check if timer isn't 0 before letting player use power-up
+        if gameScene?.context.gameInfo.timeRemaining ?? 0 <= 0 {
+            return
+        }
         // Check power-up has uses remaining
         guard let uses = powerUpUses[type], uses > 0,
               let powerUpIcon = powerUps[type],
