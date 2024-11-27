@@ -25,6 +25,7 @@ class MemorizeState: GKState {
         if !isFirstLevel {
             moveToNextImage()
             updateGridSize()
+            updateGameTime()
         }
 
         setupMemorizeScene()
@@ -40,16 +41,16 @@ class MemorizeState: GKState {
     }
 
     private func updateGridSize() {
-        let level = gameScene.context.gameInfo.level + 1  // Use next level's number
+        let level = gameScene.context.gameInfo.level
 
         // Define grid progression logic
         let newGridDimension: Int
         switch level {
         case 1...2:
             newGridDimension = 3
-        case 3...4:
+        case 3...5:
             newGridDimension = 4
-        case 5...6:
+        case 6...8:
             newGridDimension = 5
         default:
             newGridDimension = 6  // Maximum size
@@ -63,6 +64,28 @@ class MemorizeState: GKState {
 
         // Update the grid dimension
         gameScene.context.updateGridDimension(newGridDimension)
+    }
+    
+    private func updateGameTime() {
+        let level = gameScene.context.gameInfo.level
+
+        // Define grid progression logic
+        let newGameTime: TimeInterval
+        switch level {
+        case 1...2:
+            newGameTime = 10 // 3x3 grid
+        case 3...5:
+            newGameTime = 15 // 4x4 grid
+        case 6...8:
+            newGameTime = 20 // 5x5 grid
+        default:
+            newGameTime = 25 // 6x6 grid
+        }
+
+        // If grid size changed, reload images
+        if newGameTime != gameScene.context.gameInfo.timeRemaining {
+            gameScene.context.gameInfo.timeRemaining = newGameTime
+        }
     }
 
     override func willExit(to nextState: GKState) {
