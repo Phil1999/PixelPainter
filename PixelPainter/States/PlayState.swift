@@ -14,7 +14,6 @@ class PlayState: GKState {
     let bankManager: BankManager
     let hudManager: HUDManager
     var powerUpManager: PowerUpManager!
-    var effectManager: EffectManager!
 
     private var hintTimer: Timer?
     private var idleHintTimer: Timer?
@@ -24,7 +23,6 @@ class PlayState: GKState {
         self.gridManager = GridManager(gameScene: gameScene)
         self.bankManager = BankManager(gameScene: gameScene)
         self.hudManager = HUDManager(gameScene: gameScene)
-        self.effectManager = EffectManager(gameScene: gameScene)
         super.init()
         self.powerUpManager = PowerUpManager(
             gameScene: gameScene, playState: self)
@@ -141,8 +139,8 @@ class PlayState: GKState {
     }
 
     private func showWrongPlacementAnimation(for piece: SKSpriteNode) {
-        effectManager.disableInteraction()
-        effectManager.shakeNode(piece)
+        EffectManager.shared.disableInteraction()
+        EffectManager.shared.shakeNode(piece)
     }
 
     private func startGame() {
@@ -174,14 +172,14 @@ class PlayState: GKState {
 
                 // Game over check
                 if self.gameScene.context.gameInfo.timeRemaining <= 0 {
-                    self.effectManager.disableInteraction()
+                    EffectManager.shared.disableInteraction()
                     self.stopHintTimer()
                     self.stopIdleHintTimer()
                     
                     if let gridNode = self.gameScene.childNode(withName: "grid") as? SKSpriteNode,
                        !gridNode.children.filter({ $0.name?.starts(with: "piece_") ?? false }).isEmpty {
                         // Only play animation if there are pieces
-                        self.effectManager.playGameOverEffect { [weak self] in
+                        EffectManager.shared.playGameOverEffect { [weak self] in
                             guard let self = self else { return }
                             self.gameScene.context.stateMachine?.enter(GameOverState.self)
                             SoundManager.shared.playSound(.gameOver)
