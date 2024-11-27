@@ -35,15 +35,6 @@ class PlayState: GKState {
         didSuccessfullyPlacePiece()
     }
 
-    private func notifyTimerUpdate() {
-        guard
-            let timerNode = gameScene.childNode(withName: "//circularTimer")
-                as? CircularTimer
-        else { return }
-        timerNode.updateDiscreteTime(
-            newTimeRemaining: gameScene.context.gameInfo.timeRemaining)
-    }
-
     func updateTime(by seconds: Double) {
         if gameScene.context.gameInfo.timeRemaining <= 0 {
             gameScene.context.gameInfo.timeRemaining = 0
@@ -54,7 +45,6 @@ class PlayState: GKState {
         isTimeUpdatePending = true
         pendingTimeUpdate = seconds
 
-        // Update the time remaining but don't notify timer yet
         gameScene.context.gameInfo.timeRemaining = max(
             0, gameScene.context.gameInfo.timeRemaining + seconds)
 
