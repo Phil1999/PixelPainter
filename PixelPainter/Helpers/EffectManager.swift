@@ -67,10 +67,8 @@ class EffectManager {
         let scaleDownAction = SKAction.scale(to: scaleDown, duration: duration / 2)
         let pulseSequence = SKAction.sequence([scaleUpAction, scaleDownAction])
                 
-        // Repeat the pulse animation indefinitely
         let repeatPulse = SKAction.repeatForever(pulseSequence)
                 
-        // Apply the pulse animation to the node
         node.run(repeatPulse, withKey: "pulseEffect")
     }
 

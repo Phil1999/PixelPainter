@@ -168,20 +168,21 @@ class CircularTimer: SKNode {
                 }
             }
 
-            // Update the circle immediately to avoid visual stuttering
-            let progress: CGFloat
-            if isOvertime {
-                let overtimeProgress =
-                    (discreteTimeRemaining - totalDuration) / totalDuration
-                progress = 1.0 + overtimeProgress
-            } else {
-                progress = 1.0 - (discreteTimeRemaining / totalDuration)
-            }
-            updateTimerCircle(progress: CGFloat(progress))
+            // Update circle path immediately to avoid visual stuttering
+            updateTimerCircle(progress: calculateProgress())
         }
 
         // Update the label with the discrete time
         timeLabel.text = "\(Int(ceil(discreteTimeRemaining)))"
+    }
+    
+    private func calculateProgress() -> CGFloat {
+        if isOvertime {
+            let overtimeProgress = (discreteTimeRemaining - totalDuration) / totalDuration
+            return 1.0 + overtimeProgress
+        } else {
+            return 1.0 - (discreteTimeRemaining / totalDuration)
+        }
     }
 
     private func scheduleNextUpdate() {
