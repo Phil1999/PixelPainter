@@ -242,6 +242,9 @@ class PowerUpManager {
                 gameScene.context.gameInfo.pieces =
                     placedPieces + unplacedPieces
                 bankManager.showNextThreePieces()
+                
+                playState?.startIdleHintTimer()
+                
                 DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
                     self.powerUpsInCooldown.remove(type)
                 }
