@@ -151,7 +151,10 @@ class BankManager {
     }
     
     func refreshBankIfNeeded() {
-        let visiblePiecesPlaced = visiblePieces.allSatisfy { $0.parent == nil }
+        // we should remove the pieces that are not in the bank.
+        visiblePieces = visiblePieces.filter { $0.parent != nil }
+        
+        let visiblePiecesPlaced = visiblePieces.isEmpty
         
         if visiblePiecesPlaced {
             remainingPiecesIndices = gameScene?.context.gameInfo.pieces.enumerated()
@@ -164,6 +167,10 @@ class BankManager {
                 showNextThreePieces()
             }
         }
+    }
+    
+    func getRandomVisibleUnplacedPiece() -> SKSpriteNode? {
+        return visiblePieces.randomElement()
     }
     
     private func cropImage(_ image: UIImage, toRect rect: CGRect) -> UIImage {

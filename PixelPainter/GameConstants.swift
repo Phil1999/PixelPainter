@@ -20,5 +20,7 @@ enum GameConstants {
     }
     enum GeneralGamePlay {
         static let timeWarningThreshold = 5.0
+        static let hintWaitTime = 3.0
+        static let idleHintWaitTime = 4.0
     }
 }
