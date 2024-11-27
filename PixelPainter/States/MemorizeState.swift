@@ -208,16 +208,19 @@ class MemorizeState: GKState {
             remainingBlinks -= 1
 
             if remainingBlinks == 0 {
-                // On the last blink, transition to "Tap!"
                 readyLabel.text = "Tap!"
-
-                readyLabel.run(
-                    SKAction.sequence([
-                        SKAction.wait(forDuration: 1.0),
-                        SKAction.run {
-                            self.transitionToPlayState()
-                        },
-                    ]))
+                readyLabel.run(SKAction.sequence([
+                    SKAction.wait(forDuration: 1.0),
+                    SKAction.run { [weak self] in
+                        guard let self = self,
+                              let imageNode = self.gameScene.children.first(where: {
+                                  $0 is SKSpriteNode && $0 != self.gameScene.background
+                              }) as? SKSpriteNode
+                        else { return }
+                        
+                        self.animateImageBreak(imageNode: imageNode)
+                    }
+                ]))
             } else {
                 readyLabel.run(blinkSequence)
             }
@@ -226,6 +229,52 @@ class MemorizeState: GKState {
             SKAction.repeat(
                 SKAction.sequence([blinkSequence, blinkAction]),
                 count: blinkCount))
+    }
+    
+    private func animateImageBreak(imageNode: SKSpriteNode) {
+        let gridDimension = gameScene.context.layoutInfo.gridDimension
+        let pieceSize = CGSize(
+            width: imageNode.size.width / CGFloat(gridDimension),
+            height: imageNode.size.height / CGFloat(gridDimension)
+        )
+        
+        let piecesContainer = SKNode()
+        piecesContainer.position = imageNode.position
+        gameScene.addChild(piecesContainer)
+        
+        var allPieces: [SKSpriteNode] = []
+        
+        for row in 0..<gridDimension {
+            for col in 0..<gridDimension {
+                let textureRect = CGRect(
+                    x: CGFloat(col) / CGFloat(gridDimension),
+                    y: 1.0 - (CGFloat(row + 1) / CGFloat(gridDimension)),
+                    width: 1.0 / CGFloat(gridDimension),
+                    height: 1.0 / CGFloat(gridDimension)
+                )
+                
+                let pieceNode = SKSpriteNode(
+                    texture: SKTexture(rect: textureRect, in: imageNode.texture!),
+                    size: pieceSize
+                )
+                
+                pieceNode.position = CGPoint(
+                    x: CGFloat(col) * pieceSize.width - imageNode.size.width / 2 + pieceSize.width / 2,
+                    y: CGFloat((gridDimension - 1) - row) * pieceSize.height - imageNode.size.height / 2 + pieceSize.height / 2
+                )
+                
+                piecesContainer.addChild(pieceNode)
+                allPieces.append(pieceNode)
+            }
+        }
+        
+        imageNode.removeFromParent()
+        
+        
+        EffectManager.shared.ejectPieces(pieces: allPieces) { [weak self] in
+                piecesContainer.removeFromParent()
+                self?.transitionToPlayState()
+        }
     }
 
 }

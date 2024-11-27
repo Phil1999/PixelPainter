@@ -58,7 +58,7 @@ struct LayoutInfo {
         )
     }
 }
-
+	
 struct GameInfo {
     var currentImage: UIImage?
     var pieces: [PuzzlePiece] = []

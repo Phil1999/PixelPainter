@@ -141,7 +141,7 @@ class PowerUpManager {
         case .timeStop:
             if uses > 1 {
                 powerUpsInCooldown.insert(type)
-                playState?.effectManager.cooldown(
+                EffectManager.shared.cooldown(
                     powerUpIcon,
                     duration: GameConstants.PowerUpTimers.timeStopCooldown)
             }
@@ -202,7 +202,7 @@ class PowerUpManager {
         case .flash:
             if uses > 1 {
                 powerUpsInCooldown.insert(type)
-                playState?.effectManager.cooldown(
+                EffectManager.shared.cooldown(
                     powerUpIcon,
                     duration: GameConstants.PowerUpTimers.flashCooldown)
             }
@@ -228,7 +228,7 @@ class PowerUpManager {
         case .shuffle:
             if uses > 1 {
                 powerUpsInCooldown.insert(type)
-                playState?.effectManager.cooldown(powerUpIcon, duration: 0.5)
+                EffectManager.shared.cooldown(powerUpIcon, duration: 0.5)
             }
 
             if let bankManager = playState?.bankManager {
