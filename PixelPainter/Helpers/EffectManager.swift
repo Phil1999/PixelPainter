@@ -58,6 +58,21 @@ class EffectManager {
         ])
         node.run(shakeSequence)
     }
+    
+    func applyPulseEffect(to node: SKNode, scaleUp: CGFloat = 1.2, scaleDown: CGFloat = 1.0, duration: TimeInterval = 0.5) {
+        
+        node.removeAction(forKey: "pulseEffect")
+        
+        let scaleUpAction = SKAction.scale(to: scaleUp, duration: duration / 2)
+        let scaleDownAction = SKAction.scale(to: scaleDown, duration: duration / 2)
+        let pulseSequence = SKAction.sequence([scaleUpAction, scaleDownAction])
+                
+        // Repeat the pulse animation indefinitely
+        let repeatPulse = SKAction.repeatForever(pulseSequence)
+                
+        // Apply the pulse animation to the node
+        node.run(repeatPulse, withKey: "pulseEffect")
+    }
 
     func disableInteraction(for duration: TimeInterval = 1.0) {
         let disableTouchAction = SKAction.run { [weak self] in

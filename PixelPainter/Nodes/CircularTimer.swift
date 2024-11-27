@@ -71,24 +71,10 @@ class CircularTimer: SKNode {
         if let glowNode = glowNode {
             // insert behind timer circle
             insertChild(glowNode, at: 0)
+            
+            EffectManager.shared.applyPulseEffect(to: glowNode)
         }
-
-        // pulsing animation
-        let pulseOut = SKAction.scale(to: 1.2, duration: 0.5)
-        let pulseIn = SKAction.scale(by: 1.0, duration: 0.5)
-
-        pulseAction = SKAction.repeatForever(
-            SKAction.sequence([pulseOut, pulseIn]))
-        glowNode?.run(pulseAction!)
-
-        // Animate the text
-        let scaleUp = SKAction.scale(to: 1.2, duration: 0.15)
-        let scaleDown = SKAction.scale(to: 1.0, duration: 0.15)
-        let wait = SKAction.wait(forDuration: 0.7)
-        timeLabel.run(
-            SKAction.repeatForever(
-                SKAction.sequence([scaleUp, scaleDown, wait])))
-
+        EffectManager.shared.applyPulseEffect(to: timeLabel)
     }
 
     private func removeOvertimeEffects() {
