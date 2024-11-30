@@ -166,8 +166,7 @@ class PlayState: GKState {
     }
     
     private func handleGameOver() {
-        // Immediately disable user interaction
-        gameScene.isUserInteractionEnabled = false
+        EffectManager.shared.temporarilyDisableInteraction()
         
         stopHintTimer()
         stopIdleHintTimer()
@@ -220,8 +219,6 @@ class PlayState: GKState {
     }
 
     func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
-        guard gameScene.isUserInteractionEnabled else { return }
-        
         guard let touch = touches.first else { return }
         let location = touch.location(in: gameScene)
 
