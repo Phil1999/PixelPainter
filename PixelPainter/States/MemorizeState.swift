@@ -137,7 +137,7 @@ class MemorizeState: GKState {
             grantPowerUp()
         }
 
-        let readyLabel = SKLabelNode(text: "Ready?")
+        let readyLabel = SKLabelNode(text: "Memorize")
         readyLabel.fontName = "PPNeueMontreal-Bold"
         readyLabel.fontSize = 48
         readyLabel.fontColor = .white
@@ -147,7 +147,7 @@ class MemorizeState: GKState {
         gameScene.addChild(readyLabel)
 
         // Start the blinking animation
-        blinkReadyLabel(readyLabel: readyLabel, blinkCount: Int(memorizeTime))
+        blinkCountdownLabel(readyLabel: readyLabel, blinkCount: Int(memorizeTime))
 
     }
 
@@ -218,20 +218,24 @@ class MemorizeState: GKState {
         }
     }
 
-    private func blinkReadyLabel(readyLabel: SKLabelNode, blinkCount: Int) {
-        var remainingBlinks = blinkCount
+    private func blinkCountdownLabel(readyLabel: SKLabelNode, blinkCount: Int) {
+        let countdownSequence = ["3", "2", "1", "Ready?"]
+        var currentIndex = 0
         
-        let blinkIn = SKAction.fadeIn(withDuration: 0.2)
-        let blinkOut = SKAction.fadeOut(withDuration: 0.8)
+        let blinkIn = SKAction.fadeIn(withDuration: 0.8)
+        let blinkOut = SKAction.fadeOut(withDuration: 0.2)
         let blinkSequence = SKAction.sequence([blinkOut, blinkIn])
 
-        let blinkAction = SKAction.run { [weak self] in
+        let countdownAction = SKAction.run { [weak self] in
             guard let self = self else { return }
 
-            remainingBlinks -= 1
-
-            if remainingBlinks == 0 {
-                readyLabel.text = "Tap!"
+            readyLabel.text = countdownSequence[currentIndex]
+            
+            if currentIndex == countdownSequence.count - 1 {
+                // When "Ready?" appears, just show it without blinking
+                readyLabel.alpha = 1.0
+                
+                // Trigger the image break animation after a short delay
                 readyLabel.run(SKAction.sequence([
                     SKAction.wait(forDuration: 1.0),
                     SKAction.run { [weak self] in
@@ -247,11 +251,12 @@ class MemorizeState: GKState {
             } else {
                 readyLabel.run(blinkSequence)
             }
+            currentIndex += 1
         }
         readyLabel.run(
             SKAction.repeat(
-                SKAction.sequence([blinkSequence, blinkAction]),
-                count: blinkCount))
+                SKAction.sequence([blinkSequence, countdownAction]),
+                count: countdownSequence.count))
     }
     
     private func animateImageBreak(imageNode: SKSpriteNode) {
