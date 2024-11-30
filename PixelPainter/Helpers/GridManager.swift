@@ -283,7 +283,7 @@ class GridManager {
                 UIColor(red: 0.0, green: 0.4, blue: 1.0, alpha: 0.9).cgColor
 
             shape.strokeColor = UIColor.white.cgColor
-            shape.lineWidth = 4
+            shape.lineWidth = 1
 
             UIGraphicsBeginImageContextWithOptions(size, false, 0)
             if let context = UIGraphicsGetCurrentContext() {
