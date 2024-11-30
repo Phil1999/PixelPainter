@@ -6,6 +6,40 @@
 //
 import SpriteKit
 
+enum TimerState {
+    case normal
+    case frozen
+    case overtime
+    case warning
+    
+    var color: SKColor {
+        switch self {
+        case .normal:
+            return .white
+        case .frozen:
+            return .cyan
+        case .overtime:
+            return .orange
+        case.warning:
+            return .red
+        }
+    }
+    
+    var bonusColor: SKColor {
+        switch self {
+        case .normal:
+            return .green
+        case .frozen:
+            return .cyan
+        case .overtime:
+            return .orange
+        case .warning:
+            return .green
+        }
+    }
+}
+
+
 class CircularTimer: SKNode {
     private var backgroundCircle: SKShapeNode
     private var timerCircle: SKShapeNode
@@ -22,17 +56,13 @@ class CircularTimer: SKNode {
     private var isRunning = false
 
     // Visual states
+    private var currentState: TimerState = .normal
     private var isFrozen = false
     private var isWarningActive = false
     private var isOvertime = false
     private var glowNode: SKShapeNode?
     private var pulseAction: SKAction?
 
-    // Colos
-    private let frozenColor: SKColor = .cyan
-    private let overtimeColor: SKColor = .orange
-    private let warningColor: SKColor = .red
-    private let normalColor: SKColor = .white
 
     init(radius: CGFloat, gameScene: GameScene) {
         self.radius = radius
@@ -44,7 +74,7 @@ class CircularTimer: SKNode {
         backgroundCircle.alpha = 0.65
 
         timerCircle = SKShapeNode()
-        timerCircle.strokeColor = normalColor
+        timerCircle.strokeColor = TimerState.normal.color
         timerCircle.lineWidth = 4
 
         timeLabel = SKLabelNode(fontNamed: "PPNeueMontreal-Bold")
@@ -156,30 +186,35 @@ class CircularTimer: SKNode {
     }
 
     private func updateTimerState() {
-        if isFrozen {
-            timerCircle.strokeColor = frozenColor
-            timeLabel.fontColor = frozenColor
-            return
-        }
-
-        if isOvertime {
-            timerCircle.strokeColor = overtimeColor
-            timeLabel.fontColor = overtimeColor
-            setupOvertimeEffects()
-        } else if currentTime
-            <= GameConstants.GeneralGamePlay.timeWarningThreshold
-        {
-            timerCircle.strokeColor = warningColor
-            timeLabel.fontColor = warningColor
-            if !isWarningActive {
-                triggerWarningAnimation()
+            // Determine the new state
+            if isFrozen {
+                currentState = .frozen
+            } else if isOvertime {
+                currentState = .overtime
+            } else if currentTime <= GameConstants.GeneralGamePlay.timeWarningThreshold {
+                currentState = .warning
+            } else {
+                currentState = .normal
             }
-        } else {
-            timerCircle.strokeColor = normalColor
-            timeLabel.fontColor = normalColor
-            removeOvertimeEffects()
+
+            // Update visuals based on current state
+            timerCircle.strokeColor = currentState.color
+            timeLabel.fontColor = currentState.color
+
+            // Handle state-specific effects
+            switch currentState {
+            case .overtime:
+                setupOvertimeEffects()
+            case .warning:
+                if !isWarningActive {
+                    triggerWarningAnimation()
+                }
+            case .frozen:
+                break  // Frozen state is handled separately in setFrozenState
+            case .normal:
+                removeOvertimeEffects()
+            }
         }
-    }
 
     func setFrozen(active: Bool) {
         isFrozen = active
@@ -192,7 +227,7 @@ class CircularTimer: SKNode {
 
         // glow effect
         glowNode = SKShapeNode(circleOfRadius: radius + 2)
-        glowNode?.strokeColor = overtimeColor
+        glowNode?.strokeColor = currentState.color
         glowNode?.lineWidth = 2
         glowNode?.alpha = 0.5
 
@@ -217,12 +252,13 @@ class CircularTimer: SKNode {
 
         if active {
             // Change visuals
-            timeLabel.fontColor = frozenColor
+            currentState = .frozen
+            timeLabel.fontColor = currentState.color
             timerCircle.strokeColor = .clear
 
             // Add frozen overlay animation
             let cooldownNode = SKShapeNode(circleOfRadius: radius)
-            cooldownNode.strokeColor = frozenColor
+            cooldownNode.strokeColor = currentState.color
             cooldownNode.lineWidth = 3
             cooldownNode.name = "frozen"
 
@@ -281,8 +317,8 @@ class CircularTimer: SKNode {
         guard !isWarningActive else { return }
         isWarningActive = true
 
-        timerCircle.strokeColor = warningColor
-        timeLabel.fontColor = warningColor
+        timerCircle.strokeColor = TimerState.warning.color
+        timeLabel.fontColor = TimerState.warning.color
 
         let minDuration: Double = 0.05
         let maxDuration: Double = 0.6
@@ -306,7 +342,7 @@ extension CircularTimer {
         let bonusLabel = SKLabelNode(fontNamed: "PPNeueMontreal-Bold")
         bonusLabel.text = "+\(Int(seconds))s"
         bonusLabel.fontSize = 24
-        bonusLabel.fontColor = .green
+        bonusLabel.fontColor = currentState.bonusColor
         bonusLabel.position = CGPoint(x: 0, y: radius - 25)
         bonusLabel.alpha = 0
         addChild(bonusLabel)
