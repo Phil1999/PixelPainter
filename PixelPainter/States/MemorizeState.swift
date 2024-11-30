@@ -127,7 +127,7 @@ class MemorizeState: GKState {
             newGridDimension = 3
         case 3...6:
             newGridDimension = 4
-        case 7...10:
+        case 7...11:
             newGridDimension = 5
         default:
             newGridDimension = 6  // Maximum size
