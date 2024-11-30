@@ -72,7 +72,7 @@ class EffectManager {
         node.run(repeatPulse, withKey: "pulseEffect")
     }
 
-    func disableInteraction(for duration: TimeInterval = 1.0) {
+    func temporarilyDisableInteraction(for duration: TimeInterval = 1.0) {
         let disableTouchAction = SKAction.run { [weak self] in
             self?.gameScene?.isUserInteractionEnabled = false
         }
@@ -88,11 +88,15 @@ class EffectManager {
         gameScene?.run(sequence)
     }
 
+    private(set) var isPlayingGameOver = false
+    
     func playGameOverEffect(completion: @escaping () -> Void) {
         guard let gameScene = gameScene,
             let gridNode = gameScene.childNode(withName: "grid")
                 as? SKSpriteNode
         else { return }
+
+        isPlayingGameOver = true // Set flag when starting animation
 
         // Step 1: Shake effect (left-right only)
         let shakeSequence = createShakeSequence()
@@ -105,6 +109,7 @@ class EffectManager {
         // Step 3: Combine animations
         gridNode.run(shakeSequence) { [weak self] in
             self?.ejectPieces(pieces: pieces) {
+                self?.isPlayingGameOver = false // Reset flag when animation is complete
                 completion()
             }
         }

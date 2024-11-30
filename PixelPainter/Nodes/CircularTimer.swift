@@ -11,31 +11,31 @@ class CircularTimer: SKNode {
     private var timerCircle: SKShapeNode
     private var timeLabel: SKLabelNode
     private var radius: CGFloat
-    private weak var gameScene: GameScene?
 
+    weak var delegate: CircularTimerDelegate?
+    private var displayLink: CADisplayLink?
+
+    // Core timer states
+    private var currentTime: TimeInterval = 0
+    private var totalDuration: TimeInterval = 0
+    private var lastUpdateTime: TimeInterval = 0
+    private var isRunning = false
+
+    // Visual states
     private var isFrozen = false
     private var isWarningActive = false
-    private var isRunning = false
     private var isOvertime = false
+    private var glowNode: SKShapeNode?
+    private var pulseAction: SKAction?
 
-    // Track both the discrete and interpolated time
-    // since we updating the time in intervals of 1s,
-    // to keep the animation for the circle smooth we use interpolated time.
-    private var discreteTimeRemaining: TimeInterval = 0
-    private var lastUpdateTime: TimeInterval = 0
-    private var interpolatedTimeRemaining: TimeInterval = 0
-    private var totalDuration: TimeInterval = 0
-
+    // Colos
     private let frozenColor: SKColor = .cyan
     private let overtimeColor: SKColor = .orange
     private let warningColor: SKColor = .red
-
-    private var pulseAction: SKAction?
-    private var glowNode: SKShapeNode?
+    private let normalColor: SKColor = .white
 
     init(radius: CGFloat, gameScene: GameScene) {
         self.radius = radius
-        self.gameScene = gameScene
 
         backgroundCircle = SKShapeNode(circleOfRadius: radius)
         backgroundCircle.fillColor = .black
@@ -44,7 +44,7 @@ class CircularTimer: SKNode {
         backgroundCircle.alpha = 0.65
 
         timerCircle = SKShapeNode()
-        timerCircle.strokeColor = .white
+        timerCircle.strokeColor = normalColor
         timerCircle.lineWidth = 4
 
         timeLabel = SKLabelNode(fontNamed: "PPNeueMontreal-Bold")
@@ -56,6 +56,134 @@ class CircularTimer: SKNode {
         addChild(backgroundCircle)
         addChild(timerCircle)
         addChild(timeLabel)
+    }
+
+    required init?(coder aDecoder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
+    }
+
+    func startTimer(duration: TimeInterval) {
+        stopTimer()
+
+        totalDuration = duration
+        currentTime = duration
+        lastUpdateTime = CACurrentMediaTime()
+        isRunning = true
+
+        displayLink = CADisplayLink(
+            target: self, selector: #selector(updateTimer))
+        displayLink?.add(to: .current, forMode: .common)
+
+        updateVisuals()
+    }
+
+    func stopTimer() {
+        isRunning = false
+        displayLink?.invalidate()
+        displayLink = nil
+    }
+
+    func modifyTime(by seconds: TimeInterval) {
+        guard isRunning else { return }
+
+        let newTime = currentTime + seconds
+        currentTime = max(0, newTime)  // No cap for overtime
+        lastUpdateTime = CACurrentMediaTime()
+
+        timeLabel.text = "\(Int(ceil(currentTime)))"
+
+        if !isFrozen {
+            updateVisuals()
+            delegate?.timerDidUpdate(currentTime: currentTime)
+        }
+    }
+
+    @objc private func updateTimer() {
+        guard isRunning && !isFrozen else { return }
+
+        let currentTimeStamp = CACurrentMediaTime()
+        let deltaTime = currentTimeStamp - lastUpdateTime
+        lastUpdateTime = currentTimeStamp
+
+        currentTime = max(0, currentTime - deltaTime)
+
+        if currentTime <= 0 {
+            stopTimer()
+            delegate?.timerDidComplete()
+        }
+
+        updateVisuals()
+        delegate?.timerDidUpdate(currentTime: currentTime)
+    }
+
+    private func updateVisuals() {
+        timeLabel.text = "\(Int(ceil(currentTime)))"
+
+        let progress: CGFloat
+        isOvertime = currentTime > totalDuration
+
+        if isOvertime {
+            let overTimeProgress = (currentTime - totalDuration) / totalDuration
+            progress = 1.0 + overTimeProgress
+        } else {
+            progress = 1.0 - (currentTime / totalDuration)
+        }
+
+        updateTimerArc(progress: CGFloat(progress))
+        updateTimerState()
+    }
+
+    private func updateTimerArc(progress: CGFloat) {
+        let startAngle = CGFloat.pi / 2
+        let endAngle: CGFloat
+
+        if isOvertime {
+            endAngle = startAngle + (.pi * 2 * progress)
+        } else {
+            endAngle = startAngle + (.pi * 2 * min(progress, 1.0))
+        }
+
+        let path = CGMutablePath()
+        path.addArc(
+            center: .zero,
+            radius: radius,
+            startAngle: startAngle,
+            endAngle: endAngle,
+            clockwise: true
+        )
+
+        timerCircle.path = path
+    }
+
+    private func updateTimerState() {
+        if isFrozen {
+            timerCircle.strokeColor = frozenColor
+            timeLabel.fontColor = frozenColor
+            return
+        }
+
+        if isOvertime {
+            timerCircle.strokeColor = overtimeColor
+            timeLabel.fontColor = overtimeColor
+            setupOvertimeEffects()
+        } else if currentTime
+            <= GameConstants.GeneralGamePlay.timeWarningThreshold
+        {
+            timerCircle.strokeColor = warningColor
+            timeLabel.fontColor = warningColor
+            if !isWarningActive {
+                triggerWarningAnimation()
+            }
+        } else {
+            timerCircle.strokeColor = normalColor
+            timeLabel.fontColor = normalColor
+            removeOvertimeEffects()
+        }
+    }
+
+    func setFrozen(active: Bool) {
+        isFrozen = active
+        updateVisuals()
     }
 
     private func setupOvertimeEffects() {
@@ -71,7 +199,7 @@ class CircularTimer: SKNode {
         if let glowNode = glowNode {
             // insert behind timer circle
             insertChild(glowNode, at: 0)
-            
+
             EffectManager.shared.applyPulseEffect(to: glowNode)
         }
         EffectManager.shared.applyPulseEffect(to: timeLabel)
@@ -83,151 +211,11 @@ class CircularTimer: SKNode {
         timeLabel.removeAllActions()
     }
 
-    required init?(coder aDecoder: NSCoder) {
-        fatalError("init(coder:) has not been implemented")
-    }
-
-    func startGameTimer(duration: TimeInterval) {
-        guard !isRunning else { return }
-
-        removeAction(forKey: "timerUpdate")
-
-        isRunning = true
-        totalDuration = duration
-        discreteTimeRemaining = duration
-        interpolatedTimeRemaining = duration
-        lastUpdateTime = CACurrentMediaTime()
-
-        updateTimer()
-    }
-
-    func stopGameTimer() {
-        isRunning = false
-        removeAction(forKey: "timerUpdate")
-        timerCircle.path = nil
-    }
-
-    private func updateTimer() {
-        guard isRunning, !isFrozen else { return }
-
-        let currentTime = CACurrentMediaTime()
-        let deltaTime = currentTime - lastUpdateTime
-
-        // Smoothly interpolate between the last discrete time and the next expected time
-        interpolatedTimeRemaining = max(
-            discreteTimeRemaining - deltaTime,
-            discreteTimeRemaining - 1.0
-        )
-
-        // Calculate progress differently for overtime
-        let progress: CGFloat
-        if isOvertime {
-            let overtimeProgress =
-                (interpolatedTimeRemaining - totalDuration) / totalDuration
-            progress = 1.0 + overtimeProgress
-        } else {
-            progress = 1.0 - (interpolatedTimeRemaining / totalDuration)
-        }
-
-        updateTimerCircle(progress: CGFloat(progress))
-
-        scheduleNextUpdate()
-    }
-
-    // Call this when the game controller updates the time
-    func updateDiscreteTime(newTimeRemaining: TimeInterval) {
-        let wasOvertime = isOvertime
-        isOvertime = newTimeRemaining > totalDuration
-
-        discreteTimeRemaining = newTimeRemaining
-        interpolatedTimeRemaining = newTimeRemaining
-        lastUpdateTime = CACurrentMediaTime()
-
-        // Update colors and effects based on state
-        if !isFrozen {
-            if isOvertime {
-                timerCircle.strokeColor = overtimeColor
-                timeLabel.fontColor = overtimeColor
-                if !wasOvertime {
-                    // Just entered overtime
-                    setupOvertimeEffects()
-                }
-            } else {
-                if wasOvertime {
-                    // Just exited overtime
-                    removeOvertimeEffects()
-                }
-                if newTimeRemaining
-                    <= GameConstants.GeneralGamePlay.timeWarningThreshold
-                    && !isWarningActive
-                {
-                    triggerWarningAnimation(timeRemaining: newTimeRemaining)
-                } else {
-                    timerCircle.strokeColor = .white
-                    timeLabel.fontColor = .white
-                }
-            }
-
-            // Update circle path immediately to avoid visual stuttering
-            updateTimerCircle(progress: calculateProgress())
-        }
-
-        // Update the label with the discrete time
-        timeLabel.text = "\(Int(ceil(discreteTimeRemaining)))"
-    }
-    
-    private func calculateProgress() -> CGFloat {
-        if isOvertime {
-            let overtimeProgress = (discreteTimeRemaining - totalDuration) / totalDuration
-            return 1.0 + overtimeProgress
-        } else {
-            return 1.0 - (discreteTimeRemaining / totalDuration)
-        }
-    }
-
-    private func scheduleNextUpdate() {
-        // Remove any existing update action before scheduling a new one
-        removeAction(forKey: "timerUpdate")
-
-        let updateAction = SKAction.sequence([
-            SKAction.wait(forDuration: 1.0 / 60.0),  // 60 fps
-            SKAction.run { [weak self] in
-                self?.updateTimer()
-            },
-        ])
-        run(updateAction, withKey: "timerUpdate")
-    }
-
-    private func updateTimerCircle(progress: CGFloat) {
-        let startAngle = CGFloat.pi / 2
-        let endAngle: CGFloat
-
-        if isOvertime {
-            // For overtime, do multiple laps around the circle
-            endAngle = startAngle + (.pi * 2 * progress)
-        } else {
-            endAngle = startAngle + (.pi * 2 * min(progress, 1.0))
-        }
-
-        let newPath = CGMutablePath()
-        newPath.addArc(
-            center: .zero,
-            radius: radius,
-            startAngle: startAngle,
-            endAngle: endAngle,
-            clockwise: true
-        )
-        timerCircle.path = newPath
-    }
-
     func setFrozenState(active: Bool) {
         print("Setting frozen state: \(active)")
         isFrozen = active
 
         if active {
-            // Pause the timer update
-            removeAction(forKey: "timerUpdate")
-
             // Change visuals
             timeLabel.fontColor = frozenColor
             timerCircle.strokeColor = .clear
@@ -278,24 +266,18 @@ class CircularTimer: SKNode {
                 ]))
 
         } else {
-            // Resume the timer
-            updateTimer()
+            // When unfreezing, we update lastUpdateTime to now
+            // This effectively ignores any time that passed while frozen
+            lastUpdateTime = CACurrentMediaTime()
 
-            if isOvertime {
-                // restart the overtime animations
-                setupOvertimeEffects()
-            } else {
-                timerCircle.strokeColor =
-                    isWarningActive ? warningColor : .white
-                timeLabel.fontColor = isWarningActive ? warningColor : .white
-            }
+            updateVisuals()
 
             // Remove frozen overlay
             childNode(withName: "frozen")?.removeFromParent()
         }
     }
 
-    private func triggerWarningAnimation(timeRemaining: TimeInterval) {
+    private func triggerWarningAnimation() {
         guard !isWarningActive else { return }
         isWarningActive = true
 
@@ -307,7 +289,7 @@ class CircularTimer: SKNode {
 
         let scaleDuration =
             minDuration + (maxDuration - minDuration)
-            * sin(Double(timeRemaining) / 5.0 * .pi / 2)
+            * sin(Double(currentTime) / 5.0 * .pi / 2)
 
         let scaleUp = SKAction.scale(to: 1.5, duration: scaleDuration / 2)
         let scaleDown = SKAction.scale(to: 1.0, duration: scaleDuration / 2)
@@ -321,22 +303,33 @@ class CircularTimer: SKNode {
 // MARK: - Time Bonus
 extension CircularTimer {
     func showTimeBonus(seconds: Double) {
-            let bonusLabel = SKLabelNode(fontNamed: "PPNeueMontreal-Bold")
-            bonusLabel.text = "+\(Int(seconds))s"
-            bonusLabel.fontSize = 24
-            bonusLabel.fontColor = .green
-            bonusLabel.position = CGPoint(x: 0, y: radius - 25)
-            bonusLabel.alpha = 0
-            addChild(bonusLabel)
-            
-            let fadeIn = SKAction.fadeIn(withDuration: 0.2)
-            let moveUp = SKAction.moveBy(x: 0, y: 30, duration: 0.8)
-            let fadeOut = SKAction.fadeOut(withDuration: 0.3)
-            let group = SKAction.group([moveUp, SKAction.sequence([fadeIn, SKAction.wait(forDuration: 0.5), fadeOut])])
-            
-            bonusLabel.run(SKAction.sequence([
+        let bonusLabel = SKLabelNode(fontNamed: "PPNeueMontreal-Bold")
+        bonusLabel.text = "+\(Int(seconds))s"
+        bonusLabel.fontSize = 24
+        bonusLabel.fontColor = .green
+        bonusLabel.position = CGPoint(x: 0, y: radius - 25)
+        bonusLabel.alpha = 0
+        addChild(bonusLabel)
+
+        let fadeIn = SKAction.fadeIn(withDuration: 0.2)
+        let moveUp = SKAction.moveBy(x: 0, y: 30, duration: 0.8)
+        let fadeOut = SKAction.fadeOut(withDuration: 0.3)
+        let group = SKAction.group([
+            moveUp,
+            SKAction.sequence([
+                fadeIn, SKAction.wait(forDuration: 0.5), fadeOut,
+            ]),
+        ])
+
+        bonusLabel.run(
+            SKAction.sequence([
                 group,
-                SKAction.removeFromParent()
+                SKAction.removeFromParent(),
             ]))
-        }
+    }
+}
+
+protocol CircularTimerDelegate: AnyObject {
+    func timerDidComplete()
+    func timerDidUpdate(currentTime: TimeInterval)
 }

@@ -150,7 +150,6 @@ class PowerUpManager {
                 as? CircularTimer
             {
                 timerNode.setFrozenState(active: true)
-                gameScene.removeAction(forKey: "updateTimer")
 
                 DispatchQueue.main.asyncAfter(
                     deadline: .now()
@@ -158,7 +157,6 @@ class PowerUpManager {
                 ) { [weak self] in
                     timerNode.setFrozenState(active: false)
                     self?.powerUpsInCooldown.remove(type)
-                    self?.playState?.startTimer()
                 }
             }
 

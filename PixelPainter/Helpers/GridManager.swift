@@ -118,9 +118,11 @@ class GridManager {
     }
 
     func tryPlacePiece(_ piece: SKSpriteNode, at point: CGPoint) -> Bool {
-        if gameScene?.context.gameInfo.timeRemaining ?? 0 <= 0 {
+        // Check if game over animation is playing
+        if EffectManager.shared.isPlayingGameOver {
             return false
         }
+        
         guard let gameScene = gameScene,
             let gridNode = gameScene.childNode(withName: "grid")
                 as? SKSpriteNode
