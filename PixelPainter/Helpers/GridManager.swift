@@ -245,23 +245,18 @@ class GridManager {
 
     func showHintForPiece(_ piece: SKSpriteNode) {
         guard let pieceName = piece.name,
-            let gameScene = gameScene,
-            let gridNode = gameScene.childNode(withName: "grid")
-                as? SKSpriteNode,
-            let pieceIndex = gameScene.context.gameInfo.pieces.firstIndex(
-                where: {
-                    "piece_\(Int($0.correctPosition.y))_\(Int($0.correctPosition.x))"
-                        == pieceName
-                })
-        else { return }
+              let gameScene = gameScene,
+              let gridNode = gameScene.childNode(withName: "grid") as? SKSpriteNode,
+              let pieceIndex = gameScene.context.gameInfo.pieces.firstIndex(
+                  where: {
+                      "piece_\(Int($0.correctPosition.y))_\(Int($0.correctPosition.x))" == pieceName
+                  }) else { return }
 
         let puzzlePiece = gameScene.context.gameInfo.pieces[pieceIndex]
         let row = Int(puzzlePiece.correctPosition.y)
         let col = Int(puzzlePiece.correctPosition.x)
 
-        if let frameNode = gridNode.childNode(withName: "frame_\(row)_\(col)")
-            as? SKSpriteNode
-        {
+        if let frameNode = gridNode.childNode(withName: "frame_\(row)_\(col)") as? SKSpriteNode {
             hintNode = frameNode
 
             let size = frameNode.size
@@ -278,12 +273,9 @@ class GridManager {
 
             let shape = CAShapeLayer()
             shape.path = path.cgPath
-
-            shape.fillColor =
-                UIColor(red: 0.0, green: 0.4, blue: 1.0, alpha: 0.9).cgColor
-
+            shape.fillColor = UIColor(red: 0.0, green: 0.4, blue: 1.0, alpha: 0.9).cgColor
             shape.strokeColor = UIColor.white.cgColor
-            shape.lineWidth = 1
+            shape.lineWidth = 4
 
             UIGraphicsBeginImageContextWithOptions(size, false, 0)
             if let context = UIGraphicsGetCurrentContext() {
@@ -292,7 +284,14 @@ class GridManager {
             let image = UIGraphicsGetImageFromCurrentImageContext()
             UIGraphicsEndImageContext()
 
-            frameNode.texture = SKTexture(image: image!)
+            // Create a new node for the hint effect that will be above everything
+            let hintEffectNode = SKSpriteNode(texture: SKTexture(image: image!))
+            hintEffectNode.position = frameNode.position
+            hintEffectNode.zPosition = 10
+            hintEffectNode.name = "hint_effect"
+            gridNode.addChild(hintEffectNode)
+
+            hintNode = hintEffectNode
 
             // Add pulsing animation
             let scaleAction = SKAction.sequence([
@@ -300,48 +299,14 @@ class GridManager {
                 SKAction.scale(to: 1.0, duration: 0.5),
             ])
 
-            frameNode.run(
-                SKAction.repeatForever(scaleAction), withKey: "hintAnimation")
+            hintEffectNode.run(SKAction.repeatForever(scaleAction), withKey: "hintAnimation")
         }
     }
 
     func hideHint() {
-        if let frameNode = hintNode {
-            frameNode.removeAction(forKey: "hintAnimation")
-            frameNode.setScale(1.0)
-
-            // Restore original appearance
-            let size = frameNode.size
-            let rect = CGRect(origin: .zero, size: size)
-            let cornerRadius: CGFloat = 30
-
-            let path = UIBezierPath(
-                roundedRect: rect,
-                byRoundingCorners: getRoundedCorners(
-                    row: Int(frameNode.position.y),
-                    col: Int(frameNode.position.x),
-                    dimension: gameScene?.context.layoutInfo.gridDimension ?? 3
-                ),
-                cornerRadii: CGSize(width: cornerRadius, height: cornerRadius)
-            )
-
-            let shape = CAShapeLayer()
-            shape.path = path.cgPath
-            shape.fillColor =
-                UIColor(
-                    red: 51 / 255, green: 51 / 255, blue: 51 / 255, alpha: 0.95
-                ).cgColor
-            shape.strokeColor = UIColor.gray.cgColor
-            shape.lineWidth = 2
-
-            UIGraphicsBeginImageContextWithOptions(size, false, 0)
-            if let context = UIGraphicsGetCurrentContext() {
-                shape.render(in: context)
-            }
-            let image = UIGraphicsGetImageFromCurrentImageContext()
-            UIGraphicsEndImageContext()
-
-            frameNode.texture = SKTexture(image: image!)
+        if let hintNode = hintNode {
+            hintNode.removeAction(forKey: "hintAnimation")
+            hintNode.removeFromParent()
         }
         hintNode = nil
     }
