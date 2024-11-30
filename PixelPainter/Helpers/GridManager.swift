@@ -171,7 +171,6 @@ class GridManager {
                 piece.removeFromParent()
 
                 gameScene.context.gameInfo.pieces[pieceIndex].isPlaced = true
-                gameScene.context.gameInfo.score += 15
 
                 return true
             }

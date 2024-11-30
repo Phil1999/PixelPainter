@@ -107,7 +107,7 @@ class PlayState: GKState {
         stopIdleHintTimer()
         gridManager.hideHint()
 
-        gameScene.context.gameInfo.score += 15
+        gameScene.context.gameInfo.score += 30
         hudManager.updateScore(withAnimation: true)
 
         bankManager.clearSelection()
