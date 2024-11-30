@@ -245,18 +245,23 @@ class GridManager {
 
     func showHintForPiece(_ piece: SKSpriteNode) {
         guard let pieceName = piece.name,
-              let gameScene = gameScene,
-              let gridNode = gameScene.childNode(withName: "grid") as? SKSpriteNode,
-              let pieceIndex = gameScene.context.gameInfo.pieces.firstIndex(
-                  where: {
-                      "piece_\(Int($0.correctPosition.y))_\(Int($0.correctPosition.x))" == pieceName
-                  }) else { return }
+            let gameScene = gameScene,
+            let gridNode = gameScene.childNode(withName: "grid")
+                as? SKSpriteNode,
+            let pieceIndex = gameScene.context.gameInfo.pieces.firstIndex(
+                where: {
+                    "piece_\(Int($0.correctPosition.y))_\(Int($0.correctPosition.x))"
+                        == pieceName
+                })
+        else { return }
 
         let puzzlePiece = gameScene.context.gameInfo.pieces[pieceIndex]
         let row = Int(puzzlePiece.correctPosition.y)
         let col = Int(puzzlePiece.correctPosition.x)
 
-        if let frameNode = gridNode.childNode(withName: "frame_\(row)_\(col)") as? SKSpriteNode {
+        if let frameNode = gridNode.childNode(withName: "frame_\(row)_\(col)")
+            as? SKSpriteNode
+        {
             hintNode = frameNode
 
             let size = frameNode.size
@@ -273,7 +278,8 @@ class GridManager {
 
             let shape = CAShapeLayer()
             shape.path = path.cgPath
-            shape.fillColor = UIColor(red: 0.0, green: 0.4, blue: 1.0, alpha: 0.9).cgColor
+            shape.fillColor =
+                UIColor(red: 0.0, green: 0.4, blue: 1.0, alpha: 0.9).cgColor
             shape.strokeColor = UIColor.white.cgColor
             shape.lineWidth = 4
 
@@ -299,7 +305,8 @@ class GridManager {
                 SKAction.scale(to: 1.0, duration: 0.5),
             ])
 
-            hintEffectNode.run(SKAction.repeatForever(scaleAction), withKey: "hintAnimation")
+            hintEffectNode.run(
+                SKAction.repeatForever(scaleAction), withKey: "hintAnimation")
         }
     }
 

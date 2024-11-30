@@ -95,8 +95,11 @@ class EffectManager {
             let gridNode = gameScene.childNode(withName: "grid")
                 as? SKSpriteNode
         else { return }
-
+        
         isPlayingGameOver = true // Set flag when starting animation
+        
+        // Play the game end sound effect
+        SoundManager.shared.playSound(.gameOverWithPieces)
 
         // Step 1: Shake effect (left-right only)
         let shakeSequence = createShakeSequence()

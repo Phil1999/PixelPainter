@@ -39,6 +39,7 @@ class PlayState: GKState {
         stopHintTimer()
         stopIdleHintTimer()
         gridManager.hideHint()
+        
 
         if let timerNode = gameScene.childNode(withName: "//circularTimer")
             as? CircularTimer
@@ -129,6 +130,7 @@ class PlayState: GKState {
             timerNode.stopTimer()
         }
         
+        SoundManager.shared.stopBackgroundMusic()
         SoundManager.shared.playSound(.levelComplete)
 
         // Disable interaction during victory sequence
@@ -145,7 +147,7 @@ class PlayState: GKState {
         {
             backgroundNode.playVictoryAnimation { [weak self] in
                 guard let self = self else { return }
-
+                SoundManager.shared.resumeBackgroundMusic()
                 // Update board size if needed
                 if self.gameScene.context.gameInfo.level % 4 == 0
                     && self.gameScene.context.gameInfo.boardSize < 6
@@ -172,6 +174,7 @@ class PlayState: GKState {
         stopIdleHintTimer()
         gridManager.hideHint()
         self.bankManager.clearSelection()
+        SoundManager.shared.stopBackgroundMusic()
 
         if let gridNode = gameScene.childNode(withName: "grid")
             as? SKSpriteNode,
@@ -183,12 +186,11 @@ class PlayState: GKState {
             EffectManager.shared.playGameOverEffect { [weak self] in
                 guard let self = self else { return }
                 self.gameScene.context.stateMachine?.enter(GameOverState.self)
-                SoundManager.shared.playSound(.gameOver)
             }
         } else {
             // Go directly to game over if no pieces
             self.gameScene.context.stateMachine?.enter(GameOverState.self)
-            SoundManager.shared.playSound(.gameOver)
+            SoundManager.shared.playSound(.gameOverNoPieces)
         }
     }
 

@@ -17,11 +17,14 @@ class GameOverState: GKState {
     }
     
     override func didEnter(from previousState: GKState?) {
+        SoundManager.shared.stopBackgroundMusic()
         setupGameOverScene()
     }
     
     override func willExit(to nextState: GKState) {
         gameScene.removeAllChildren()
+        // May not need this later on (only used for restarting game)
+        SoundManager.shared.playBackgroundMusic("game-bg", fileType: "mp3")
     }
     
     override func isValidNextState(_ stateClass: AnyClass) -> Bool {
