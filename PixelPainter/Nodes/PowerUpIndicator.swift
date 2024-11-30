@@ -5,8 +5,8 @@
 //  Created by Tim Hsieh on 10/22/24.
 //
 
-import SpriteKit
 import Foundation
+import SpriteKit
 
 enum PowerUpType: String, CaseIterable {
     case timeStop = "Time Stop"
@@ -17,11 +17,8 @@ enum PowerUpType: String, CaseIterable {
 
 extension PowerUpType {
     static var all: [PowerUpType] = Self.allCases.map { $0 }
-    
-    var initialUses: Int {
-        return GameConstants.PowerUp.minUses
-    }
-    
+
+
     var weight: Int {
         switch self {
         case .timeStop: return 2
@@ -30,15 +27,15 @@ extension PowerUpType {
         case .shuffle: return 4
         }
     }
-    
+
     var displayName: String {
         return self.rawValue
     }
-    
+
     var shortName: String {
         return self.rawValue.prefix(1).uppercased()
     }
-    
+
     var iconName: String {
         switch self {
         case .timeStop: return "time_stop"
@@ -47,8 +44,27 @@ extension PowerUpType {
         case .shuffle: return "shuffle"
         }
     }
+
+    var videoFileName: String {
+        switch self {
+        case .timeStop: return "time_stop_demo"
+        case .place: return "place_demo"
+        case .flash: return "flash_demo"
+        case .shuffle: return "shuffle_demo"
+
+        }
+    }
+
+    var uses: Int {
+        switch self {
+        case .timeStop: return 4
+        case .place: return 2
+        case .flash: return 2	
+        case .shuffle: return 4
+        }
+    }
 }
 
 class PowerUpIndicator: SKNode {
-    
+
 }

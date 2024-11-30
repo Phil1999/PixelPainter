@@ -50,8 +50,11 @@ class GameScene: SKScene {
             case let gameOverState as GameOverState:
                 gameOverState.handleTouches(touches, with: event)
                 
-            case is MemorizeState:
-                break
+            case let memorizeState as MemorizeState:
+                        if let touch = touches.first {
+                            let location = touch.location(in: self)
+                            memorizeState.handleTouch(at: location)
+                        }
 
             default:
                 break
