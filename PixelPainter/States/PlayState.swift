@@ -74,23 +74,38 @@ class PlayState: GKState {
     }
 
     private func handleLevelComplete() {
+        // Stop timers immediately
+        gameScene.removeAction(forKey: "updateTimer")
+        stopHintTimer()
+        stopIdleHintTimer()
         SoundManager.shared.playSound(.levelComplete)
-
+        
+        // Disable interaction during victory sequence
+        EffectManager.shared.disableInteraction(for: 5.5)  // Match total animation duration
+        
         let bonus = Int(gameScene.context.gameInfo.timeRemaining)
-        //        print("current score: ", gameScene.context.gameInfo.score)
-        //        print("gaining a bonus of: ", bonus)
         gameScene.context.gameInfo.score += bonus
-        //        print("new score: ", gameScene.context.gameInfo.score)
         gameScene.context.gameInfo.level += 1
-        if gameScene.context.gameInfo.level % 4 == 0
-            && gameScene.context.gameInfo.boardSize < 6
-        {
-            gameScene.context.gameInfo.boardSize += 1
-            print("board size is now: ", gameScene.context.gameInfo.boardSize)
+        
+        // Play victory animation before transitioning to next state
+        if let backgroundNode = gameScene.childNode(withName: "backgroundNode") as? Background {
+            backgroundNode.playVictoryAnimation { [weak self] in
+                guard let self = self else { return }
+                
+                // Update board size if needed
+                if self.gameScene.context.gameInfo.level % 4 == 0
+                    && self.gameScene.context.gameInfo.boardSize < 6
+                {
+                    self.gameScene.context.gameInfo.boardSize += 1
+                    print("board size is now: ", self.gameScene.context.gameInfo.boardSize)
+                }
+                
+                // Transition to memorize state after animation completes
+                self.gameScene.context.stateMachine?.enter(MemorizeState.self)
+            }
         }
-        gameScene.context.stateMachine?.enter(MemorizeState.self)
     }
-
+    
     override func didEnter(from previousState: GKState?) {
         print("Entering Play State")
         setupPlayScene()
@@ -157,49 +172,55 @@ class PlayState: GKState {
     }
 
     func startTimer() {
-        let updateTimerAction = SKAction.sequence([
-            SKAction.run { [weak self] in
-                guard let self = self else { return }
+            let updateTimerAction = SKAction.sequence([
+                SKAction.run { [weak self] in
+                    guard let self = self else { return }
 
-                // Update the circular timer with new discrete time
-                if let timerNode = self.gameScene.childNode(
-                    withName: "//circularTimer") as? CircularTimer
-                {
-                    timerNode.updateDiscreteTime(
-                        newTimeRemaining: self.gameScene.context.gameInfo
-                            .timeRemaining)
-                }
-
-                // Game over check
-                if self.gameScene.context.gameInfo.timeRemaining <= 0 {
-                    EffectManager.shared.disableInteraction()
-                    self.stopHintTimer()
-                    self.stopIdleHintTimer()
-                    
-                    if let gridNode = self.gameScene.childNode(withName: "grid") as? SKSpriteNode,
-                       !gridNode.children.filter({ $0.name?.starts(with: "piece_") ?? false }).isEmpty {
-                        // Only play animation if there are pieces
-                        EffectManager.shared.playGameOverEffect { [weak self] in
-                            guard let self = self else { return }
-                            self.gameScene.context.stateMachine?.enter(GameOverState.self)
-                            SoundManager.shared.playSound(.gameOver)
-                        }
-                    } else {
-                        // Go directly to game over if no pieces
-                        self.gameScene.context.stateMachine?.enter(GameOverState.self)
-                        SoundManager.shared.playSound(.gameOver)
+                    // Update the circular timer with new discrete time
+                    if let timerNode = self.gameScene.childNode(
+                        withName: "//circularTimer") as? CircularTimer
+                    {
+                        timerNode.updateDiscreteTime(
+                            newTimeRemaining: self.gameScene.context.gameInfo
+                                .timeRemaining)
                     }
-                    return
-                }
 
-                self.gameScene.context.gameInfo.timeRemaining -= 1
-            },
-            SKAction.wait(forDuration: 1.0),
-        ])
-        gameScene.run(
-            SKAction.repeatForever(updateTimerAction), withKey: "updateTimer")
-    }
+                    // Game over check
+                    if self.gameScene.context.gameInfo.timeRemaining <= 0 {
+                        // Disable interaction immediately
+                        EffectManager.shared.disableInteraction()
+                        self.stopHintTimer()
+                        self.stopIdleHintTimer()
+                        
+                        // Small delay to allow any in-progress piece placement to complete
+                        DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) { [weak self] in
+                            guard let self = self else { return }
+                            
+                            if let gridNode = self.gameScene.childNode(withName: "grid") as? SKSpriteNode,
+                               !gridNode.children.filter({ $0.name?.starts(with: "piece_") ?? false }).isEmpty {
+                                // Only play animation if there are pieces
+                                EffectManager.shared.playGameOverEffect { [weak self] in
+                                    guard let self = self else { return }
+                                    self.gameScene.context.stateMachine?.enter(GameOverState.self)
+                                    SoundManager.shared.playSound(.gameOver)
+                                }
+                            } else {
+                                // Go directly to game over if no pieces
+                                self.gameScene.context.stateMachine?.enter(GameOverState.self)
+                                SoundManager.shared.playSound(.gameOver)
+                            }
+                        }
+                        return
+                    }
 
+                    self.gameScene.context.gameInfo.timeRemaining -= 1
+                },
+                SKAction.wait(forDuration: 1.0),
+            ])
+            gameScene.run(
+                SKAction.repeatForever(updateTimerAction), withKey: "updateTimer")
+        }
+    
     func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
         guard let touch = touches.first else { return }
         let location = touch.location(in: gameScene)

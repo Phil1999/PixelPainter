@@ -4,6 +4,7 @@ class Background: SKNode {
     private var mainBackground: SKSpriteNode!
     private var gradientLayer: SKSpriteNode!
     private var fogEffect: SKSpriteNode!
+    private var victoryGlow: SKSpriteNode!
     private var screenSize: CGSize = .zero
 
     override init() {
@@ -24,6 +25,7 @@ extension Background {
     private func setupLayers() {
         setupGradient()
         setupMainBackground()
+        setupVictoryGlow()
         setupFog()
     }
 
@@ -62,6 +64,47 @@ extension Background {
         mainBackground.zPosition = -2
         addChild(mainBackground)
     }
+    
+    private func setupVictoryGlow() {
+        guard let glowImage = UIImage(named: "VictoryGlow") else { return }
+        
+        // Resize the image if it's too large
+        let maxSize: CGFloat = 2048 // Using a smaller max size for better performance
+        let imageSize = glowImage.size
+        let scaleFactor: CGFloat
+        
+        if imageSize.width > maxSize || imageSize.height > maxSize {
+            scaleFactor = maxSize / max(imageSize.width, imageSize.height)
+            let newSize = CGSize(
+                width: imageSize.width * scaleFactor,
+                height: imageSize.height * scaleFactor
+            )
+            UIGraphicsBeginImageContextWithOptions(newSize, false, 1.0)
+            glowImage.draw(in: CGRect(origin: .zero, size: newSize))
+            let resizedImage = UIGraphicsGetImageFromCurrentImageContext()
+            UIGraphicsEndImageContext()
+            
+            guard let resizedImage = resizedImage else { return }
+            victoryGlow = SKSpriteNode(texture: SKTexture(image: resizedImage))
+        } else {
+            victoryGlow = SKSpriteNode(texture: SKTexture(image: glowImage))
+        }
+        
+        // Scale to screen size while maintaining aspect ratio but larger
+        let scale = 2.75  // Increased from 1.15 to make it larger
+        let targetHeight = screenSize.height * scale
+        let targetWidth = targetHeight * (glowImage.size.width / glowImage.size.height)
+        
+        victoryGlow.size = CGSize(width: targetWidth, height: targetHeight)
+        victoryGlow.position = CGPoint(
+            x: screenSize.width / 2,
+            y: screenSize.height / 2 + 75
+        )
+        victoryGlow.zPosition = -1.5
+        victoryGlow.alpha = 0
+        victoryGlow.name = "victoryGlow"
+        addChild(victoryGlow)
+    }
 
     private func setupFog() {
         let scale = 1.15
@@ -91,6 +134,29 @@ extension Background {
             fogEffect.alpha = 0.8
             addChild(fogEffect)
         }
+    }
+    
+    func playVictoryAnimation(completion: @escaping () -> Void) {
+        guard let victoryGlow = self.childNode(withName: "victoryGlow"),
+              let fogEffect = self.fogEffect else {
+            completion()
+            return
+        }
+        
+        // Slower fade in for victory glow
+        let fadeInGlow = SKAction.fadeIn(withDuration: 1.2)
+        
+        // Slower fade out for fog
+        let fadeOutFog = SKAction.fadeOut(withDuration: 1.5)
+        
+        // Run the sequence with longer pauses
+        victoryGlow.run(fadeInGlow)
+        fogEffect.run(SKAction.sequence([
+            SKAction.wait(forDuration: 1.2),  // Wait for glow to fade in
+            fadeOutFog,
+            SKAction.wait(forDuration: 2.5),  // Much longer pause to appreciate the victory state
+            SKAction.run(completion)
+        ]))
     }
 
     private func createGradientTexture(colors: [UIColor], size: CGSize)
