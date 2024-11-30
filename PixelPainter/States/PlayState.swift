@@ -28,84 +28,6 @@ class PlayState: GKState {
             gameScene: gameScene, playState: self)
     }
 
-    func notifyPiecePlaced() {
-        didSuccessfullyPlacePiece()
-    }
-
-    private func notifyTimerUpdate() {
-        guard
-            let timerNode = gameScene.childNode(withName: "//circularTimer")
-                as? CircularTimer
-        else { return }
-        timerNode.updateDiscreteTime(
-            newTimeRemaining: gameScene.context.gameInfo.timeRemaining)
-    }
-
-    func updateTime(by seconds: Double) {
-        
-        if gameScene.context.gameInfo.timeRemaining <= 0 {
-            gameScene.context.gameInfo.timeRemaining = 0
-            return
-        }
-        
-        gameScene.context.gameInfo.timeRemaining = max(0, gameScene.context.gameInfo.timeRemaining + seconds)
-
-        notifyTimerUpdate()
-    }
-
-    private func didSuccessfullyPlacePiece() {
-        SoundManager.shared.playSound(.piecePlaced)
-
-        updateTime(by: 2)
-
-        // Clear hint effects on successful placement
-        stopHintTimer()
-        gridManager.hideHint()
-
-        hudManager.updateScore()
-        bankManager.clearSelection()
-        bankManager.refreshBankIfNeeded()
-        
-        startIdleHintTimer()
-
-        if bankManager.isBankEmpty() {
-            handleLevelComplete()
-        }
-    }
-
-    private func handleLevelComplete() {
-        // Stop timers immediately
-        gameScene.removeAction(forKey: "updateTimer")
-        stopHintTimer()
-        stopIdleHintTimer()
-        SoundManager.shared.playSound(.levelComplete)
-        
-        // Disable interaction during victory sequence
-        EffectManager.shared.disableInteraction(for: 5.5)  // Match total animation duration
-        
-        let bonus = Int(gameScene.context.gameInfo.timeRemaining)
-        gameScene.context.gameInfo.score += bonus
-        gameScene.context.gameInfo.level += 1
-        
-        // Play victory animation before transitioning to next state
-        if let backgroundNode = gameScene.childNode(withName: "backgroundNode") as? Background {
-            backgroundNode.playVictoryAnimation { [weak self] in
-                guard let self = self else { return }
-                
-                // Update board size if needed
-                if self.gameScene.context.gameInfo.level % 4 == 0
-                    && self.gameScene.context.gameInfo.boardSize < 6
-                {
-                    self.gameScene.context.gameInfo.boardSize += 1
-                    print("board size is now: ", self.gameScene.context.gameInfo.boardSize)
-                }
-                
-                // Transition to memorize state after animation completes
-                self.gameScene.context.stateMachine?.enter(MemorizeState.self)
-            }
-        }
-    }
-    
     override func didEnter(from previousState: GKState?) {
         print("Entering Play State")
         setupPlayScene()
@@ -113,8 +35,19 @@ class PlayState: GKState {
     }
 
     override func willExit(to nextState: GKState) {
+        // Cleanup hint system related assets.
+        stopHintTimer()
+        stopIdleHintTimer()
+        gridManager.hideHint()
+        
+
+        if let timerNode = gameScene.childNode(withName: "//circularTimer")
+            as? CircularTimer
+        {
+            timerNode.stopTimer()
+        }
+
         gameScene.removeAllChildren()
-        gameScene.removeAction(forKey: "updateTimer")
     }
 
     private func setupPlayScene() {
@@ -131,7 +64,137 @@ class PlayState: GKState {
         bankManager.createPictureBank()
         hudManager.createHUD()
         powerUpManager.setupPowerUps()
+
+        if let timerNode = gameScene.childNode(withName: "//circularTimer")
+            as? CircularTimer
+        {
+            timerNode.delegate = self
+        }
     }
+
+    private func startGame() {
+        if let timerNode = gameScene.childNode(withName: "//circularTimer")
+            as? CircularTimer
+        {
+            timerNode.delegate = self
+            timerNode.startTimer(
+                duration: gameScene.context.gameInfo.timeRemaining)
+        }
+        startIdleHintTimer()
+    }
+
+
+    func notifyPiecePlaced() {
+        didSuccessfullyPlacePiece()
+    }
+
+    func updateTime(by seconds: Double) {
+        if let timerNode = gameScene.childNode(withName: "//circularTimer")
+            as? CircularTimer
+        {
+            timerNode.modifyTime(by: seconds)
+            timerNode.showTimeBonus(seconds: seconds)  // Show the bonus animation
+        }
+    }
+
+    private func didSuccessfullyPlacePiece() {
+        SoundManager.shared.playSound(.piecePlaced)
+
+        updateTime(by: 2)
+
+        // Clear hint effects on successful placement
+        stopHintTimer()
+        stopIdleHintTimer()
+        gridManager.hideHint()
+
+        gameScene.context.gameInfo.score += 30
+        hudManager.updateScore(withAnimation: true)
+
+        bankManager.clearSelection()
+        bankManager.refreshBankIfNeeded()
+
+        startIdleHintTimer()
+
+        if bankManager.isBankEmpty() {
+            handleLevelComplete()
+        }
+    }
+
+    private func handleLevelComplete() {
+        // Stop timers immediately
+        stopHintTimer()
+        stopIdleHintTimer()
+        
+
+        if let timerNode = gameScene.childNode(withName: "//circularTimer") as? CircularTimer {
+            timerNode.stopTimer()
+        }
+        
+        SoundManager.shared.stopBackgroundMusic()
+        SoundManager.shared.playSound(.levelComplete)
+
+        // Disable interaction during victory sequence
+        EffectManager.shared.temporarilyDisableInteraction(for: 5.5)  // Match total animation duration
+
+        let timeBonus = Int(gameScene.context.gameInfo.timeRemaining)
+        gameScene.context.gameInfo.score += timeBonus
+
+        gameScene.context.gameInfo.level += 1
+
+        // Play victory animation before transitioning to the next state
+        if let backgroundNode = gameScene.childNode(withName: "backgroundNode")
+            as? Background
+        {
+            backgroundNode.playVictoryAnimation { [weak self] in
+                guard let self = self else { return }
+                SoundManager.shared.resumeBackgroundMusic()
+                // Update board size if needed
+                if self.gameScene.context.gameInfo.level % 4 == 0
+                    && self.gameScene.context.gameInfo.boardSize < 6
+                {
+                    self.gameScene.context.gameInfo.boardSize += 1
+                    print(
+                        "board size is now: ",
+                        self.gameScene.context.gameInfo.boardSize)
+                }
+
+                // Transition to memorize state after animation completes
+                self.gameScene.context.stateMachine?.enter(MemorizeState.self)
+            }
+        } else {
+            // If no background node, directly transition to the next state
+            gameScene.context.stateMachine?.enter(MemorizeState.self)
+        }
+    }
+    
+    private func handleGameOver() {
+        EffectManager.shared.temporarilyDisableInteraction()
+        
+        stopHintTimer()
+        stopIdleHintTimer()
+        gridManager.hideHint()
+        self.bankManager.clearSelection()
+        SoundManager.shared.stopBackgroundMusic()
+
+        if let gridNode = gameScene.childNode(withName: "grid")
+            as? SKSpriteNode,
+            !gridNode.children.filter({
+                $0.name?.starts(with: "piece_") ?? false
+            }).isEmpty
+        {
+            // Only play animation if there are pieces
+            EffectManager.shared.playGameOverEffect { [weak self] in
+                guard let self = self else { return }
+                self.gameScene.context.stateMachine?.enter(GameOverState.self)
+            }
+        } else {
+            // Go directly to game over if no pieces
+            self.gameScene.context.stateMachine?.enter(GameOverState.self)
+            SoundManager.shared.playSound(.gameOverNoPieces)
+        }
+    }
+
+    // MARK: - Touch Handling
 
     func handleGridPlacement(at location: CGPoint) {
         guard
@@ -154,73 +217,9 @@ class PlayState: GKState {
     }
 
     private func showWrongPlacementAnimation(for piece: SKSpriteNode) {
-        EffectManager.shared.disableInteraction()
         EffectManager.shared.shakeNode(piece)
     }
 
-    private func startGame() {
-        // Start game timer here
-        if let timerNode = gameScene.childNode(withName: "//circularTimer")
-            as? CircularTimer
-        {
-            timerNode.startGameTimer(
-                duration: gameScene.context.gameInfo.timeRemaining)
-        }
-        // start update timer
-        startTimer()
-        startIdleHintTimer()
-    }
-
-    func startTimer() {
-            let updateTimerAction = SKAction.sequence([
-                SKAction.run { [weak self] in
-                    guard let self = self else { return }
-
-                    // Update the circular timer with new discrete time
-                    if let timerNode = self.gameScene.childNode(
-                        withName: "//circularTimer") as? CircularTimer
-                    {
-                        timerNode.updateDiscreteTime(
-                            newTimeRemaining: self.gameScene.context.gameInfo
-                                .timeRemaining)
-                    }
-
-                    // Game over check
-                    if self.gameScene.context.gameInfo.timeRemaining <= 0 {
-                        // Disable interaction immediately
-                        EffectManager.shared.disableInteraction()
-                        self.stopHintTimer()
-                        self.stopIdleHintTimer()
-                        
-                        // Small delay to allow any in-progress piece placement to complete
-                        DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) { [weak self] in
-                            guard let self = self else { return }
-                            
-                            if let gridNode = self.gameScene.childNode(withName: "grid") as? SKSpriteNode,
-                               !gridNode.children.filter({ $0.name?.starts(with: "piece_") ?? false }).isEmpty {
-                                // Only play animation if there are pieces
-                                EffectManager.shared.playGameOverEffect { [weak self] in
-                                    guard let self = self else { return }
-                                    self.gameScene.context.stateMachine?.enter(GameOverState.self)
-                                    SoundManager.shared.playSound(.gameOver)
-                                }
-                            } else {
-                                // Go directly to game over if no pieces
-                                self.gameScene.context.stateMachine?.enter(GameOverState.self)
-                                SoundManager.shared.playSound(.gameOver)
-                            }
-                        }
-                        return
-                    }
-
-                    self.gameScene.context.gameInfo.timeRemaining -= 1
-                },
-                SKAction.wait(forDuration: 1.0),
-            ])
-            gameScene.run(
-                SKAction.repeatForever(updateTimerAction), withKey: "updateTimer")
-        }
-    
     func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
         guard let touch = touches.first else { return }
         let location = touch.location(in: gameScene)
@@ -239,7 +238,7 @@ class PlayState: GKState {
                 .first(where: { $0.name?.starts(with: "piece_") == true })
                 as? SKSpriteNode
             {
-                
+
                 if touchedPiece != bankManager.getSelectedPiece() {
                     stopHintTimer()
                     stopIdleHintTimer()
@@ -255,6 +254,14 @@ class PlayState: GKState {
         handleGridPlacement(at: location)
     }
 
+    func touchesMoved(_ touches: Set<UITouch>, with event: UIEvent?) {
+    }
+
+    func touchesEnded(_ touches: Set<UITouch>, with event: UIEvent?) {
+    }
+
+
+    // MARK: - Hint System
     private func startHintTimer() {
         hintTimer = Timer.scheduledTimer(
             withTimeInterval: GameConstants.GeneralGamePlay.hintWaitTime,
@@ -272,16 +279,22 @@ class PlayState: GKState {
         hintTimer?.invalidate()
         hintTimer = nil
     }
-    
+
     func startIdleHintTimer() {
         stopIdleHintTimer()
-        
-        idleHintTimer = Timer.scheduledTimer(withTimeInterval: GameConstants.GeneralGamePlay.idleHintWaitTime, repeats: false) { [weak self] _ in
+
+        idleHintTimer = Timer.scheduledTimer(
+            withTimeInterval: GameConstants.GeneralGamePlay.idleHintWaitTime,
+            repeats: false
+        ) { [weak self] _ in
             guard let self = self,
-                  self.bankManager.getSelectedPiece() == nil else { return }
-                  
+                self.bankManager.getSelectedPiece() == nil
+            else { return }
+
             // Only show hint if no piece is currently selected
-            if let randomPiece = self.bankManager.getRandomVisibleUnplacedPiece() {
+            if let randomPiece = self.bankManager
+                .getRandomVisibleUnplacedPiece()
+            {
                 self.bankManager.selectPiece(randomPiece)
                 self.gridManager.showHintForPiece(randomPiece)
             }
@@ -293,9 +306,15 @@ class PlayState: GKState {
         idleHintTimer = nil
     }
 
-    func touchesMoved(_ touches: Set<UITouch>, with event: UIEvent?) {
+}
+
+// MARK: - CircularTimerDelegate
+extension PlayState: CircularTimerDelegate {
+    func timerDidComplete() {
+        handleGameOver()
     }
 
-    func touchesEnded(_ touches: Set<UITouch>, with event: UIEvent?) {
+    func timerDidUpdate(currentTime: TimeInterval) {
+        gameScene.context.gameInfo.timeRemaining = currentTime
     }
 }

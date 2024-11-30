@@ -22,6 +22,7 @@ class GameScene: SKScene {
         super.init(size: size)
         SoundManager.shared.setGameScene(self)
         EffectManager.shared.setGameScene(self)
+        SoundManager.shared.playBackgroundMusic("game-bg", fileType: "mp3")
     }
     
     required init?(coder aDecoder: NSCoder) { fatalError("init(coder:) has not been implemented") }

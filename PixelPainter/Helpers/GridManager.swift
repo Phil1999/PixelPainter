@@ -92,7 +92,7 @@ class GridManager {
         size: CGSize, cornerRadius: CGFloat, corners: UIRectCorner,
         cellColor: UIColor
     ) -> SKSpriteNode {
-        let adjustedSize = CGSize(width: size.width, height: size.height)  // Removed the -1.5 spacing
+        let adjustedSize = CGSize(width: size.width, height: size.height)
         let rect = CGRect(origin: .zero, size: adjustedSize)
 
         let path = UIBezierPath(
@@ -104,8 +104,8 @@ class GridManager {
         let shape = CAShapeLayer()
         shape.path = path.cgPath
         shape.fillColor = cellColor.cgColor
-        shape.strokeColor = UIColor.gray.cgColor
-        shape.lineWidth = 2
+        shape.strokeColor = UIColor.gray.withAlphaComponent(0.3).cgColor
+        shape.lineWidth = 1
 
         UIGraphicsBeginImageContextWithOptions(adjustedSize, false, 0)
         if let context = UIGraphicsGetCurrentContext() {
@@ -122,7 +122,7 @@ class GridManager {
         if EffectManager.shared.isPlayingGameOver {
             return false
         }
-        
+
         guard let gameScene = gameScene,
             let gridNode = gameScene.childNode(withName: "grid")
                 as? SKSpriteNode
@@ -171,7 +171,6 @@ class GridManager {
                 piece.removeFromParent()
 
                 gameScene.context.gameInfo.pieces[pieceIndex].isPlaced = true
-                gameScene.context.gameInfo.score += 15
 
                 return true
             }
@@ -245,44 +244,75 @@ class GridManager {
 
     func showHintForPiece(_ piece: SKSpriteNode) {
         guard let pieceName = piece.name,
-                  let gameScene = gameScene,
-                  let gridNode = gameScene.childNode(withName: "grid") as? SKSpriteNode,
-                  let pieceIndex = gameScene.context.gameInfo.pieces.firstIndex(where: {
-                      "piece_\(Int($0.correctPosition.y))_\(Int($0.correctPosition.x))" == pieceName
-                  }) else { return }
+            let gameScene = gameScene,
+            let gridNode = gameScene.childNode(withName: "grid")
+                as? SKSpriteNode,
+            let pieceIndex = gameScene.context.gameInfo.pieces.firstIndex(
+                where: {
+                    "piece_\(Int($0.correctPosition.y))_\(Int($0.correctPosition.x))"
+                        == pieceName
+                })
+        else { return }
 
         let puzzlePiece = gameScene.context.gameInfo.pieces[pieceIndex]
-           let row = Int(puzzlePiece.correctPosition.y)
-           let col = Int(puzzlePiece.correctPosition.x)
+        let row = Int(puzzlePiece.correctPosition.y)
+        let col = Int(puzzlePiece.correctPosition.x)
 
-        // Find the frame node for this position
         if let frameNode = gridNode.childNode(withName: "frame_\(row)_\(col)")
             as? SKSpriteNode
         {
-            // Store reference to currently hinted frame
             hintNode = frameNode
-            
-            let glowAction = SKAction.sequence([
-                SKAction.colorize(with: UIColor(red: 0.0, green: 0.8, blue: 1.0, alpha: 0.9), colorBlendFactor: 1, duration: 0),
-            ])
 
+            let size = frameNode.size
+            let rect = CGRect(origin: .zero, size: size)
+            let cornerRadius: CGFloat = 30
+
+            let path = UIBezierPath(
+                roundedRect: rect,
+                byRoundingCorners: getRoundedCorners(
+                    row: row, col: col,
+                    dimension: gameScene.context.layoutInfo.gridDimension),
+                cornerRadii: CGSize(width: cornerRadius, height: cornerRadius)
+            )
+
+            let shape = CAShapeLayer()
+            shape.path = path.cgPath
+            shape.fillColor =
+                UIColor(red: 0.0, green: 0.4, blue: 1.0, alpha: 0.9).cgColor
+            shape.strokeColor = UIColor.white.cgColor
+            shape.lineWidth = 4
+
+            UIGraphicsBeginImageContextWithOptions(size, false, 0)
+            if let context = UIGraphicsGetCurrentContext() {
+                shape.render(in: context)
+            }
+            let image = UIGraphicsGetImageFromCurrentImageContext()
+            UIGraphicsEndImageContext()
+
+            // Create a new node for the hint effect that will be above everything
+            let hintEffectNode = SKSpriteNode(texture: SKTexture(image: image!))
+            hintEffectNode.position = frameNode.position
+            hintEffectNode.zPosition = 10
+            hintEffectNode.name = "hint_effect"
+            gridNode.addChild(hintEffectNode)
+
+            hintNode = hintEffectNode
+
+            // Add pulsing animation
             let scaleAction = SKAction.sequence([
                 SKAction.scale(to: 1.05, duration: 0.5),
                 SKAction.scale(to: 1.0, duration: 0.5),
             ])
 
-            // Combine effects
-            let hintAction = SKAction.group([glowAction, scaleAction])
-            frameNode.run(
-                SKAction.repeatForever(hintAction), withKey: "hintAnimation")
+            hintEffectNode.run(
+                SKAction.repeatForever(scaleAction), withKey: "hintAnimation")
         }
     }
 
     func hideHint() {
-        if let frameNode = hintNode {
-            frameNode.removeAction(forKey: "hintAnimation")
-            frameNode.colorBlendFactor = 0
-            frameNode.setScale(1.0)
+        if let hintNode = hintNode {
+            hintNode.removeAction(forKey: "hintAnimation")
+            hintNode.removeFromParent()
         }
         hintNode = nil
     }

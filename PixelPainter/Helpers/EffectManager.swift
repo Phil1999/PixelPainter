@@ -58,8 +58,21 @@ class EffectManager {
         ])
         node.run(shakeSequence)
     }
+    
+    func applyPulseEffect(to node: SKNode, scaleUp: CGFloat = 1.2, scaleDown: CGFloat = 1.0, duration: TimeInterval = 0.5) {
+        
+        node.removeAction(forKey: "pulseEffect")
+        
+        let scaleUpAction = SKAction.scale(to: scaleUp, duration: duration / 2)
+        let scaleDownAction = SKAction.scale(to: scaleDown, duration: duration / 2)
+        let pulseSequence = SKAction.sequence([scaleUpAction, scaleDownAction])
+                
+        let repeatPulse = SKAction.repeatForever(pulseSequence)
+                
+        node.run(repeatPulse, withKey: "pulseEffect")
+    }
 
-    func disableInteraction(for duration: TimeInterval = 1.0) {
+    func temporarilyDisableInteraction(for duration: TimeInterval = 1.0) {
         let disableTouchAction = SKAction.run { [weak self] in
             self?.gameScene?.isUserInteractionEnabled = false
         }
@@ -82,8 +95,11 @@ class EffectManager {
             let gridNode = gameScene.childNode(withName: "grid")
                 as? SKSpriteNode
         else { return }
-
+        
         isPlayingGameOver = true // Set flag when starting animation
+        
+        // Play the game end sound effect
+        SoundManager.shared.playSound(.gameOverWithPieces)
 
         // Step 1: Shake effect (left-right only)
         let shakeSequence = createShakeSequence()
