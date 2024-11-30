@@ -244,6 +244,7 @@ class CircularTimer: SKNode {
         glowNode?.removeFromParent()
         glowNode = nil
         timeLabel.removeAllActions()
+        timeLabel.setScale(1.0)
     }
 
     func setFrozenState(active: Bool) {
@@ -316,6 +317,8 @@ class CircularTimer: SKNode {
     private func triggerWarningAnimation() {
         guard !isWarningActive else { return }
         isWarningActive = true
+        
+        timeLabel.setScale(1.0)
 
         timerCircle.strokeColor = TimerState.warning.color
         timeLabel.fontColor = TimerState.warning.color
@@ -331,7 +334,9 @@ class CircularTimer: SKNode {
         let scaleDown = SKAction.scale(to: 1.0, duration: scaleDuration / 2)
         let resetState = SKAction.run { [weak self] in
             self?.isWarningActive = false
+            self?.timeLabel.setScale(1.0)
         }
+        timeLabel.removeAllActions()
         timeLabel.run(SKAction.sequence([scaleUp, scaleDown, resetState]))
     }
 }
