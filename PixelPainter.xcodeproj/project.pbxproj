@@ -20,9 +20,11 @@
 		D46D0FA92CCB1B6200E8D37C /* PPNeueMontreal-Book.otf in Resources */ = {isa = PBXBuildFile; fileRef = D46D0F9C2CCB1B6200E8D37C /* PPNeueMontreal-Book.otf */; };
 		D4AC0F9A2CBEF294004FF844 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = D4AC0F992CBEF294004FF844 /* Assets.xcassets */; };
 		D4D2E6522CD4721000E713B5 /* GameConstants.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4D2E6512CD4721000E713B5 /* GameConstants.swift */; };
-		D4D2E6D32CDC100C00E713B5 /* piece_placed.wav in Resources */ = {isa = PBXBuildFile; fileRef = D4D2E6D22CDC100C00E713B5 /* piece_placed.wav */; };
-		D4D2E6D42CDC100C00E713B5 /* level_complete.wav in Resources */ = {isa = PBXBuildFile; fileRef = D4D2E6D12CDC100C00E713B5 /* level_complete.wav */; };
-		D4D2E6D62CDC155200E713B5 /* game_over.wav in Resources */ = {isa = PBXBuildFile; fileRef = D4D2E6D52CDC155200E713B5 /* game_over.wav */; };
+		D4F4F8072CFAC46B00AF05F5 /* game-end-incomplete-puzzle.mp3 in Resources */ = {isa = PBXBuildFile; fileRef = D4F4F8042CFAC46B00AF05F5 /* game-end-incomplete-puzzle.mp3 */; };
+		D4F4F8082CFAC46B00AF05F5 /* game-bg.mp3 in Resources */ = {isa = PBXBuildFile; fileRef = D4F4F8032CFAC46B00AF05F5 /* game-bg.mp3 */; };
+		D4F4F8092CFAC46B00AF05F5 /* level_complete.wav in Resources */ = {isa = PBXBuildFile; fileRef = D4F4F8052CFAC46B00AF05F5 /* level_complete.wav */; };
+		D4F4F80A2CFAC46B00AF05F5 /* piece_placed.wav in Resources */ = {isa = PBXBuildFile; fileRef = D4F4F8062CFAC46B00AF05F5 /* piece_placed.wav */; };
+		D4F4F80D2CFAC56300AF05F5 /* game-over-no-puzzle.wav in Resources */ = {isa = PBXBuildFile; fileRef = D4F4F80C2CFAC56300AF05F5 /* game-over-no-puzzle.wav */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -59,9 +61,11 @@
 		D4AC0FA22CBEF294004FF844 /* PixelPainterTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = PixelPainterTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		D4AC0FAC2CBEF294004FF844 /* PixelPainterUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = PixelPainterUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		D4D2E6512CD4721000E713B5 /* GameConstants.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GameConstants.swift; sourceTree = "<group>"; };
-		D4D2E6D12CDC100C00E713B5 /* level_complete.wav */ = {isa = PBXFileReference; lastKnownFileType = audio.wav; path = level_complete.wav; sourceTree = "<group>"; };
-		D4D2E6D22CDC100C00E713B5 /* piece_placed.wav */ = {isa = PBXFileReference; lastKnownFileType = audio.wav; path = piece_placed.wav; sourceTree = "<group>"; };
-		D4D2E6D52CDC155200E713B5 /* game_over.wav */ = {isa = PBXFileReference; lastKnownFileType = audio.wav; path = game_over.wav; sourceTree = "<group>"; };
+		D4F4F8032CFAC46B00AF05F5 /* game-bg.mp3 */ = {isa = PBXFileReference; lastKnownFileType = audio.mp3; path = "game-bg.mp3"; sourceTree = "<group>"; };
+		D4F4F8042CFAC46B00AF05F5 /* game-end-incomplete-puzzle.mp3 */ = {isa = PBXFileReference; lastKnownFileType = audio.mp3; path = "game-end-incomplete-puzzle.mp3"; sourceTree = "<group>"; };
+		D4F4F8052CFAC46B00AF05F5 /* level_complete.wav */ = {isa = PBXFileReference; lastKnownFileType = audio.wav; path = level_complete.wav; sourceTree = "<group>"; };
+		D4F4F8062CFAC46B00AF05F5 /* piece_placed.wav */ = {isa = PBXFileReference; lastKnownFileType = audio.wav; path = piece_placed.wav; sourceTree = "<group>"; };
+		D4F4F80C2CFAC56300AF05F5 /* game-over-no-puzzle.wav */ = {isa = PBXFileReference; lastKnownFileType = audio.wav; path = "game-over-no-puzzle.wav"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
@@ -150,9 +154,11 @@
 		D4D2E6D02CDC0FA400E713B5 /* sounds */ = {
 			isa = PBXGroup;
 			children = (
-				D4D2E6D52CDC155200E713B5 /* game_over.wav */,
-				D4D2E6D12CDC100C00E713B5 /* level_complete.wav */,
-				D4D2E6D22CDC100C00E713B5 /* piece_placed.wav */,
+				D4F4F80C2CFAC56300AF05F5 /* game-over-no-puzzle.wav */,
+				D4F4F8032CFAC46B00AF05F5 /* game-bg.mp3 */,
+				D4F4F8042CFAC46B00AF05F5 /* game-end-incomplete-puzzle.mp3 */,
+				D4F4F8052CFAC46B00AF05F5 /* level_complete.wav */,
+				D4F4F8062CFAC46B00AF05F5 /* piece_placed.wav */,
 			);
 			path = sounds;
 			sourceTree = "<group>";
@@ -268,12 +274,14 @@
 			buildActionMask = 2147483647;
 			files = (
 				D4AC0F9A2CBEF294004FF844 /* Assets.xcassets in Resources */,
+				D4F4F80D2CFAC56300AF05F5 /* game-over-no-puzzle.wav in Resources */,
 				D46D0FA32CCB1B6200E8D37C /* PPNeueMontreal-Bold.otf in Resources */,
-				D4D2E6D62CDC155200E713B5 /* game_over.wav in Resources */,
 				D46D0FA42CCB1B6200E8D37C /* PPNeueMontreal-Italic.otf in Resources */,
-				D4D2E6D32CDC100C00E713B5 /* piece_placed.wav in Resources */,
-				D4D2E6D42CDC100C00E713B5 /* level_complete.wav in Resources */,
 				D46D0FA52CCB1B6200E8D37C /* PPNeueMontreal-SemiBold.ttf in Resources */,
+				D4F4F8072CFAC46B00AF05F5 /* game-end-incomplete-puzzle.mp3 in Resources */,
+				D4F4F8082CFAC46B00AF05F5 /* game-bg.mp3 in Resources */,
+				D4F4F8092CFAC46B00AF05F5 /* level_complete.wav in Resources */,
+				D4F4F80A2CFAC46B00AF05F5 /* piece_placed.wav in Resources */,
 				D46D0FA62CCB1B6200E8D37C /* PPNeueMontreal-SemiBolditalic.otf in Resources */,
 				D46D0FA72CCB1B6200E8D37C /* PPNeueMontreal-Medium.otf in Resources */,
 				D46D0FA82CCB1B6200E8D37C /* PPNeueMontreal-Thin.otf in Resources */,
