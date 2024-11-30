@@ -92,7 +92,7 @@ class GridManager {
         size: CGSize, cornerRadius: CGFloat, corners: UIRectCorner,
         cellColor: UIColor
     ) -> SKSpriteNode {
-        let adjustedSize = CGSize(width: size.width, height: size.height)  // Removed the -1.5 spacing
+        let adjustedSize = CGSize(width: size.width, height: size.height)
         let rect = CGRect(origin: .zero, size: adjustedSize)
 
         let path = UIBezierPath(
@@ -104,8 +104,8 @@ class GridManager {
         let shape = CAShapeLayer()
         shape.path = path.cgPath
         shape.fillColor = cellColor.cgColor
-        shape.strokeColor = UIColor.gray.cgColor
-        shape.lineWidth = 2
+        shape.strokeColor = UIColor.gray.withAlphaComponent(0.3).cgColor
+        shape.lineWidth = 1
 
         UIGraphicsBeginImageContextWithOptions(adjustedSize, false, 0)
         if let context = UIGraphicsGetCurrentContext() {
