@@ -19,15 +19,6 @@ extension PowerUpType {
     static var all: [PowerUpType] = Self.allCases.map { $0 }
 
 
-    var weight: Int {
-        switch self {
-        case .timeStop: return 2
-        case .place: return 1
-        case .flash: return 3
-        case .shuffle: return 4
-        }
-    }
-
     var displayName: String {
         return self.rawValue
     }
@@ -57,7 +48,7 @@ extension PowerUpType {
 
     var uses: Int {
         switch self {
-        case .timeStop: return 4
+        case .timeStop: return 3
         case .place: return 2
         case .flash: return 2	
         case .shuffle: return 4

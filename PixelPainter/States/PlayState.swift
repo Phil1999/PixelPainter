@@ -217,6 +217,8 @@ class PlayState: GKState {
     }
 
     private func showWrongPlacementAnimation(for piece: SKSpriteNode) {
+        EffectManager.shared.temporarilyDisableInteraction(for: 0.5)
+        EffectManager.shared.cooldown(piece, duration: 0.5)
         EffectManager.shared.shakeNode(piece)
     }
 
