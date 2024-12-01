@@ -52,8 +52,9 @@ class PowerUpIcon: SKNode {
 
         super.init()
         
-        // Incase we'd like a minimal version of the icon with just the icon.
+        // Incase we'd like a minimal version of the icon with just the icon and circle
         if minimal {
+            addChild(mainCircle)
             addChild(iconNode)
         } else {
             addChild(mainCircle)

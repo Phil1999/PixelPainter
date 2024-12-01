@@ -9,9 +9,6 @@ import Foundation
 
 enum GameConstants {
     enum PowerUp {
-        // NOTE: minUses should be less than maxUses. But will work anyways if not (for testing).
-        static let maxUses = 20
-        static let minUses = 2
         static let maxShufflePieces = 3
     }
     enum PowerUpTimers {
@@ -21,6 +18,7 @@ enum GameConstants {
     enum GeneralGamePlay {
         static let timeWarningThreshold = 5.0
         static let hintWaitTime = 3.0
-        static let idleHintWaitTime = 4.0
+        static let idleHintWaitTime = 3.5
+        static let wrongPlacementBufferTime = 0.5
     }
 }

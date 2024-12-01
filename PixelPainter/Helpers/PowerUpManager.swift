@@ -5,67 +5,26 @@ class PowerUpManager {
     weak var playState: PlayState?
     private var powerUps: [PowerUpType: PowerUpIcon] = [:]
     private var powerUpsInCooldown: Set<PowerUpType> = []
-    private var powerUpPool: [PowerUpType] = []
 
-    // Refer to the uses from GameInfo
-    private var powerUpUses: [PowerUpType: Int] {
-        get { gameScene?.context.gameInfo.powerUpUses ?? [:] }
-        set {
-            gameScene?.context.gameInfo.powerUpUses = newValue
-        }
-    }
+    private var powerUpUses: [PowerUpType: Int] = [:]
 
     init(gameScene: GameScene, playState: PlayState) {
         self.gameScene = gameScene
         self.playState = playState
-        fillPool()
     }
 
-    private func fillPool() {
-        powerUpPool = []
-
-        for type in PowerUpType.allCases {
-            powerUpPool.append(
-                contentsOf: Array(repeating: type, count: type.weight))
-        }
-
-        powerUpPool.shuffle()
-    }
-
-    func grantRandomPowerup() -> PowerUpType? {
-        // Only look for valid power-ups
-        let availablePowerUps = powerUpPool.filter { type in
-            let currentUses = powerUpUses[type] ?? 0
-            return currentUses < GameConstants.PowerUp.maxUses
-        }
-
-        guard !availablePowerUps.isEmpty else {
-            // No available power-ups
-            return nil
-        }
-
-        print("Current power-up pool: ", availablePowerUps)
-
-        // Choose random powerup (weighted pool)
-        guard let selectedPowerUp = availablePowerUps.randomElement() else {
-            print("No power-ups available")
-            return nil
-        }
-        powerUpUses[selectedPowerUp, default: 0] += 1
-
-        return selectedPowerUp
-    }
 
     func setupPowerUps() {
         guard let gameScene = gameScene else { return }
 
         let centerX = gameScene.size.width / 2
         let spacing: CGFloat = 40 * 2.3
-        let totalWidth = CGFloat(PowerUpType.all.count - 1) * spacing
+        let powerUpTypes = Array(powerUpUses.keys)
+        let totalWidth = CGFloat(powerUpTypes.count - 1) * spacing
         let startX = centerX - (totalWidth / 2)
         let yPosition: CGFloat = 210 + 40
 
-        for (index, type) in PowerUpType.all.enumerated() {
+        for (index, type) in powerUpTypes.enumerated() {
             let uses = powerUpUses[type] ?? 0
             let powerUpIcon = PowerUpIcon(type: type, uses: uses)
             let xPos = startX + CGFloat(index) * spacing
@@ -75,25 +34,24 @@ class PowerUpManager {
         }
     }
 
-    func resetPowerUps() {
-        gameScene?.context.gameInfo.powerUpUses = Dictionary(
-            uniqueKeysWithValues: PowerUpType.all.map { ($0, $0.initialUses) }
-        )
+    func setPowerUps(_ types: [PowerUpType]) {
+        // Clear existing power-ups
+        powerUps.values.forEach { $0.removeFromParent() }
+        powerUps.removeAll()
 
-        // Update visuals for all power-ups
-        for type in PowerUpType.allCases {
-            updatePowerUpVisual(type: type)
-        }
+        powerUpUses = Dictionary(
+            uniqueKeysWithValues: types.map { ($0, $0.uses) })
     }
 
-    
+
+
     private func updatePowerUpVisual(type: PowerUpType) {
         guard let powerUpIcon = powerUps[type] else { return }
 
         let uses = powerUpUses[type] ?? 0
 
         powerUpIcon.updateUses(uses)
-        
+
     }
 
     func handleTouch(at location: CGPoint) -> Bool {
@@ -131,8 +89,9 @@ class PowerUpManager {
         }
         // Check power-up has uses remaining
         guard let uses = powerUpUses[type], uses > 0,
-              let powerUpIcon = powerUps[type],
-              let gameScene = gameScene else { return }
+            let powerUpIcon = powerUps[type],
+            let gameScene = gameScene
+        else { return }
 
         // check if power-up is in cooldown
         if powerUpsInCooldown.contains(type) { return }
@@ -244,9 +203,9 @@ class PowerUpManager {
                 gameScene.context.gameInfo.pieces =
                     placedPieces + unplacedPieces
                 bankManager.showNextThreePieces()
-                
+
                 playState?.startIdleHintTimer()
-                
+
                 DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
                     self.powerUpsInCooldown.remove(type)
                 }
