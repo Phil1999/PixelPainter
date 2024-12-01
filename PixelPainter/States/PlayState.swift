@@ -217,6 +217,8 @@ class PlayState: GKState {
     }
 
     private func showWrongPlacementAnimation(for piece: SKSpriteNode) {
+        EffectManager.shared.temporarilyDisableInteraction(for: GameConstants.GeneralGamePlay.wrongPlacementBufferTime)
+        EffectManager.shared.cooldown(piece, duration: GameConstants.GeneralGamePlay.wrongPlacementBufferTime)
         EffectManager.shared.shakeNode(piece)
     }
 
