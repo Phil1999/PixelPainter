@@ -151,12 +151,12 @@ class MemorizeState: GKState {
         switch level {
         case 1...2:
             newGameTime = 10  // 3x3 grid
-        case 3...6:
+        case 3...5:
             newGameTime = 15  // 4x4 grid
-        case 7...10:
-            newGameTime = 25  // 5x5 grid
+        case 6...9:
+            newGameTime = 20  // 5x5 grid
         default:
-            newGameTime = 30  // 6x6 grid
+            newGameTime = 25  // 6x6 grid
         }
 
         // If grid size changed, reload images
