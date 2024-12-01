@@ -125,9 +125,9 @@ class MemorizeState: GKState {
         switch level {
         case 1...2:
             newGridDimension = 3
-        case 3...6:
+        case 3...5:
             newGridDimension = 4
-        case 7...11:
+        case 6...9:
             newGridDimension = 5
         default:
             newGridDimension = 6  // Maximum size
@@ -224,7 +224,7 @@ class MemorizeState: GKState {
             gameScene.addChild(chooseLabel)
         }
 
-        let readyLabel = SKLabelNode(text: "Memorize")
+        let readyLabel = SKLabelNode(text: "")
         readyLabel.fontName = "PPNeueMontreal-Bold"
         readyLabel.fontSize = 48
         readyLabel.fontColor = .white

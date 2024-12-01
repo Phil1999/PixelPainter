@@ -131,7 +131,7 @@ class BankManager {
         piece.alpha = 0.7
         
         let pulseAction = SKAction.sequence([
-            SKAction.scale(to: 1.1, duration: 0.5),
+            SKAction.scale(to: 1.2, duration: 0.5),
             SKAction.scale(to: 1.0, duration: 0.5)
         ])
         piece.run(SKAction.repeatForever(pulseAction))
