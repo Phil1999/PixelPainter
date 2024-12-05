@@ -185,7 +185,7 @@ class EffectManager {
     
     func playFreezeEffect() {
        guard let gameScene = gameScene,
-             let backgroundNode = gameScene.childNode(withName: "backgroundNode") as? Background else { return }
+             let _ = gameScene.childNode(withName: "backgroundNode") as? Background else { return }
 
        // Add cyan overlay
        let freezeOverlay = SKSpriteNode(color: UIColor.cyan.withAlphaComponent(0.3), size: gameScene.size)

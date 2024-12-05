@@ -95,8 +95,8 @@ extension Background {
             width: screenSize.width, height: screenSize.height)
         gradientLayer = SKSpriteNode(color: .white, size: gradientSize)
 
-        let topColor = UIColor(hex: "BAB3B9")
-        let bottomColor = UIColor(hex: "171717")
+        let topColor = UIColor(hex: "4b4b4b") // Originially BAB3B9
+        let bottomColor = UIColor(hex: "030303") // Originally 171717
         let gradientTexture = createGradientTexture(
             colors: [topColor, bottomColor], size: gradientSize)
 
@@ -124,7 +124,7 @@ extension Background {
             x: screenSize.width / 2 + xOffset, y: screenSize.height / 2)
         mainBackground.zPosition = -2
         
-        mainBackground.alpha = 0.5
+        mainBackground.alpha = 1
         
         addChild(mainBackground)
     }

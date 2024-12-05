@@ -81,6 +81,23 @@ class PowerUpManager {
         }
         return type
     }
+    
+    private func showPowerUpAnimation(_ type: PowerUpType) {
+       guard let gameScene = gameScene else { return }
+       
+       let iconTexture = SKTexture(imageNamed: type.iconName)
+       let iconNode = SKSpriteNode(texture: iconTexture, size: CGSize(width: 80, height: 80))
+       iconNode.position = CGPoint(x: gameScene.size.width/2, y: gameScene.size.height/2)
+       iconNode.alpha = 0
+       iconNode.zPosition = 99999
+       gameScene.addChild(iconNode)
+       
+       let fadeIn = SKAction.fadeIn(withDuration: 0.2)
+       let fadeOut = SKAction.fadeOut(withDuration: 0.2)
+       let remove = SKAction.removeFromParent()
+       
+       iconNode.run(SKAction.sequence([fadeIn, fadeOut, remove]))
+    }
 
     private func activatePowerUp(_ type: PowerUpType) {
         // check if timer isn't 0 before letting player use power-up
@@ -98,6 +115,7 @@ class PowerUpManager {
 
         switch type {
         case .timeStop:
+            showPowerUpAnimation(type)
             if uses > 1 {
                 powerUpsInCooldown.insert(type)
                 EffectManager.shared.cooldown(
@@ -123,6 +141,7 @@ class PowerUpManager {
             }
 
         case .place:
+            showPowerUpAnimation(type)
             if let selectedPiece = gameScene.context.gameInfo.pieces.first(
                 where: { !$0.isPlaced }),
                 let gridNode = gameScene.childNode(withName: "grid")
@@ -160,6 +179,7 @@ class PowerUpManager {
             }
 
         case .flash:
+            showPowerUpAnimation(type)
             if uses > 1 {
                 powerUpsInCooldown.insert(type)
                 EffectManager.shared.cooldown(
@@ -186,6 +206,7 @@ class PowerUpManager {
             }
 
         case .shuffle:
+            showPowerUpAnimation(type)
             if uses > 1 {
                 powerUpsInCooldown.insert(type)
                 EffectManager.shared.cooldown(powerUpIcon, duration: 0.5)

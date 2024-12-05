@@ -144,6 +144,13 @@ class PlayState: GKState {
         if let backgroundNode = gameScene.childNode(withName: "backgroundNode")
             as? Background
         {
+            
+            if let snow = gameScene.childNode(withName: "snowEffect"),
+               let overlay = gameScene.childNode(withName: "freezeOverlay") {
+                snow.removeFromParent()
+                overlay.removeFromParent()
+            }
+            
             backgroundNode.fadeOutWarningOverlay {
                 backgroundNode.playVictoryAnimation { [weak self] in
                     guard let self = self else { return }
