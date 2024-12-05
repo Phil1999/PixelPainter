@@ -182,6 +182,38 @@ class EffectManager {
             SKAction.moveBy(x: 0, y: 0, duration: 0.1),  // Reset position
         ])
     }
+    
+    func playFreezeEffect() {
+       guard let gameScene = gameScene,
+             let backgroundNode = gameScene.childNode(withName: "backgroundNode") as? Background else { return }
+
+       // Add cyan overlay
+       let freezeOverlay = SKSpriteNode(color: UIColor.cyan.withAlphaComponent(0.3), size: gameScene.size)
+       freezeOverlay.position = CGPoint(x: gameScene.size.width/2, y: gameScene.size.height/2)
+       freezeOverlay.zPosition = -1.5
+       freezeOverlay.name = "freezeOverlay"
+       gameScene.addChild(freezeOverlay)
+       
+       // Add falling snow effect
+       if let snow = SKEmitterNode(fileNamed: "FallingStars") {
+           snow.particleTexture = SKTexture(imageNamed: "time_stop")
+           snow.position = CGPoint(x: gameScene.size.width/2, y: gameScene.size.height)
+           snow.name = "snowEffect"
+           gameScene.addChild(snow)
+       }
+    }
+
+    func removeFreezeEffect() {
+       guard let gameScene = gameScene else { return }
+       
+       if let freezeOverlay = gameScene.childNode(withName: "freezeOverlay") {
+           freezeOverlay.removeFromParent()
+       }
+       
+       if let snow = gameScene.childNode(withName: "snowEffect") {
+           snow.removeFromParent()
+       }
+    }
 
 }
 

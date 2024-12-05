@@ -79,7 +79,6 @@
 /* Begin PBXFileSystemSynchronizedRootGroup section */
 		A95E25942CC7F6D600163C5C /* States */ = {isa = PBXFileSystemSynchronizedRootGroup; explicitFileTypes = {}; explicitFolders = (); path = States; sourceTree = "<group>"; };
 		A95E259B2CC7F91200163C5C /* Helpers */ = {isa = PBXFileSystemSynchronizedRootGroup; explicitFileTypes = {}; explicitFolders = (); path = Helpers; sourceTree = "<group>"; };
-		A95E25A02CC7FA2800163C5C /* Models */ = {isa = PBXFileSystemSynchronizedRootGroup; explicitFileTypes = {}; explicitFolders = (); path = Models; sourceTree = "<group>"; };
 		A95E25A22CC7FA3D00163C5C /* Nodes */ = {isa = PBXFileSystemSynchronizedRootGroup; explicitFileTypes = {}; explicitFolders = (); path = Nodes; sourceTree = "<group>"; };
 /* End PBXFileSystemSynchronizedRootGroup section */
 
@@ -147,7 +146,6 @@
 				D4D2E6D02CDC0FA400E713B5 /* sounds */,
 				D46D0FA22CCB1B6200E8D37C /* fonts */,
 				A95E259B2CC7F91200163C5C /* Helpers */,
-				A95E25A02CC7FA2800163C5C /* Models */,
 				A95E25A22CC7FA3D00163C5C /* Nodes */,
 				A95E25942CC7F6D600163C5C /* States */,
 				D4AC0F992CBEF294004FF844 /* Assets.xcassets */,
@@ -201,7 +199,6 @@
 			fileSystemSynchronizedGroups = (
 				A95E25942CC7F6D600163C5C /* States */,
 				A95E259B2CC7F91200163C5C /* Helpers */,
-				A95E25A02CC7FA2800163C5C /* Models */,
 				A95E25A22CC7FA3D00163C5C /* Nodes */,
 			);
 			name = PixelPainter;

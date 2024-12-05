@@ -110,12 +110,15 @@ class PowerUpManager {
             {
                 timerNode.setFrozenState(active: true)
 
+                EffectManager.shared.playFreezeEffect()
+                
                 DispatchQueue.main.asyncAfter(
                     deadline: .now()
                         + GameConstants.PowerUpTimers.timeStopCooldown
                 ) { [weak self] in
                     timerNode.setFrozenState(active: false)
                     self?.powerUpsInCooldown.remove(type)
+                    EffectManager.shared.removeFreezeEffect()
                 }
             }
 
