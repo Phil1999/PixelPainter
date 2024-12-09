@@ -7,6 +7,7 @@ class Background: SKNode {
     private var victoryGlow: SKSpriteNode!
     private var screenSize: CGSize = .zero
     private var warningOverlay: SKSpriteNode!
+    private var darknessOverlay: SKSpriteNode!
 
     override init() {
         super.init()
@@ -27,9 +28,18 @@ extension Background {
         setupGradient()
         setupWarningOverlay()
         setupMainBackground()
+        setupDarknessOverlay()
         setupVictoryGlow()
         setupFog()
 
+    }
+    
+    private func setupDarknessOverlay() {
+        darknessOverlay = SKSpriteNode(color: .black, size: screenSize)
+        darknessOverlay.position = CGPoint(x: screenSize.width / 2, y: screenSize.height / 2)
+        darknessOverlay.zPosition = -1  // Position between fog and warning overlay
+        darknessOverlay.alpha = 0.7
+        addChild(darknessOverlay)
     }
     
     func fadeOutWarningOverlay(completion: @escaping () -> Void) {
@@ -71,9 +81,9 @@ extension Background {
        gradientLayer.frame = CGRect(origin: .zero, size: screenSize)
        
        // Create colors with smooth intensity transition
-        let topColor = UIColor(hex: "FF2E32").withAlphaComponent(pow(intensity, 2) * 0.8)
-        let midColor = UIColor(hex: "300001").withAlphaComponent(pow(intensity, 2) * 0.8)
-        let bottomColor = UIColor(hex: "171717").withAlphaComponent(pow(intensity, 2) * 0.8)
+        let topColor = UIColor(hex: "FF2E32").withAlphaComponent(pow(intensity, 2) * 0.9)
+        let midColor = UIColor(hex: "300001").withAlphaComponent(pow(intensity, 2) * 0.9)
+        let bottomColor = UIColor(hex: "171717").withAlphaComponent(pow(intensity, 2) * 0.9)
        
        gradientLayer.colors = [topColor.cgColor, midColor.cgColor, bottomColor.cgColor]
        gradientLayer.locations = [0.0, 0.5, 1.0]
@@ -194,7 +204,7 @@ extension Background {
 
             fogEffect.position = CGPoint(
                 x: screenSize.width / 3 + 20, y: screenSize.height / 3 + 30)
-            fogEffect.zPosition = -1
+            fogEffect.zPosition = -0.5
             fogEffect.alpha = 0.8
             addChild(fogEffect)
         }
@@ -213,8 +223,16 @@ extension Background {
         // Slower fade out for fog
         let fadeOutFog = SKAction.fadeOut(withDuration: 1.5)
         
+        let fadeOutBackground = SKAction.fadeOut(withDuration: 1.5)
+        
         // Run the sequence with longer pauses
         victoryGlow.run(fadeInGlow)
+        darknessOverlay.run(SKAction.sequence([
+            SKAction.wait(forDuration: 1.2),  // Wait for glow to fade in
+            fadeOutBackground,
+            SKAction.wait(forDuration: 2.5),  // Much longer pause to appreciate the victory state
+            SKAction.run(completion)
+        ]))
         fogEffect.run(SKAction.sequence([
             SKAction.wait(forDuration: 1.2),  // Wait for glow to fade in
             fadeOutFog,

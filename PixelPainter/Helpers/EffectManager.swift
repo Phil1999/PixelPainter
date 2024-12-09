@@ -188,7 +188,7 @@ class EffectManager {
              let _ = gameScene.childNode(withName: "backgroundNode") as? Background else { return }
 
        // Add cyan overlay
-       let freezeOverlay = SKSpriteNode(color: UIColor.cyan.withAlphaComponent(0.3), size: gameScene.size)
+       let freezeOverlay = SKSpriteNode(color: UIColor.cyan.withAlphaComponent(0.2), size: gameScene.size)
        freezeOverlay.position = CGPoint(x: gameScene.size.width/2, y: gameScene.size.height/2)
        freezeOverlay.zPosition = -1.5
        freezeOverlay.name = "freezeOverlay"

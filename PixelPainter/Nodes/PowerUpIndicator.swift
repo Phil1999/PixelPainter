@@ -48,10 +48,10 @@ extension PowerUpType {
 
     var uses: Int {
         switch self {
-        case .timeStop: return 3
+        case .timeStop: return 1
         case .place: return 2
-        case .flash: return 2	
-        case .shuffle: return 4
+        case .flash: return 1
+        case .shuffle: return 3
         }
     }
 }

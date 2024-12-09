@@ -152,11 +152,11 @@ class MemorizeState: GKState {
         case 1...2:
             newGameTime = 10  // 3x3 grid
         case 3...5:
-            newGameTime = 15  // 4x4 grid
+            newGameTime = 10  // 4x4 grid
         case 6...9:
-            newGameTime = 20  // 5x5 grid
+            newGameTime = 15  // 5x5 grid
         default:
-            newGameTime = 25  // 6x6 grid
+            newGameTime = 20  // 6x6 grid
         }
 
         // If grid size changed, reload images
@@ -187,7 +187,7 @@ class MemorizeState: GKState {
         let imageNode = SKSpriteNode(texture: SKTexture(image: image))
         imageNode.size = gameScene.context.layoutInfo.gridSize
         imageNode.position = CGPoint(
-            x: gameScene.size.width / 2, y: gameScene.size.height / 2)
+            x: gameScene.size.width / 2, y: gameScene.size.height / 1.85)
         gameScene.addChild(imageNode)
 
         let levelLabel =
@@ -205,20 +205,31 @@ class MemorizeState: GKState {
         gameScene.addChild(levelLabel)
 
         if !isFirstLevel {
+            // score is not shown on first round
             let scoreCounter = ScoreCounter(
                 text: "\(gameScene.context.gameInfo.score)")
             scoreCounter.position = CGPoint(
-                x: gameScene.size.width / 2, y: gameScene.size.height / 2 - 220)
+                x: gameScene.size.width / 6, y: gameScene.size.height - 90)
             gameScene.addChild(scoreCounter)
-        } else {
-            // for first level, we should have a text informing the user they can choose
-            // two powerups.
+            
+            // add "choose two" label every round for consistency
             let chooseLabel = SKLabelNode(text: "Choose two")
             chooseLabel.fontName = "PPNeueMontreal-Bold"
             chooseLabel.fontSize = 32
             chooseLabel.position = CGPoint(
                 x: gameScene.size.width / 2,
-                y: gameScene.size.height / 2 - 220
+                y: gameScene.size.height / 2 - 200
+            )
+            self.chooseTwoLabel = chooseLabel
+            gameScene.addChild(chooseLabel)
+            
+        } else {
+            let chooseLabel = SKLabelNode(text: "Choose two")
+            chooseLabel.fontName = "PPNeueMontreal-Bold"
+            chooseLabel.fontSize = 32
+            chooseLabel.position = CGPoint(
+                x: gameScene.size.width / 2,
+                y: gameScene.size.height / 2 - 200
             )
             self.chooseTwoLabel = chooseLabel
             gameScene.addChild(chooseLabel)
@@ -229,7 +240,7 @@ class MemorizeState: GKState {
         readyLabel.fontSize = 48
         readyLabel.fontColor = .white
         readyLabel.position = CGPoint(
-            x: gameScene.size.width / 2, y: gameScene.size.height - 200)
+            x: gameScene.size.width / 2, y: gameScene.size.height - 180)
         readyLabel.name = "readyLabel"
         readyLabel.alpha = 0  // Start hidden
         gameScene.addChild(readyLabel)
@@ -242,7 +253,7 @@ class MemorizeState: GKState {
     }
 
     private func blinkCountdownLabel(readyLabel: SKLabelNode, blinkCount: Int) {
-        let countdownSequence = ["3", "2", "1", "Ready?"]
+        let countdownSequence = ["3", "2", "1", "Go!"]
         var currentIndex = 0
 
         let blinkIn = SKAction.fadeIn(withDuration: 0.8)
@@ -440,7 +451,7 @@ extension MemorizeState {
                 type: type, uses: type.uses, minimal: true)
             icon.position = CGPoint(
                 x: startX + CGFloat(index) * spacing,
-                y: gameScene.size.height / 2 - 300
+                y: gameScene.size.height / 2 - 260
             )
             icon.alpha = 0.5
             gameScene.addChild(icon)
@@ -509,7 +520,7 @@ extension MemorizeState {
         // Position below power-up icons
         button.position = CGPoint(
             x: gameScene.size.width / 2,
-            y: gameScene.size.height / 2 - 380  // Below the power-up icons
+            y: gameScene.size.height / 2 - 350  // Below the power-up icons
         )
         button.name = "confirm_button"
 
