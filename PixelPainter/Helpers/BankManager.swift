@@ -16,10 +16,10 @@ class BankManager {
         guard let gameScene = gameScene,
               let image = gameScene.queueManager.getCurrentImage() else { return }
         
-        let bankHeight = gameScene.context.layoutInfo.bankHeight + 30
+        let bankHeight = gameScene.context.layoutInfo.bankHeight + 100
         let bankWidth = gameScene.size.width
         
-        let bankColor = UIColor(red: 30/255, green: 30/255, blue: 30/255, alpha: 0.75)
+        let bankColor = UIColor(red: 30/255, green: 30/255, blue: 30/255, alpha: 0)
         bankNode = SKSpriteNode(color: bankColor, size: CGSize(width: bankWidth, height: bankHeight))
         
         // Moved the bank position up by increasing the y value

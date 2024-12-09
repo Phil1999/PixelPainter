@@ -23,24 +23,23 @@ class HUDManager {
         hudNode.position = CGPoint(x: 0, y: gameScene.size.height - 100)
         gameScene.addChild(hudNode)
         
-        // timer
-        let timerRadius: CGFloat = 35
+        // timer - now positioned where score counter was
+        let timerRadius: CGFloat = 40
         let timer = CircularTimer(
             radius: timerRadius,
             gameScene: gameScene
         )
-        timer.position = CGPoint(x: 50, y: 0)
+        timer.position = CGPoint(x: gameScene.size.width / 2, y: -30)
         timer.name = "circularTimer"
         hudNode.addChild(timer)
         self.circularTimer = timer
         
-        // score counter
+        // score counter - now positioned where timer was
         let scoreCounter = ScoreCounter(text: "\(gameScene.context.gameInfo.score)")
-        scoreCounter.position = CGPoint(x: gameScene.size.width / 2, y: -60)
+        scoreCounter.position = CGPoint(x: 65, y: 0)
         scoreCounter.name = "scoreCounter"
         hudNode.addChild(scoreCounter)
         self.scoreCounter = scoreCounter
-        
     }
     
     func updateScore(withAnimation: Bool = false) {
@@ -51,7 +50,5 @@ class HUDManager {
         
         let newScoreText = "\(gameScene.context.gameInfo.score)"
         scoreCounter.updateText(newScoreText)
-       
-        
     }
 }

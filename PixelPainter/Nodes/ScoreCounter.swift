@@ -1,45 +1,49 @@
-//
-//  ScoreCounter.swift
-//  PixelPainter
-//
-//  Created by Philip Lee on 11/23/24.
-//
-
 import SpriteKit
 
 class ScoreCounter: SKNode {
     private var container: SKShapeNode
-    private var label: SKLabelNode
+    private var scoreLabel: SKLabelNode
+    private var valueLabel: SKLabelNode
     private let minWidth: CGFloat
 
     init(
-        text: String, fontSize: CGFloat = 24, minWidth: CGFloat = 100,
-        height: CGFloat = 40
+        text: String, fontSize: CGFloat = 20, minWidth: CGFloat = 70,
+        height: CGFloat = 50 // Reduced box height
     ) {
         self.minWidth = minWidth
 
-        // Container (pill shape)
+        // Container (rounded box) with 1px white border
         container = SKShapeNode()
-        // only container background should be transparent
         container.fillColor = UIColor(hex: "2C2C2C").withAlphaComponent(0.75)
-        container.lineWidth = 0
+        container.strokeColor = .white
+        container.lineWidth = 0.75
+        container.alpha = 0.8
 
-        // Label
-        label = SKLabelNode(text: text)
-        label.fontName = "PPNeueMontreal-Bold"
-        label.fontSize = fontSize
-        label.fontColor = .white
-        label.verticalAlignmentMode = .center
-        label.horizontalAlignmentMode = .center
-        label.zPosition = 1
+        // "Score" label
+        scoreLabel = SKLabelNode(text: "Score")
+        scoreLabel.fontName = "PPNeueMontreal-Bold"
+        scoreLabel.fontSize = fontSize * 0.8 // Smaller size for label
+        scoreLabel.fontColor = .lightGray
+        scoreLabel.verticalAlignmentMode = .center
+        scoreLabel.horizontalAlignmentMode = .center
+        scoreLabel.zPosition = 1
+
+        // Value label (displays score)
+        valueLabel = SKLabelNode(text: text)
+        valueLabel.fontName = "PPNeueMontreal-Bold"
+        valueLabel.fontSize = fontSize
+        valueLabel.fontColor = .white
+        valueLabel.verticalAlignmentMode = .center
+        valueLabel.horizontalAlignmentMode = .center
+        valueLabel.zPosition = 1
 
         super.init()
 
         addChild(container)
-        container.addChild(label)
+        addChild(scoreLabel)
+        addChild(valueLabel)
 
-        updateContainer(for: text, height: height)
-
+        updateLayout(for: height)
     }
 
     required init?(coder aDecoder: NSCoder) {
@@ -47,34 +51,44 @@ class ScoreCounter: SKNode {
     }
 
     func updateText(_ newText: String) {
-        label.text = newText
-        updateContainer(for: newText)
+        valueLabel.text = newText
     }
 
-    private func updateContainer(for text: String, height: CGFloat = 40) {
+    private func updateLayout(for height: CGFloat) {
+        // Calculate box dimensions
+        let spacing: CGFloat = 6 // Reduced spacing
+        let totalHeight = height
+        let labelHeight = (totalHeight - spacing) / 2
 
-        // Width should be based on text and includes some padding
-        let textWidth = label.frame.width
+        // Position labels
+        scoreLabel.position = CGPoint(x: 0, y: labelHeight / 2)
+        valueLabel.position = CGPoint(x: 0, y: -labelHeight / 2)
+
+        // Calculate container width dynamically
+        let textWidth = max(scoreLabel.frame.width, valueLabel.frame.width)
         let width = max(minWidth, textWidth + 40)
-        let cornerRadius = height / 2
+        let cornerRadius: CGFloat = 8 // Slightly smaller corner radius
 
+        // Create rounded box path
         let rect = CGRect(
-            x: -width / 2, y: -height / 2, width: width, height: height)
+            x: -width / 2, y: -totalHeight / 2, width: width, height: totalHeight
+        )
         let path = CGPath(
             roundedRect: rect,
             cornerWidth: cornerRadius,
             cornerHeight: cornerRadius,
-            transform: nil)
-
+            transform: nil
+        )
         container.path = path
     }
 }
+
 // MARK: - Score bonus animation
 extension ScoreCounter {
     func showScoreBonus(points: Int) {
         let bonusLabel = SKLabelNode(fontNamed: "PPNeueMontreal-Bold")
         bonusLabel.text = "+\(points)"
-        bonusLabel.fontSize = 24
+        bonusLabel.fontSize = 20
         bonusLabel.fontColor = .yellow
         bonusLabel.position = CGPoint(x: 35, y: 0)
         bonusLabel.alpha = 0
@@ -96,15 +110,13 @@ extension ScoreCounter {
     
     func updateScore(_ newScore: Int, withAnimation: Bool = false) {
         if withAnimation {
-            // Only show animation if score increased
-            let oldScore = Int(label.text ?? "0") ?? 0
+            let oldScore = Int(valueLabel.text ?? "0") ?? 0
             let difference = newScore - oldScore
             if difference > 0 {
                 showScoreBonus(points: difference)
             }
         }
         
-        // Update the actual score text
         updateText("\(newScore)")
     }
 }

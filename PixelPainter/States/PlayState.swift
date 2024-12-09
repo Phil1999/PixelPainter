@@ -138,28 +138,36 @@ class PlayState: GKState {
 
         let timeBonus = Int(gameScene.context.gameInfo.timeRemaining)
         gameScene.context.gameInfo.score += timeBonus
-
         gameScene.context.gameInfo.level += 1
 
         // Play victory animation before transitioning to the next state
         if let backgroundNode = gameScene.childNode(withName: "backgroundNode")
             as? Background
         {
-            backgroundNode.playVictoryAnimation { [weak self] in
-                guard let self = self else { return }
-                SoundManager.shared.resumeBackgroundMusic()
-                // Update board size if needed
-                if self.gameScene.context.gameInfo.level % 4 == 0
-                    && self.gameScene.context.gameInfo.boardSize < 6
-                {
-                    self.gameScene.context.gameInfo.boardSize += 1
-                    print(
-                        "board size is now: ",
-                        self.gameScene.context.gameInfo.boardSize)
+            
+            if let snow = gameScene.childNode(withName: "snowEffect"),
+               let overlay = gameScene.childNode(withName: "freezeOverlay") {
+                snow.removeFromParent()
+                overlay.removeFromParent()
+            }
+            
+            backgroundNode.fadeOutWarningOverlay {
+                backgroundNode.playVictoryAnimation { [weak self] in
+                    guard let self = self else { return }
+                    SoundManager.shared.resumeBackgroundMusic()
+                    // Update board size if needed
+                    if self.gameScene.context.gameInfo.level % 4 == 0
+                        && self.gameScene.context.gameInfo.boardSize < 6
+                    {
+                        self.gameScene.context.gameInfo.boardSize += 1
+                        print(
+                            "board size is now: ",
+                            self.gameScene.context.gameInfo.boardSize)
+                    }
+                    
+                    // Transition to memorize state after animation completes
+                    self.gameScene.context.stateMachine?.enter(MemorizeState.self)
                 }
-
-                // Transition to memorize state after animation completes
-                self.gameScene.context.stateMachine?.enter(MemorizeState.self)
             }
         } else {
             // If no background node, directly transition to the next state
@@ -318,5 +326,8 @@ extension PlayState: CircularTimerDelegate {
 
     func timerDidUpdate(currentTime: TimeInterval) {
         gameScene.context.gameInfo.timeRemaining = currentTime
+        if let background = gameScene.childNode(withName: "backgroundNode") as? Background {
+            background.updateWarningLevel(timeRemaining: currentTime)
+        }
     }
 }
