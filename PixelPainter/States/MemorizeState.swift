@@ -496,7 +496,7 @@ extension MemorizeState {
             return "Briefly flashes the complete image over the grid."
         case .shuffle:
             return
-                "Reorganizes all unplaced pieces in the bank, helping you find the piece you need."
+                "Immediately refreshes the piece bank helping you find the pieces you need."
         }
     }
 
