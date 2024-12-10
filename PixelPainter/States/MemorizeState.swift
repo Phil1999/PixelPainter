@@ -28,7 +28,7 @@ class MemorizeState: GKState {
 
     override func didEnter(from previousState: GKState?) {
         gameScene.isUserInteractionEnabled = true
-        
+
         resetPowerUpSelectionState()
 
         isFirstLevel = gameScene.context.gameInfo.level == 1
@@ -42,7 +42,7 @@ class MemorizeState: GKState {
         setupMemorizeScene()
         showPowerUpSelection()
     }
-    
+
     private func resetPowerUpSelectionState() {
         powerUpSelectionNodes.removeAll()
         selectedPowerUps.removeAll()
@@ -87,7 +87,7 @@ class MemorizeState: GKState {
             completePowerUpSelection()
             return
         }
-        
+
         // Touch logic for selecting tutorial icon
         if let touchedNode = gameScene.nodes(at: location).first,
             let name = touchedNode.name,
@@ -211,7 +211,7 @@ class MemorizeState: GKState {
             scoreCounter.position = CGPoint(
                 x: gameScene.size.width / 6, y: gameScene.size.height - 90)
             gameScene.addChild(scoreCounter)
-            
+
             // add "choose two" label every round for consistency
             let chooseLabel = SKLabelNode(text: "Choose two")
             chooseLabel.fontName = "PPNeueMontreal-Bold"
@@ -222,7 +222,7 @@ class MemorizeState: GKState {
             )
             self.chooseTwoLabel = chooseLabel
             gameScene.addChild(chooseLabel)
-            
+
         } else {
             let chooseLabel = SKLabelNode(text: "Choose two")
             chooseLabel.fontName = "PPNeueMontreal-Bold"
@@ -372,26 +372,33 @@ extension MemorizeState {
         titleLabel.position = CGPoint(x: 0, y: 200)
         titleLabel.horizontalAlignmentMode = .center
         modal.addChild(titleLabel)
-        
 
-        // Video player
+        // Video container
         let videoContainerSize = CGSize(width: 225, height: 250)
-        let videoContainer = SKShapeNode(rectOf: videoContainerSize, cornerRadius: 12)
-        videoContainer.fillColor = type.themeColor
-        videoContainer.strokeColor = type.themeColor
-        videoContainer.lineWidth = 2
-        videoContainer.position = CGPoint(x: 0, y: 50)
-        modal.addChild(videoContainer)
+
+        let cropNode = SKCropNode()
+        let maskNode = SKShapeNode(rectOf: videoContainerSize, cornerRadius: 12)
+        maskNode.fillColor = .white
+        cropNode.maskNode = maskNode
+        cropNode.position = CGPoint(x: 0, y: 50)
 
         // Video player
         let fileName = "\(type.videoFileName).mp4"
         let videoNode = SKVideoNode(fileNamed: fileName)
         videoNode.size = videoContainerSize
-        videoNode.position = videoContainer.position
-        modal.addChild(videoNode)
+        cropNode.addChild(videoNode)
         videoNode.play()
 
-  
+        // Border container
+        let videoContainer = SKShapeNode(
+            rectOf: videoContainerSize, cornerRadius: 12)
+        videoContainer.fillColor = .clear
+        videoContainer.strokeColor = type.themeColor
+        videoContainer.lineWidth = 2
+        videoContainer.position = cropNode.position
+
+        modal.addChild(cropNode)
+        modal.addChild(videoContainer)
 
         // Description section
         let containerWidth = backgroundSize.width - 40
@@ -401,10 +408,12 @@ extension MemorizeState {
         tempLabel.text = descriptionText
         tempLabel.fontSize = 16
         tempLabel.numberOfLines = 0
-        tempLabel.preferredMaxLayoutWidth = containerWidth - 40 // Add padding
+        tempLabel.preferredMaxLayoutWidth = containerWidth - 40  // Add padding
         let textHeight = tempLabel.calculateAccumulatedFrame().height
 
-        let descriptionContainer = SKShapeNode(rectOf: CGSize(width: containerWidth, height: textHeight + 30), cornerRadius: 12)
+        let descriptionContainer = SKShapeNode(
+            rectOf: CGSize(width: containerWidth, height: textHeight + 30),
+            cornerRadius: 12)
         descriptionContainer.fillColor = UIColor(white: 0.1, alpha: 0.95)
         descriptionContainer.strokeColor = UIColor(white: 1, alpha: 0.1)
         descriptionContainer.position = CGPoint(x: 0, y: -135)
@@ -419,8 +428,8 @@ extension MemorizeState {
         descLabel.horizontalAlignmentMode = .left
 
         descLabel.position = CGPoint(
-            x: -containerWidth/2 + 20,
-            y: descriptionContainer.position.y + (textHeight/2) - textHeight
+            x: -containerWidth / 2 + 20,
+            y: descriptionContainer.position.y + (textHeight / 2) - textHeight
         )
         modal.addChild(descLabel)
 
@@ -430,7 +439,7 @@ extension MemorizeState {
         usesLabel.fontSize = 16
         usesLabel.fontColor = .white
         usesLabel.horizontalAlignmentMode = .left
-        usesLabel.position = CGPoint(x: -backgroundSize.width/2 + 65, y: -200)
+        usesLabel.position = CGPoint(x: -backgroundSize.width / 2 + 65, y: -200)
         modal.addChild(usesLabel)
 
         let cooldownLabel = SKLabelNode(fontNamed: "PPNeueMontreal-Medium")
@@ -438,20 +447,22 @@ extension MemorizeState {
         cooldownLabel.fontSize = 16
         cooldownLabel.fontColor = .white
         cooldownLabel.horizontalAlignmentMode = .right
-        cooldownLabel.position = CGPoint(x: backgroundSize.width/2 - 75, y: -200)
+        cooldownLabel.position = CGPoint(
+            x: backgroundSize.width / 2 - 75, y: -200)
         modal.addChild(cooldownLabel)
-        
+
         let dividerLine = SKShapeNode()
         let path = CGMutablePath()
-        path.move(to: CGPoint(x: -backgroundSize.width/2 + 20, y: -210))
-        path.addLine(to: CGPoint(x: backgroundSize.width/2 - 20, y: -210))
+        path.move(to: CGPoint(x: -backgroundSize.width / 2 + 20, y: -210))
+        path.addLine(to: CGPoint(x: backgroundSize.width / 2 - 20, y: -210))
         dividerLine.path = path
         dividerLine.strokeColor = UIColor(white: 0.3, alpha: 1)
         dividerLine.lineWidth = 1
         modal.addChild(dividerLine)
-        
+
         let instructionLabel = SKLabelNode(fontNamed: "PPNeueMontreal-Regular")
-        instructionLabel.text = "Tap the power-up icon during gameplay to activate"
+        instructionLabel.text =
+            "Tap the power-up icon during gameplay to activate"
         instructionLabel.fontSize = 12
         instructionLabel.fontColor = UIColor(white: 0.7, alpha: 1)
         instructionLabel.horizontalAlignmentMode = .center
@@ -529,7 +540,7 @@ extension MemorizeState {
             infoButton.colorBlendFactor = 1.0
             infoButton.color = type.themeColor
             infoButton.name = "info_\(type.rawValue)"
-            
+
             gameScene.addChild(infoButton)
             infoButtons.append(infoButton)
         }
@@ -611,7 +622,6 @@ extension MemorizeState {
         confirmButton?.removeFromParent()
         chooseTwoLabel?.removeFromParent()
         chooseTwoLabel = nil
-        
 
         if !countdownStarted {
             countdownStarted = true
