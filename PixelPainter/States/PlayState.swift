@@ -118,6 +118,9 @@ class PlayState: GKState {
         if bankManager.isBankEmpty() {
             handleLevelComplete()
         }
+        let impactLight = UIImpactFeedbackGenerator(style: .light)
+        impactLight.prepare()
+        impactLight.impactOccurred()
     }
 
     private func handleLevelComplete() {
@@ -183,6 +186,10 @@ class PlayState: GKState {
         gridManager.hideHint()
         self.bankManager.clearSelection()
         SoundManager.shared.stopBackgroundMusic()
+        
+        let impactHeavy = UIImpactFeedbackGenerator(style: .heavy)
+        impactHeavy.prepare()
+        impactHeavy.impactOccurred()
 
         if let gridNode = gameScene.childNode(withName: "grid")
             as? SKSpriteNode,
@@ -228,6 +235,10 @@ class PlayState: GKState {
         EffectManager.shared.temporarilyDisableInteraction(for: GameConstants.GeneralGamePlay.wrongPlacementBufferTime)
         EffectManager.shared.cooldown(piece, duration: GameConstants.GeneralGamePlay.wrongPlacementBufferTime)
         EffectManager.shared.shakeNode(piece)
+        
+        let impactMedium = UIImpactFeedbackGenerator(style: .medium)
+        impactMedium.prepare()
+        impactMedium.impactOccurred()
     }
 
     func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {

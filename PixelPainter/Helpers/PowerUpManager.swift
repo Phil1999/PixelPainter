@@ -112,6 +112,10 @@ class PowerUpManager {
 
         // check if power-up is in cooldown
         if powerUpsInCooldown.contains(type) { return }
+        
+        let impactLight = UIImpactFeedbackGenerator(style: .light)
+        impactLight.prepare()
+        impactLight.impactOccurred()
 
         switch type {
         case .timeStop:

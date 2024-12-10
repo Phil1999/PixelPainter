@@ -19,13 +19,19 @@ class PowerUpIcon: SKNode {
 
     init(type: PowerUpType, uses: Int, minimal: Bool = false) {
         let iconName = type.iconName
+        
+        let glowNode = SKShapeNode(circleOfRadius: mainRadius)
+        glowNode.fillColor = .clear
+        glowNode.strokeColor = type.themeColor
+        glowNode.glowWidth = 10
+        glowNode.alpha = 0.3 // Adjust transparency as needed
 
         // Main circle
         mainCircle = SKShapeNode(circleOfRadius: mainRadius)
         mainCircle.fillColor = UIColor(hex: "252525").withAlphaComponent(0.95)
         mainCircle.strokeColor = type.themeColor
-        mainCircle.lineWidth = 3
-        mainCircle.glowWidth = 1
+        mainCircle.lineWidth = 1
+        mainCircle.glowWidth = 0.2
 
         // Icon
         iconNode = SKSpriteNode(texture: SKTexture(imageNamed: iconName))
@@ -55,9 +61,11 @@ class PowerUpIcon: SKNode {
         
         // Incase we'd like a minimal version of the icon with just the icon and circle
         if minimal {
+            addChild(glowNode)
             addChild(mainCircle)
             addChild(iconNode)
         } else {
+            addChild(glowNode)
             addChild(mainCircle)
             addChild(iconNode)
             addChild(usesBubble)
