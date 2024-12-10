@@ -375,7 +375,7 @@ extension MemorizeState {
         // Semi-transparent background
         let backgroundSize = CGSize(width: 325, height: 500)
         let bg = SKShapeNode(rectOf: backgroundSize, cornerRadius: 20)
-        bg.fillColor = UIColor(white: 0.1, alpha: 0.95)
+        bg.fillColor = UIColor(white: 0.1, alpha: 1)
         bg.strokeColor = UIColor(white: 1, alpha: 0.1)
         bg.lineWidth = 2
         modal.addChild(bg)
