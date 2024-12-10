@@ -105,6 +105,11 @@ class BankManager {
             shapeNode.strokeColor = .white
             shapeNode.lineWidth = 2
             
+            let glowNode = SKShapeNode(path: roundedRectPath.cgPath)
+            glowNode.strokeColor = .white
+            glowNode.glowWidth = 4
+            glowNode.fillColor = .clear
+            
             // Create the piece sprite with the texture
             let pieceNode = SKSpriteNode(texture: SKTexture(image: piece.image))
             pieceNode.size = CGSize(width: bankPieceSize, height: bankPieceSize)
@@ -116,6 +121,7 @@ class BankManager {
             cropNode.maskNode = maskNode
             cropNode.addChild(pieceNode)
             
+            containerNode.addChild(glowNode)
             containerNode.addChild(cropNode)
             containerNode.addChild(shapeNode)
             
