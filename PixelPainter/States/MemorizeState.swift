@@ -526,7 +526,10 @@ extension MemorizeState {
                 x: icon.position.x + 25,
                 y: icon.position.y + 25
             )
+            infoButton.colorBlendFactor = 1.0
+            infoButton.color = type.themeColor
             infoButton.name = "info_\(type.rawValue)"
+            
             gameScene.addChild(infoButton)
             infoButtons.append(infoButton)
         }
