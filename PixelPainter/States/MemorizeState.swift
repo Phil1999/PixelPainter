@@ -185,10 +185,22 @@ class MemorizeState: GKState {
         gameScene.context.gameInfo.currentImage = image
 
         let imageNode = SKSpriteNode(texture: SKTexture(image: image))
+        imageNode.name = "imageNode"
         imageNode.size = gameScene.context.layoutInfo.gridSize
         imageNode.position = CGPoint(
             x: gameScene.size.width / 2, y: gameScene.size.height / 1.85)
         gameScene.addChild(imageNode)
+
+        let frameSize = CGSize(
+            width: imageNode.size.width + 15,
+            height: imageNode.size.height + 15)
+        let frameNode = SKShapeNode(rectOf: frameSize, cornerRadius: 10)
+        frameNode.strokeColor = .white
+        frameNode.lineWidth = 4
+        frameNode.position = imageNode.position
+        frameNode.zPosition = imageNode.zPosition - 1
+        frameNode.name = "frameNode"
+        gameScene.addChild(frameNode)
 
         let levelLabel =
             isFirstLevel
@@ -302,6 +314,10 @@ class MemorizeState: GKState {
             width: imageNode.size.width / CGFloat(gridDimension),
             height: imageNode.size.height / CGFloat(gridDimension)
         )
+
+        if let frameNode = gameScene.childNode(withName: "frameNode") {
+            frameNode.removeFromParent()
+        }
 
         let piecesContainer = SKNode()
         piecesContainer.position = imageNode.position
