@@ -265,7 +265,7 @@ class GridManager {
 
             let size = frameNode.size
             let rect = CGRect(origin: .zero, size: size)
-            let cornerRadius: CGFloat = 30
+            let cornerRadius: CGFloat = 2
 
             let path = UIBezierPath(
                 roundedRect: rect,
