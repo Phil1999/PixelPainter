@@ -22,9 +22,10 @@ class PowerUpIcon: SKNode {
 
         // Main circle
         mainCircle = SKShapeNode(circleOfRadius: mainRadius)
-        mainCircle.fillColor = UIColor(hex: "252525").withAlphaComponent(0.9)
-        mainCircle.strokeColor = .clear
-        mainCircle.lineWidth = 0
+        mainCircle.fillColor = UIColor(hex: "252525").withAlphaComponent(0.95)
+        mainCircle.strokeColor = type.themeColor
+        mainCircle.lineWidth = 3
+        mainCircle.glowWidth = 1
 
         // Icon
         iconNode = SKSpriteNode(texture: SKTexture(imageNamed: iconName))
