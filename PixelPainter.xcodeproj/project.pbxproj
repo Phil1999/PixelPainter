@@ -25,10 +25,10 @@
 		D4F4F8092CFAC46B00AF05F5 /* level_complete.wav in Resources */ = {isa = PBXBuildFile; fileRef = D4F4F8052CFAC46B00AF05F5 /* level_complete.wav */; };
 		D4F4F80A2CFAC46B00AF05F5 /* piece_placed.wav in Resources */ = {isa = PBXBuildFile; fileRef = D4F4F8062CFAC46B00AF05F5 /* piece_placed.wav */; };
 		D4F4F80D2CFAC56300AF05F5 /* game-over-no-puzzle.wav in Resources */ = {isa = PBXBuildFile; fileRef = D4F4F80C2CFAC56300AF05F5 /* game-over-no-puzzle.wav */; };
-		D4F4F88D2CFBDC3300AF05F5 /* time_stop_demo.mp4 in Resources */ = {isa = PBXBuildFile; fileRef = D4F4F88B2CFBDC3300AF05F5 /* time_stop_demo.mp4 */; };
-		D4F4F88E2CFBDC3300AF05F5 /* shuffle_demo.mp4 in Resources */ = {isa = PBXBuildFile; fileRef = D4F4F88A2CFBDC3300AF05F5 /* shuffle_demo.mp4 */; };
-		D4F4F88F2CFBDC3300AF05F5 /* flash_demo.mp4 in Resources */ = {isa = PBXBuildFile; fileRef = D4F4F8882CFBDC3300AF05F5 /* flash_demo.mp4 */; };
-		D4F4F8902CFBDC3300AF05F5 /* place_demo.mp4 in Resources */ = {isa = PBXBuildFile; fileRef = D4F4F8892CFBDC3300AF05F5 /* place_demo.mp4 */; };
+		D4F4F97F2D07CF4200AF05F5 /* flash_demo.mp4 in Resources */ = {isa = PBXBuildFile; fileRef = D4F4F97B2D07CF4200AF05F5 /* flash_demo.mp4 */; };
+		D4F4F9802D07CF4200AF05F5 /* shuffle_demo.mp4 in Resources */ = {isa = PBXBuildFile; fileRef = D4F4F97E2D07CF4200AF05F5 /* shuffle_demo.mp4 */; };
+		D4F4F9822D07CF4200AF05F5 /* place_demo.mp4 in Resources */ = {isa = PBXBuildFile; fileRef = D4F4F97D2D07CF4200AF05F5 /* place_demo.mp4 */; };
+		D4F4F9842D07CF9700AF05F5 /* time_stop_demo.mp4 in Resources */ = {isa = PBXBuildFile; fileRef = D4F4F9832D07CF9700AF05F5 /* time_stop_demo.mp4 */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -70,10 +70,10 @@
 		D4F4F8052CFAC46B00AF05F5 /* level_complete.wav */ = {isa = PBXFileReference; lastKnownFileType = audio.wav; path = level_complete.wav; sourceTree = "<group>"; };
 		D4F4F8062CFAC46B00AF05F5 /* piece_placed.wav */ = {isa = PBXFileReference; lastKnownFileType = audio.wav; path = piece_placed.wav; sourceTree = "<group>"; };
 		D4F4F80C2CFAC56300AF05F5 /* game-over-no-puzzle.wav */ = {isa = PBXFileReference; lastKnownFileType = audio.wav; path = "game-over-no-puzzle.wav"; sourceTree = "<group>"; };
-		D4F4F8882CFBDC3300AF05F5 /* flash_demo.mp4 */ = {isa = PBXFileReference; lastKnownFileType = file; path = flash_demo.mp4; sourceTree = "<group>"; };
-		D4F4F8892CFBDC3300AF05F5 /* place_demo.mp4 */ = {isa = PBXFileReference; lastKnownFileType = file; path = place_demo.mp4; sourceTree = "<group>"; };
-		D4F4F88A2CFBDC3300AF05F5 /* shuffle_demo.mp4 */ = {isa = PBXFileReference; lastKnownFileType = file; path = shuffle_demo.mp4; sourceTree = "<group>"; };
-		D4F4F88B2CFBDC3300AF05F5 /* time_stop_demo.mp4 */ = {isa = PBXFileReference; lastKnownFileType = file; path = time_stop_demo.mp4; sourceTree = "<group>"; };
+		D4F4F97B2D07CF4200AF05F5 /* flash_demo.mp4 */ = {isa = PBXFileReference; lastKnownFileType = file; path = flash_demo.mp4; sourceTree = "<group>"; };
+		D4F4F97D2D07CF4200AF05F5 /* place_demo.mp4 */ = {isa = PBXFileReference; lastKnownFileType = file; path = place_demo.mp4; sourceTree = "<group>"; };
+		D4F4F97E2D07CF4200AF05F5 /* shuffle_demo.mp4 */ = {isa = PBXFileReference; lastKnownFileType = file; path = shuffle_demo.mp4; sourceTree = "<group>"; };
+		D4F4F9832D07CF9700AF05F5 /* time_stop_demo.mp4 */ = {isa = PBXFileReference; lastKnownFileType = file; path = time_stop_demo.mp4; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
@@ -173,10 +173,10 @@
 		D4F4F88C2CFBDC3300AF05F5 /* tutorial_videos */ = {
 			isa = PBXGroup;
 			children = (
-				D4F4F8882CFBDC3300AF05F5 /* flash_demo.mp4 */,
-				D4F4F8892CFBDC3300AF05F5 /* place_demo.mp4 */,
-				D4F4F88A2CFBDC3300AF05F5 /* shuffle_demo.mp4 */,
-				D4F4F88B2CFBDC3300AF05F5 /* time_stop_demo.mp4 */,
+				D4F4F9832D07CF9700AF05F5 /* time_stop_demo.mp4 */,
+				D4F4F97B2D07CF4200AF05F5 /* flash_demo.mp4 */,
+				D4F4F97D2D07CF4200AF05F5 /* place_demo.mp4 */,
+				D4F4F97E2D07CF4200AF05F5 /* shuffle_demo.mp4 */,
 			);
 			path = tutorial_videos;
 			sourceTree = "<group>";
@@ -291,19 +291,19 @@
 			buildActionMask = 2147483647;
 			files = (
 				D4AC0F9A2CBEF294004FF844 /* Assets.xcassets in Resources */,
+				D4F4F9842D07CF9700AF05F5 /* time_stop_demo.mp4 in Resources */,
 				D4F4F80D2CFAC56300AF05F5 /* game-over-no-puzzle.wav in Resources */,
 				D46D0FA32CCB1B6200E8D37C /* PPNeueMontreal-Bold.otf in Resources */,
 				D46D0FA42CCB1B6200E8D37C /* PPNeueMontreal-Italic.otf in Resources */,
 				D46D0FA52CCB1B6200E8D37C /* PPNeueMontreal-SemiBold.ttf in Resources */,
 				D4F4F8072CFAC46B00AF05F5 /* game-end-incomplete-puzzle.mp3 in Resources */,
+				D4F4F97F2D07CF4200AF05F5 /* flash_demo.mp4 in Resources */,
+				D4F4F9802D07CF4200AF05F5 /* shuffle_demo.mp4 in Resources */,
+				D4F4F9822D07CF4200AF05F5 /* place_demo.mp4 in Resources */,
 				D4F4F8082CFAC46B00AF05F5 /* game-bg.mp3 in Resources */,
 				D4F4F8092CFAC46B00AF05F5 /* level_complete.wav in Resources */,
 				D4F4F80A2CFAC46B00AF05F5 /* piece_placed.wav in Resources */,
 				D46D0FA62CCB1B6200E8D37C /* PPNeueMontreal-SemiBolditalic.otf in Resources */,
-				D4F4F88D2CFBDC3300AF05F5 /* time_stop_demo.mp4 in Resources */,
-				D4F4F88E2CFBDC3300AF05F5 /* shuffle_demo.mp4 in Resources */,
-				D4F4F88F2CFBDC3300AF05F5 /* flash_demo.mp4 in Resources */,
-				D4F4F8902CFBDC3300AF05F5 /* place_demo.mp4 in Resources */,
 				D46D0FA72CCB1B6200E8D37C /* PPNeueMontreal-Medium.otf in Resources */,
 				D46D0FA82CCB1B6200E8D37C /* PPNeueMontreal-Thin.otf in Resources */,
 				D46D0FA92CCB1B6200E8D37C /* PPNeueMontreal-Book.otf in Resources */,
@@ -504,8 +504,7 @@
 				INFOPLIST_KEY_UILaunchStoryboardName = "";
 				INFOPLIST_KEY_UIMainStoryboardFile = "";
 				INFOPLIST_KEY_UIStatusBarHidden = YES;
-				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
-				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				INFOPLIST_KEY_UISupportedInterfaceOrientations = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown";
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -533,8 +532,7 @@
 				INFOPLIST_KEY_UILaunchStoryboardName = "";
 				INFOPLIST_KEY_UIMainStoryboardFile = "";
 				INFOPLIST_KEY_UIStatusBarHidden = YES;
-				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
-				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				INFOPLIST_KEY_UISupportedInterfaceOrientations = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown";
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
