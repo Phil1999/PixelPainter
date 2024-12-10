@@ -121,9 +121,9 @@ class BankManager {
             cropNode.maskNode = maskNode
             cropNode.addChild(pieceNode)
             
-            containerNode.addChild(glowNode)
             containerNode.addChild(cropNode)
             containerNode.addChild(shapeNode)
+            containerNode.addChild(glowNode)
             
             bankNode.addChild(containerNode)
             visiblePieces.append(containerNode)
