@@ -54,6 +54,19 @@ extension PowerUpType {
         case .shuffle: return 3
         }
     }
+    
+    var themeColor: UIColor {
+        switch self {
+        case .timeStop:
+            return UIColor(hex: "06B6D4") // Cyan-500
+        case .place:
+            return UIColor(hex: "10B981") // Emerald-500
+        case .flash:
+            return UIColor(hex: "F59E0B") // Amber-500
+        case .shuffle:
+            return UIColor(hex: "8B5CF6") // Purple-500
+            }
+        }
 }
 
 class PowerUpIndicator: SKNode {

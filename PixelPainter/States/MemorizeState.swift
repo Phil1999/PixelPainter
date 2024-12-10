@@ -357,10 +357,10 @@ extension MemorizeState {
         let modal = SKNode()
 
         // Semi-transparent background
-        let bg = SKShapeNode(
-            rectOf: CGSize(width: 300, height: 400), cornerRadius: 20)
-        bg.fillColor = UIColor(white: 0, alpha: 0.9)
-        bg.strokeColor = .white
+        let backgroundSize = CGSize(width: 325, height: 500)
+        let bg = SKShapeNode(rectOf: backgroundSize, cornerRadius: 20)
+        bg.fillColor = UIColor(white: 0.1, alpha: 0.95)
+        bg.strokeColor = UIColor(white: 1, alpha: 0.1)
         bg.lineWidth = 2
         modal.addChild(bg)
 
@@ -368,38 +368,100 @@ extension MemorizeState {
         let titleLabel = SKLabelNode(fontNamed: "PPNeueMontreal-Bold")
         titleLabel.text = type.displayName
         titleLabel.fontSize = 24
-        titleLabel.position = CGPoint(x: 0, y: 150)
+        titleLabel.fontColor = type.themeColor
+        titleLabel.position = CGPoint(x: 0, y: 200)
+        titleLabel.horizontalAlignmentMode = .center
         modal.addChild(titleLabel)
+        
+
+        // Video player
+        let videoContainerSize = CGSize(width: 225, height: 250)
+        let videoContainer = SKShapeNode(rectOf: videoContainerSize, cornerRadius: 12)
+        videoContainer.fillColor = type.themeColor
+        videoContainer.strokeColor = type.themeColor
+        videoContainer.lineWidth = 2
+        videoContainer.position = CGPoint(x: 0, y: 50)
+        modal.addChild(videoContainer)
 
         // Video player
         let fileName = "\(type.videoFileName).mp4"
         let videoNode = SKVideoNode(fileNamed: fileName)
-        videoNode.size = CGSize(width: 200, height: 200)
-        videoNode.position = CGPoint(x: 0, y: 30)
+        videoNode.size = videoContainerSize
+        videoNode.position = videoContainer.position
         modal.addChild(videoNode)
         videoNode.play()
 
-        // Description
+  
+
+        // Description section
+        let containerWidth = backgroundSize.width - 40
+        let descriptionText = getPowerUpDescription(type)
+
+        let tempLabel = SKLabelNode(fontNamed: "PPNeueMontreal-Regular")
+        tempLabel.text = descriptionText
+        tempLabel.fontSize = 16
+        tempLabel.numberOfLines = 0
+        tempLabel.preferredMaxLayoutWidth = containerWidth - 40 // Add padding
+        let textHeight = tempLabel.calculateAccumulatedFrame().height
+
+        let descriptionContainer = SKShapeNode(rectOf: CGSize(width: containerWidth, height: textHeight + 30), cornerRadius: 12)
+        descriptionContainer.fillColor = UIColor(white: 0.1, alpha: 0.95)
+        descriptionContainer.strokeColor = UIColor(white: 1, alpha: 0.1)
+        descriptionContainer.position = CGPoint(x: 0, y: -135)
+        modal.addChild(descriptionContainer)
+
         let descLabel = SKLabelNode(fontNamed: "PPNeueMontreal-Regular")
-        descLabel.text = getPowerUpDescription(type)
+        descLabel.text = descriptionText
         descLabel.fontSize = 16
+        descLabel.fontColor = .white
         descLabel.numberOfLines = 0
-        descLabel.preferredMaxLayoutWidth = 250
-        descLabel.position = CGPoint(x: 0, y: -140)
+        descLabel.preferredMaxLayoutWidth = containerWidth - 40
+        descLabel.horizontalAlignmentMode = .left
+
+        descLabel.position = CGPoint(
+            x: -containerWidth/2 + 20,
+            y: descriptionContainer.position.y + (textHeight/2) - textHeight
+        )
         modal.addChild(descLabel)
 
         // Uses and cooldown info
-        let statsLabel = SKLabelNode(fontNamed: "PPNeueMontreal-Medium")
-        statsLabel.text =
-            "Uses: \(type.uses) | Cooldown: \(getCooldownText(type))"
-        statsLabel.fontSize = 16
-        statsLabel.position = CGPoint(x: 0, y: -180)
-        modal.addChild(statsLabel)
+        let usesLabel = SKLabelNode(fontNamed: "PPNeueMontreal-Medium")
+        usesLabel.text = "Uses: \(type.uses)"
+        usesLabel.fontSize = 16
+        usesLabel.fontColor = .white
+        usesLabel.horizontalAlignmentMode = .left
+        usesLabel.position = CGPoint(x: -backgroundSize.width/2 + 65, y: -200)
+        modal.addChild(usesLabel)
+
+        let cooldownLabel = SKLabelNode(fontNamed: "PPNeueMontreal-Medium")
+        cooldownLabel.text = "Cooldown: \(getCooldownText(type))"
+        cooldownLabel.fontSize = 16
+        cooldownLabel.fontColor = .white
+        cooldownLabel.horizontalAlignmentMode = .right
+        cooldownLabel.position = CGPoint(x: backgroundSize.width/2 - 75, y: -200)
+        modal.addChild(cooldownLabel)
+        
+        let dividerLine = SKShapeNode()
+        let path = CGMutablePath()
+        path.move(to: CGPoint(x: -backgroundSize.width/2 + 20, y: -210))
+        path.addLine(to: CGPoint(x: backgroundSize.width/2 - 20, y: -210))
+        dividerLine.path = path
+        dividerLine.strokeColor = UIColor(white: 0.3, alpha: 1)
+        dividerLine.lineWidth = 1
+        modal.addChild(dividerLine)
+        
+        let instructionLabel = SKLabelNode(fontNamed: "PPNeueMontreal-Regular")
+        instructionLabel.text = "Tap the power-up icon during gameplay to activate"
+        instructionLabel.fontSize = 12
+        instructionLabel.fontColor = UIColor(white: 0.7, alpha: 1)
+        instructionLabel.horizontalAlignmentMode = .center
+        instructionLabel.position = CGPoint(x: 0, y: -235)
+        modal.addChild(instructionLabel)
 
         // Close button
-        let closeButton = SKSpriteNode(imageNamed: "close")
-        closeButton.size = CGSize(width: 30, height: 30)
-        closeButton.position = CGPoint(x: 120, y: 170)
+        let closeButton = SKSpriteNode(imageNamed: "close-button")
+        closeButton.size = CGSize(width: 12, height: 12)
+        closeButton.position = CGPoint(x: 135, y: 225)
         closeButton.name = "close_info"
         modal.addChild(closeButton)
 
@@ -418,7 +480,7 @@ extension MemorizeState {
                 "Freezes the timer for 5 seconds, giving you extra time to think and place pieces."
         case .place:
             return
-                "Automatically places one random unplaced piece in its correct position."
+                "Automatically places the leftmost unplaced piece in its correct position."
         case .flash:
             return "Briefly flashes the complete image over the grid."
         case .shuffle:
