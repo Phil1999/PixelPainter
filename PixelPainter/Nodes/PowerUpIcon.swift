@@ -23,7 +23,7 @@ class PowerUpIcon: SKNode {
         let glowNode = SKShapeNode(circleOfRadius: mainRadius)
         glowNode.fillColor = .clear
         glowNode.strokeColor = type.themeColor
-        glowNode.glowWidth = 10
+        glowNode.glowWidth = 4
         glowNode.alpha = 0.3 // Adjust transparency as needed
 
         // Main circle

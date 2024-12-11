@@ -109,7 +109,7 @@ class BankManager {
             glowNode.strokeColor = .white.withAlphaComponent(0.5)
             glowNode.lineWidth = 0.2
             glowNode.fillColor = .clear
-            glowNode.glowWidth = 8
+            glowNode.glowWidth = 4
             glowNode.zPosition = -1
             
             // Create the piece sprite with the texture
