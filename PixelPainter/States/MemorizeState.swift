@@ -16,11 +16,11 @@ class MemorizeState: GKState {
     private var powerUpSelectionNodes: [PowerUpIcon] = []
     private var selectedPowerUps: Set<PowerUpType> = []
     private var chooseTwoLabel: SKLabelNode?
+    private var levelLabel: SKLabelNode?
     private var countdownStarted = false
     private var currentInfoModal: SKNode?
     private var confirmButton: SKNode?
     private var infoButtons: [SKSpriteNode] = []
-    private var levelContainer: SKNode?
 
     init(gameScene: GameScene) {
         self.gameScene = gameScene
@@ -203,58 +203,27 @@ class MemorizeState: GKState {
         frameNode.name = "frameNode"
         gameScene.addChild(frameNode)
 
-        // level label container
-        let levelContainer = SKNode()
-        levelContainer.position = CGPoint(
-            x: gameScene.size.width / 2, y: gameScene.size.height - 145)
+        let levelLabel =
+            isFirstLevel
+            ? SKLabelNode(text: "Level 1")
+            : SKLabelNode(
+                text: "Level \(Int(gameScene.context.gameInfo.level))")
 
-        let screenScale = gameScene.size.width / 390 // Using iPhone 14 as reference
-        let numberFontSize: CGFloat = 56 * screenScale
-        let levelFontSize: CGFloat = 20 * screenScale
-
-        let tempLabel = SKLabelNode(fontNamed: "PPNeueMontreal-Bold")
-        tempLabel.fontSize = numberFontSize
-        tempLabel.text = "1000"  // reference number
-        let maxNumberWidth = tempLabel.frame.width
-
-        let levelText = SKLabelNode()
-        levelText.fontName = "PPNeueMontreal-Bold"
-        levelText.fontSize = levelFontSize
-        levelText.text = "LEVEL"
-        levelText.fontColor = .white.withAlphaComponent(0.75)
-        levelText.verticalAlignmentMode = .center
-        levelText.horizontalAlignmentMode = .center
-        levelText.position = CGPoint(x: 5, y: 15 * screenScale)
-
-        let levelNum = isFirstLevel ? 1 : Int(gameScene.context.gameInfo.level)
-        let numberLabel = SKLabelNode(fontNamed: "PPNeueMontreal-Bold")
-        numberLabel.fontSize = numberFontSize
-        numberLabel.text = "\(levelNum)"
-        numberLabel.fontColor = .white
-        numberLabel.verticalAlignmentMode = .center
-        numberLabel.horizontalAlignmentMode = .center
-        numberLabel.position = CGPoint(x: 0, y: -20 * screenScale)
-
-        let underline = SKShapeNode(
-            rectOf: CGSize(width: maxNumberWidth, height: 1 * screenScale))
-        underline.fillColor = .white
-        underline.strokeColor = .clear
-        underline.alpha = 0.3
-        underline.position = CGPoint(x: 0, y: -50 * screenScale)
-
-        levelContainer.addChild(levelText)
-        levelContainer.addChild(numberLabel)
-        levelContainer.addChild(underline)
-        levelContainer.name = "levelLabel"
-        self.levelContainer = levelContainer
-        gameScene.addChild(levelContainer)
+        levelLabel.fontName = "PPNeueMontreal-Bold"
+        levelLabel.fontSize = 36
+        levelLabel.fontColor = .white
+        levelLabel.position = CGPoint(
+            x: gameScene.size.width / 2, y: gameScene.size.height - 100)
+        levelLabel.name = "levelLabel"
+        self.levelLabel = levelLabel
+        gameScene.addChild(levelLabel)
 
         if !isFirstLevel {
             // score is not shown on first round
             let scoreCounter = ScoreCounter(
                 text: "\(gameScene.context.gameInfo.score)")
             scoreCounter.position = CGPoint(
-                x: gameScene.size.width / 6, y: gameScene.size.height - 90)
+                x: gameScene.size.width / 6, y: gameScene.size.height - 100)
             gameScene.addChild(scoreCounter)
 
             // add "choose two" label every round for consistency
@@ -679,7 +648,7 @@ extension MemorizeState {
         infoButtons.forEach { $0.removeFromParent() }
         confirmButton?.removeFromParent()
         chooseTwoLabel?.removeFromParent()
-        levelContainer?.removeFromParent()
+        levelLabel?.removeFromParent()
         chooseTwoLabel = nil
 
         if !countdownStarted {
