@@ -33,7 +33,9 @@ class SoundManager {
             "level_complete": "level_complete.wav",
             "game_over_incomplete_puzzle": "game-end-incomplete-puzzle.mp3",
             "game_over_no_puzzle": "game-over-no-puzzle.wav",
-
+            "freeze":"freeze.mp3",
+            "shutter-click":"shutter-click.mp3",
+            "shuffle":"shuffle.mp3",
         ]
 
         // Preload each sound
@@ -130,4 +132,8 @@ enum GameSound: String {
     case levelComplete = "level_complete"
     case gameOverWithPieces = "game_over_incomplete_puzzle"
     case gameOverNoPieces = "game_over_no_puzzle"
+    case freeze = "freeze"
+    case shutter = "shutter-click"
+    case shuffle = "shuffle"
 }
+

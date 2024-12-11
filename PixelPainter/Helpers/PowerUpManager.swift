@@ -1,4 +1,5 @@
 import SpriteKit
+import AVFoundation
 
 class PowerUpManager {
     weak var gameScene: GameScene?
@@ -120,6 +121,7 @@ class PowerUpManager {
         switch type {
         case .timeStop:
             showPowerUpAnimation(type)
+            SoundManager.shared.playSound(.freeze)
             if uses > 1 {
                 powerUpsInCooldown.insert(type)
                 EffectManager.shared.cooldown(
@@ -184,6 +186,7 @@ class PowerUpManager {
 
         case .flash:
             showPowerUpAnimation(type)
+            SoundManager.shared.playSound(.shutter)
             if uses > 1 {
                 powerUpsInCooldown.insert(type)
                 EffectManager.shared.cooldown(
@@ -212,6 +215,7 @@ class PowerUpManager {
 
         case .shuffle:
             showPowerUpAnimation(type)
+            SoundManager.shared.playSound(.shuffle)
             if uses > 1 {
                 powerUpsInCooldown.insert(type)
                 EffectManager.shared.cooldown(powerUpIcon, duration: 0.5)
@@ -250,3 +254,4 @@ class PowerUpManager {
         }
     }
 }
+

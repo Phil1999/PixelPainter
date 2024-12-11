@@ -14,7 +14,9 @@
 		A9BA14972D090C4000F1C5BE /* game-end-incomplete-puzzle.mp3 in Resources */ = {isa = PBXBuildFile; fileRef = A9BA14962D090C4000F1C5BE /* game-end-incomplete-puzzle.mp3 */; };
 		A9BA14982D090C4000F1C5BE /* game-end-incomplete-puzzle.mp3 in Resources */ = {isa = PBXBuildFile; fileRef = A9BA14962D090C4000F1C5BE /* game-end-incomplete-puzzle.mp3 */; };
 		A9BA14992D090C4000F1C5BE /* game-end-incomplete-puzzle.mp3 in Resources */ = {isa = PBXBuildFile; fileRef = A9BA14962D090C4000F1C5BE /* game-end-incomplete-puzzle.mp3 */; };
-		A9EC40EA2D090B4D00DA4AF1 /* drum-roll.mp3 in Resources */ = {isa = PBXBuildFile; fileRef = A9EC40E92D090B4D00DA4AF1 /* drum-roll.mp3 */; };
+		A9BA149B2D09138800F1C5BE /* freeze.mp3 in Resources */ = {isa = PBXBuildFile; fileRef = A9BA149A2D09138800F1C5BE /* freeze.mp3 */; };
+		A9BA149D2D0914ED00F1C5BE /* shutter-click.mp3 in Resources */ = {isa = PBXBuildFile; fileRef = A9BA149C2D0914ED00F1C5BE /* shutter-click.mp3 */; };
+		A9BA149F2D09165000F1C5BE /* shuffle.mp3 in Resources */ = {isa = PBXBuildFile; fileRef = A9BA149E2D09165000F1C5BE /* shuffle.mp3 */; };
 		D46D0FA32CCB1B6200E8D37C /* PPNeueMontreal-Bold.otf in Resources */ = {isa = PBXBuildFile; fileRef = D46D0F9B2CCB1B6200E8D37C /* PPNeueMontreal-Bold.otf */; };
 		D46D0FA42CCB1B6200E8D37C /* PPNeueMontreal-Italic.otf in Resources */ = {isa = PBXBuildFile; fileRef = D46D0F9D2CCB1B6200E8D37C /* PPNeueMontreal-Italic.otf */; };
 		D46D0FA52CCB1B6200E8D37C /* PPNeueMontreal-SemiBold.ttf in Resources */ = {isa = PBXBuildFile; fileRef = D46D0F9F2CCB1B6200E8D37C /* PPNeueMontreal-SemiBold.ttf */; };
@@ -57,7 +59,9 @@
 		A95E25902CC7F46400163C5C /* GameContext.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GameContext.swift; sourceTree = "<group>"; };
 		A95E25922CC7F56D00163C5C /* GameScene.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GameScene.swift; sourceTree = "<group>"; };
 		A9BA14962D090C4000F1C5BE /* game-end-incomplete-puzzle.mp3 */ = {isa = PBXFileReference; lastKnownFileType = audio.mp3; path = "game-end-incomplete-puzzle.mp3"; sourceTree = "<group>"; };
-		A9EC40E92D090B4D00DA4AF1 /* drum-roll.mp3 */ = {isa = PBXFileReference; lastKnownFileType = audio.mp3; path = "drum-roll.mp3"; sourceTree = "<group>"; };
+		A9BA149A2D09138800F1C5BE /* freeze.mp3 */ = {isa = PBXFileReference; lastKnownFileType = audio.mp3; path = freeze.mp3; sourceTree = "<group>"; };
+		A9BA149C2D0914ED00F1C5BE /* shutter-click.mp3 */ = {isa = PBXFileReference; lastKnownFileType = audio.mp3; path = "shutter-click.mp3"; sourceTree = "<group>"; };
+		A9BA149E2D09165000F1C5BE /* shuffle.mp3 */ = {isa = PBXFileReference; lastKnownFileType = audio.mp3; path = shuffle.mp3; sourceTree = "<group>"; };
 		D46D0F9B2CCB1B6200E8D37C /* PPNeueMontreal-Bold.otf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "PPNeueMontreal-Bold.otf"; sourceTree = "<group>"; };
 		D46D0F9C2CCB1B6200E8D37C /* PPNeueMontreal-Book.otf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "PPNeueMontreal-Book.otf"; sourceTree = "<group>"; };
 		D46D0F9D2CCB1B6200E8D37C /* PPNeueMontreal-Italic.otf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "PPNeueMontreal-Italic.otf"; sourceTree = "<group>"; };
@@ -168,9 +172,11 @@
 				D4F4F80C2CFAC56300AF05F5 /* game-over-no-puzzle.wav */,
 				D4F4F8032CFAC46B00AF05F5 /* game-bg.mp3 */,
 				A9BA14962D090C4000F1C5BE /* game-end-incomplete-puzzle.mp3 */,
-				A9EC40E92D090B4D00DA4AF1 /* drum-roll.mp3 */,
 				D4F4F8052CFAC46B00AF05F5 /* level_complete.wav */,
+				A9BA149E2D09165000F1C5BE /* shuffle.mp3 */,
+				A9BA149C2D0914ED00F1C5BE /* shutter-click.mp3 */,
 				D4F4F8062CFAC46B00AF05F5 /* piece_placed.wav */,
+				A9BA149A2D09138800F1C5BE /* freeze.mp3 */,
 			);
 			path = sounds;
 			sourceTree = "<group>";
@@ -300,6 +306,7 @@
 				D4F4F80D2CFAC56300AF05F5 /* game-over-no-puzzle.wav in Resources */,
 				D46D0FA32CCB1B6200E8D37C /* PPNeueMontreal-Bold.otf in Resources */,
 				A9BA14972D090C4000F1C5BE /* game-end-incomplete-puzzle.mp3 in Resources */,
+				A9BA149B2D09138800F1C5BE /* freeze.mp3 in Resources */,
 				D46D0FA42CCB1B6200E8D37C /* PPNeueMontreal-Italic.otf in Resources */,
 				D46D0FA52CCB1B6200E8D37C /* PPNeueMontreal-SemiBold.ttf in Resources */,
 				D4F4F97F2D07CF4200AF05F5 /* flash_demo.mp4 in Resources */,
@@ -309,8 +316,9 @@
 				D4F4F8092CFAC46B00AF05F5 /* level_complete.wav in Resources */,
 				D4F4F80A2CFAC46B00AF05F5 /* piece_placed.wav in Resources */,
 				D46D0FA62CCB1B6200E8D37C /* PPNeueMontreal-SemiBolditalic.otf in Resources */,
-				A9EC40EA2D090B4D00DA4AF1 /* drum-roll.mp3 in Resources */,
+				A9BA149D2D0914ED00F1C5BE /* shutter-click.mp3 in Resources */,
 				D46D0FA72CCB1B6200E8D37C /* PPNeueMontreal-Medium.otf in Resources */,
+				A9BA149F2D09165000F1C5BE /* shuffle.mp3 in Resources */,
 				D46D0FA82CCB1B6200E8D37C /* PPNeueMontreal-Thin.otf in Resources */,
 				D46D0FA92CCB1B6200E8D37C /* PPNeueMontreal-Book.otf in Resources */,
 			);
