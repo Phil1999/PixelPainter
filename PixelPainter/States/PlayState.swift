@@ -179,6 +179,7 @@ class PlayState: GKState {
     }
     
     private func handleGameOver() {
+
         EffectManager.shared.temporarilyDisableInteraction()
         
         stopHintTimer()
@@ -198,12 +199,14 @@ class PlayState: GKState {
             }).isEmpty
         {
             // Only play animation if there are pieces
+            self.powerUpManager.removeFlashImage()  // Add this line
             EffectManager.shared.playGameOverEffect { [weak self] in
                 guard let self = self else { return }
                 self.gameScene.context.stateMachine?.enter(GameOverState.self)
             }
         } else {
             // Go directly to game over if no pieces
+            self.powerUpManager.removeFlashImage()  // Add this line
             self.gameScene.context.stateMachine?.enter(GameOverState.self)
             SoundManager.shared.playSound(.gameOverNoPieces)
         }

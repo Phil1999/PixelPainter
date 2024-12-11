@@ -22,7 +22,7 @@ class PowerUpManager {
         let powerUpTypes = Array(powerUpUses.keys)
         let totalWidth = CGFloat(powerUpTypes.count - 1) * spacing
         let startX = centerX - (totalWidth / 2)
-        let yPosition: CGFloat = 210 + 40
+        let yPosition: CGFloat = 210 + 5
 
         for (index, type) in powerUpTypes.enumerated() {
             let uses = powerUpUses[type] ?? 0
@@ -164,7 +164,7 @@ class PowerUpManager {
                         / (2 * gridDimension),
                     y: CGFloat(Int(gridDimension - 1 - correctPosition.y))
                         * gridNode.size.height / gridDimension - gridNode.size
-                        .height / 2
+                        .height / 2.5
                         + gridNode.size.height / (2 * gridDimension)
                 )
 
@@ -196,16 +196,17 @@ class PowerUpManager {
                 imageNode.size = gameScene.context.layoutInfo.gridSize
                 imageNode.position = CGPoint(
                     x: gameScene.size.width / 2,
-                    y: gameScene.size.height / 2 + 50)
+                    y: gameScene.size.height / 2 + 15)
                 imageNode.zPosition = 9999
                 imageNode.alpha = 0.6
+                imageNode.name = "flashImage"
                 gameScene.addChild(imageNode)
 
                 DispatchQueue.main.asyncAfter(
                     deadline: .now() + GameConstants.PowerUpTimers.flashCooldown
-                ) {
-                    imageNode.removeFromParent()
-                    self.powerUpsInCooldown.remove(type)
+                ) { [weak self] in
+                    self?.removeFlashImage()
+                    self?.powerUpsInCooldown.remove(type)
                 }
             }
 
@@ -241,5 +242,11 @@ class PowerUpManager {
         }
         powerUpUses[type] = uses - 1
         updatePowerUpVisual(type: type)
+    }
+    
+    func removeFlashImage() {
+        gameScene?.enumerateChildNodes(withName: "flashImage") { node, _ in
+            node.removeFromParent()
+        }
     }
 }

@@ -13,7 +13,7 @@ class PowerUpIcon: SKNode {
     private var usesBubble: SKShapeNode
     private var usesLabel: SKLabelNode
 
-    private let mainRadius: CGFloat = 33
+    private let mainRadius: CGFloat = 28
     private let bubbleRadius: CGFloat = 12
     private let iconSize = CGSize(width: 40, height: 40)
 

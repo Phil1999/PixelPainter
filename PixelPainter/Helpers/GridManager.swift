@@ -44,7 +44,7 @@ class GridManager {
 
         let gridNode = SKSpriteNode(texture: SKTexture(image: image!))
         gridNode.position = CGPoint(
-            x: gameScene.size.width / 2, y: gameScene.size.height / 2 + 50)
+            x: gameScene.size.width / 2, y: gameScene.size.height / 2 + 15)
         gridNode.name = "grid"
         gameScene.addChild(gridNode)
 
@@ -265,7 +265,7 @@ class GridManager {
 
             let size = frameNode.size
             let rect = CGRect(origin: .zero, size: size)
-            let cornerRadius: CGFloat = 2
+            let cornerRadius: CGFloat = 30
 
             let path = UIBezierPath(
                 roundedRect: rect,

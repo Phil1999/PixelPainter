@@ -23,7 +23,7 @@ class BankManager {
         bankNode = SKSpriteNode(color: bankColor, size: CGSize(width: bankWidth, height: bankHeight))
         
         // Moved the bank position up by increasing the y value
-        bankNode?.position = CGPoint(x: gameScene.size.width / 2, y: bankHeight/2)
+        bankNode?.position = CGPoint(x: gameScene.size.width / 2, y: bankHeight/2 - 35)
         bankNode?.name = "bank"
         gameScene.addChild(bankNode!)
         
@@ -92,7 +92,7 @@ class BankManager {
             
             // Create the main container sprite node with smaller size
             let containerNode = SKSpriteNode(color: .clear, size: CGSize(width: bankPieceSize, height: bankPieceSize))
-            containerNode.position = CGPoint(x: startX + CGFloat(i) * (bankPieceSize + spacing), y: 15)
+            containerNode.position = CGPoint(x: startX + CGFloat(i) * (bankPieceSize + spacing), y: 10)
             containerNode.name = "piece_\(Int(piece.correctPosition.y))_\(Int(piece.correctPosition.x))"
             
             // Create rounded rectangle shape for clipping
