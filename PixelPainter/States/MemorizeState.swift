@@ -354,7 +354,21 @@ class MemorizeState: GKState {
 
         imageNode.removeFromParent()
 
-        EffectManager.shared.ejectPieces(pieces: allPieces) { [weak self] in
+        for piece in allPieces {
+            let randomAngle = CGFloat.random(in: 0...2 * .pi)
+            let randomDistance = CGFloat.random(in: 200...400)
+            let dx = randomDistance * cos(randomAngle)
+            let dy = randomDistance * sin(randomAngle)
+
+            let moveAction = SKAction.move(by: CGVector(dx: dx, dy: dy), duration: 0.5)
+            let fadeOutAction = SKAction.fadeOut(withDuration: 0.5)
+            let rotateAction = SKAction.rotate(byAngle: .pi * 2 * CGFloat.random(in: -1...1), duration: 0.5)
+            let group = SKAction.group([moveAction, fadeOutAction, rotateAction])
+
+            piece.run(group)
+        }
+
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.6) { [weak self] in
             piecesContainer.removeFromParent()
             self?.transitionToPlayState()
         }
