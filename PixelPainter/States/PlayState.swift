@@ -118,6 +118,9 @@ class PlayState: GKState {
         if bankManager.isBankEmpty() {
             handleLevelComplete()
         }
+        let impactLight = UIImpactFeedbackGenerator(style: .light)
+        impactLight.prepare()
+        impactLight.impactOccurred()
     }
 
     private func handleLevelComplete() {
@@ -176,6 +179,7 @@ class PlayState: GKState {
     }
     
     private func handleGameOver() {
+
         EffectManager.shared.temporarilyDisableInteraction()
         
         stopHintTimer()
@@ -183,6 +187,10 @@ class PlayState: GKState {
         gridManager.hideHint()
         self.bankManager.clearSelection()
         SoundManager.shared.stopBackgroundMusic()
+        
+        let impactHeavy = UIImpactFeedbackGenerator(style: .heavy)
+        impactHeavy.prepare()
+        impactHeavy.impactOccurred()
 
         if let gridNode = gameScene.childNode(withName: "grid")
             as? SKSpriteNode,
@@ -191,12 +199,14 @@ class PlayState: GKState {
             }).isEmpty
         {
             // Only play animation if there are pieces
+            self.powerUpManager.removeFlashImage()  // Add this line
             EffectManager.shared.playGameOverEffect { [weak self] in
                 guard let self = self else { return }
                 self.gameScene.context.stateMachine?.enter(GameOverState.self)
             }
         } else {
             // Go directly to game over if no pieces
+            self.powerUpManager.removeFlashImage()  // Add this line
             self.gameScene.context.stateMachine?.enter(GameOverState.self)
             SoundManager.shared.playSound(.gameOverNoPieces)
         }
@@ -228,6 +238,10 @@ class PlayState: GKState {
         EffectManager.shared.temporarilyDisableInteraction(for: GameConstants.GeneralGamePlay.wrongPlacementBufferTime)
         EffectManager.shared.cooldown(piece, duration: GameConstants.GeneralGamePlay.wrongPlacementBufferTime)
         EffectManager.shared.shakeNode(piece)
+        
+        let impactMedium = UIImpactFeedbackGenerator(style: .medium)
+        impactMedium.prepare()
+        impactMedium.impactOccurred()
     }
 
     func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {

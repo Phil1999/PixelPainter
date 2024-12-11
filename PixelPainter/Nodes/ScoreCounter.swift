@@ -8,7 +8,7 @@ class ScoreCounter: SKNode {
 
     init(
         text: String, fontSize: CGFloat = 20, minWidth: CGFloat = 70,
-        height: CGFloat = 50 // Reduced box height
+        height: CGFloat = 45 // Reduced box height
     ) {
         self.minWidth = minWidth
 
@@ -20,9 +20,9 @@ class ScoreCounter: SKNode {
         container.alpha = 0.8
 
         // "Score" label
-        scoreLabel = SKLabelNode(text: "Score")
+        scoreLabel = SKLabelNode(text: "score")
         scoreLabel.fontName = "PPNeueMontreal-Bold"
-        scoreLabel.fontSize = fontSize * 0.8 // Smaller size for label
+        scoreLabel.fontSize = fontSize * 0.7 // Smaller size for label
         scoreLabel.fontColor = .lightGray
         scoreLabel.verticalAlignmentMode = .center
         scoreLabel.horizontalAlignmentMode = .center

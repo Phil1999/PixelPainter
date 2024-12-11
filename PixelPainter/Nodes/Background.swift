@@ -81,12 +81,12 @@ extension Background {
        gradientLayer.frame = CGRect(origin: .zero, size: screenSize)
        
        // Create colors with smooth intensity transition
-        let topColor = UIColor(hex: "FF2E32").withAlphaComponent(pow(intensity, 2) * 0.9)
-        let midColor = UIColor(hex: "300001").withAlphaComponent(pow(intensity, 2) * 0.9)
-        let bottomColor = UIColor(hex: "171717").withAlphaComponent(pow(intensity, 2) * 0.9)
+        let topColor = UIColor(hex: "FF2E32").withAlphaComponent(pow(intensity, 2) * 0.7)
+        let midColor = UIColor(hex: "300001").withAlphaComponent(pow(intensity, 2) * 0.7)
+        let bottomColor = UIColor(hex: "171717").withAlphaComponent(pow(intensity, 2) * 0.7)
        
        gradientLayer.colors = [topColor.cgColor, midColor.cgColor, bottomColor.cgColor]
-       gradientLayer.locations = [0.0, 0.5, 1.0]
+       gradientLayer.locations = [0.0, 0.8, 1.0]
        
        let scale = UIScreen.main.scale
        UIGraphicsBeginImageContextWithOptions(screenSize, false, scale)

@@ -44,7 +44,7 @@ class GridManager {
 
         let gridNode = SKSpriteNode(texture: SKTexture(image: image!))
         gridNode.position = CGPoint(
-            x: gameScene.size.width / 2, y: gameScene.size.height / 2 + 50)
+            x: gameScene.size.width / 2, y: gameScene.size.height / 2 + 15)
         gridNode.name = "grid"
         gameScene.addChild(gridNode)
 

@@ -24,12 +24,12 @@ class HUDManager {
         gameScene.addChild(hudNode)
         
         // timer - now positioned where score counter was
-        let timerRadius: CGFloat = 40
+        let timerRadius: CGFloat = 45
         let timer = CircularTimer(
             radius: timerRadius,
             gameScene: gameScene
         )
-        timer.position = CGPoint(x: gameScene.size.width / 2, y: -30)
+        timer.position = CGPoint(x: gameScene.size.width / 2, y: -65)
         timer.name = "circularTimer"
         hudNode.addChild(timer)
         self.circularTimer = timer
