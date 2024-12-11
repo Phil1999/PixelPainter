@@ -223,7 +223,7 @@ class MemorizeState: GKState {
             let scoreCounter = ScoreCounter(
                 text: "\(gameScene.context.gameInfo.score)")
             scoreCounter.position = CGPoint(
-                x: gameScene.size.width / 6, y: gameScene.size.height - 100)
+                x: gameScene.size.width / 6, y: gameScene.size.height - 90)
             gameScene.addChild(scoreCounter)
 
             // add "choose two" label every round for consistency
