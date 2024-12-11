@@ -403,7 +403,7 @@ extension MemorizeState {
         modal.addChild(titleLabel)
 
         // Video container
-        let videoContainerSize = CGSize(width: 225, height: 250)
+        let videoContainerSize = CGSize(width: 119.35, height: 250)
 
         let cropNode = SKCropNode()
         let maskNode = SKShapeNode(rectOf: videoContainerSize, cornerRadius: 12)
@@ -462,28 +462,19 @@ extension MemorizeState {
         )
         modal.addChild(descLabel)
 
-        // Uses and cooldown info
+        // Uses
         let usesLabel = SKLabelNode(fontNamed: "PPNeueMontreal-Medium")
         usesLabel.text = "Uses: \(type.uses)"
         usesLabel.fontSize = 16
         usesLabel.fontColor = .white
-        usesLabel.horizontalAlignmentMode = .left
-        usesLabel.position = CGPoint(x: -backgroundSize.width / 2 + 65, y: -200)
+        usesLabel.horizontalAlignmentMode = .center
+        usesLabel.position = CGPoint(x: 0, y: -208)
         modal.addChild(usesLabel)
-
-        let cooldownLabel = SKLabelNode(fontNamed: "PPNeueMontreal-Medium")
-        cooldownLabel.text = "Cooldown: \(getCooldownText(type))"
-        cooldownLabel.fontSize = 16
-        cooldownLabel.fontColor = .white
-        cooldownLabel.horizontalAlignmentMode = .right
-        cooldownLabel.position = CGPoint(
-            x: backgroundSize.width / 2 - 75, y: -200)
-        modal.addChild(cooldownLabel)
 
         let dividerLine = SKShapeNode()
         let path = CGMutablePath()
-        path.move(to: CGPoint(x: -backgroundSize.width / 2 + 20, y: -210))
-        path.addLine(to: CGPoint(x: backgroundSize.width / 2 - 20, y: -210))
+        path.move(to: CGPoint(x: -backgroundSize.width / 2 + 20, y: -220))
+        path.addLine(to: CGPoint(x: backgroundSize.width / 2 - 20, y: -220))
         dividerLine.path = path
         dividerLine.strokeColor = UIColor(white: 0.3, alpha: 1)
         dividerLine.lineWidth = 1
@@ -492,15 +483,15 @@ extension MemorizeState {
         let instructionLabel = SKLabelNode(fontNamed: "PPNeueMontreal-Regular")
         instructionLabel.text =
             "Tap the power-up icon during gameplay to activate"
-        instructionLabel.fontSize = 12
+        instructionLabel.fontSize = 10
         instructionLabel.fontColor = UIColor(white: 0.7, alpha: 1)
         instructionLabel.horizontalAlignmentMode = .center
-        instructionLabel.position = CGPoint(x: 0, y: -235)
+        instructionLabel.position = CGPoint(x: 0, y: -240)
         modal.addChild(instructionLabel)
 
         // Close button
-        let closeButton = SKSpriteNode(imageNamed: "close-button")
-        closeButton.size = CGSize(width: 12, height: 12)
+        let closeButton = SKSpriteNode(imageNamed: "close-icon")
+        closeButton.size = CGSize(width: 18, height: 18)
         closeButton.position = CGPoint(x: 135, y: 225)
         closeButton.name = "close_info"
         modal.addChild(closeButton)
@@ -522,7 +513,7 @@ extension MemorizeState {
             return
                 "Automatically places the leftmost unplaced piece in its correct position."
         case .flash:
-            return "Briefly flashes the complete image over the grid."
+            return "Briefly flashes the complete image for 5 seconds over the grid."
         case .shuffle:
             return
                 "Immediately refreshes the piece bank helping you find the pieces you need."
