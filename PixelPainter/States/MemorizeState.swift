@@ -20,6 +20,7 @@ class MemorizeState: GKState {
     private var currentInfoModal: SKNode?
     private var confirmButton: SKNode?
     private var infoButtons: [SKSpriteNode] = []
+    private var levelContainer: SKNode?
 
     init(gameScene: GameScene) {
         self.gameScene = gameScene
@@ -202,19 +203,51 @@ class MemorizeState: GKState {
         frameNode.name = "frameNode"
         gameScene.addChild(frameNode)
 
-        let levelLabel =
-            isFirstLevel
-            ? SKLabelNode(text: "Level 1")
-            : SKLabelNode(
-                text: "Level \(Int(gameScene.context.gameInfo.level))")
+        // level label container
+        let levelContainer = SKNode()
+        levelContainer.position = CGPoint(
+            x: gameScene.size.width / 2, y: gameScene.size.height - 145)
 
-        levelLabel.fontName = "PPNeueMontreal-Bold"
-        levelLabel.fontSize = 36
-        levelLabel.fontColor = .white
-        levelLabel.position = CGPoint(
-            x: gameScene.size.width / 2, y: gameScene.size.height - 100)
-        levelLabel.name = "levelLabel"
-        gameScene.addChild(levelLabel)
+        let screenScale = gameScene.size.width / 390 // Using iPhone 14 as reference
+        let numberFontSize: CGFloat = 56 * screenScale
+        let levelFontSize: CGFloat = 20 * screenScale
+
+        let tempLabel = SKLabelNode(fontNamed: "PPNeueMontreal-Bold")
+        tempLabel.fontSize = numberFontSize
+        tempLabel.text = "1000"  // reference number
+        let maxNumberWidth = tempLabel.frame.width
+
+        let levelText = SKLabelNode()
+        levelText.fontName = "PPNeueMontreal-Bold"
+        levelText.fontSize = levelFontSize
+        levelText.text = "LEVEL"
+        levelText.fontColor = .white.withAlphaComponent(0.75)
+        levelText.verticalAlignmentMode = .center
+        levelText.horizontalAlignmentMode = .center
+        levelText.position = CGPoint(x: 5, y: 15 * screenScale)
+
+        let levelNum = isFirstLevel ? 1 : Int(gameScene.context.gameInfo.level)
+        let numberLabel = SKLabelNode(fontNamed: "PPNeueMontreal-Bold")
+        numberLabel.fontSize = numberFontSize
+        numberLabel.text = "\(levelNum)"
+        numberLabel.fontColor = .white
+        numberLabel.verticalAlignmentMode = .center
+        numberLabel.horizontalAlignmentMode = .center
+        numberLabel.position = CGPoint(x: 0, y: -20 * screenScale)
+
+        let underline = SKShapeNode(
+            rectOf: CGSize(width: maxNumberWidth, height: 1 * screenScale))
+        underline.fillColor = .white
+        underline.strokeColor = .clear
+        underline.alpha = 0.3
+        underline.position = CGPoint(x: 0, y: -50 * screenScale)
+
+        levelContainer.addChild(levelText)
+        levelContainer.addChild(numberLabel)
+        levelContainer.addChild(underline)
+        levelContainer.name = "levelLabel"
+        self.levelContainer = levelContainer
+        gameScene.addChild(levelContainer)
 
         if !isFirstLevel {
             // score is not shown on first round
@@ -238,7 +271,7 @@ class MemorizeState: GKState {
         } else {
             let chooseLabel = SKLabelNode(text: "Choose two")
             chooseLabel.fontName = "PPNeueMontreal-Bold"
-            chooseLabel.fontSize = 32
+            chooseLabel.fontSize = 28
             chooseLabel.position = CGPoint(
                 x: gameScene.size.width / 2,
                 y: gameScene.size.height / 2 - 200
@@ -252,7 +285,7 @@ class MemorizeState: GKState {
         readyLabel.fontSize = 48
         readyLabel.fontColor = .white
         readyLabel.position = CGPoint(
-            x: gameScene.size.width / 2, y: gameScene.size.height - 180)
+            x: gameScene.size.width / 2, y: gameScene.size.height / 2 - 260)
         readyLabel.name = "readyLabel"
         readyLabel.alpha = 0  // Start hidden
         gameScene.addChild(readyLabel)
@@ -360,10 +393,14 @@ class MemorizeState: GKState {
             let dx = randomDistance * cos(randomAngle)
             let dy = randomDistance * sin(randomAngle)
 
-            let moveAction = SKAction.move(by: CGVector(dx: dx, dy: dy), duration: 0.5)
+            let moveAction = SKAction.move(
+                by: CGVector(dx: dx, dy: dy), duration: 0.5)
             let fadeOutAction = SKAction.fadeOut(withDuration: 0.5)
-            let rotateAction = SKAction.rotate(byAngle: .pi * 2 * CGFloat.random(in: -1...1), duration: 0.5)
-            let group = SKAction.group([moveAction, fadeOutAction, rotateAction])
+            let rotateAction = SKAction.rotate(
+                byAngle: .pi * 2 * CGFloat.random(in: -1...1), duration: 0.5)
+            let group = SKAction.group([
+                moveAction, fadeOutAction, rotateAction,
+            ])
 
             piece.run(group)
         }
@@ -513,7 +550,8 @@ extension MemorizeState {
             return
                 "Automatically places the leftmost unplaced piece in its correct position."
         case .flash:
-            return "Briefly flashes the complete image for 5 seconds over the grid."
+            return
+                "Briefly flashes the complete image for 5 seconds over the grid."
         case .shuffle:
             return
                 "Immediately refreshes the piece bank helping you find the pieces you need."
@@ -641,6 +679,7 @@ extension MemorizeState {
         infoButtons.forEach { $0.removeFromParent() }
         confirmButton?.removeFromParent()
         chooseTwoLabel?.removeFromParent()
+        levelContainer?.removeFromParent()
         chooseTwoLabel = nil
 
         if !countdownStarted {
