@@ -344,6 +344,7 @@ class CircularTimer: SKNode {
 // MARK: - Time Bonus
 extension CircularTimer {
     func showTimeBonus(seconds: Double) {
+        if !isRunning { return }
         let bonusLabel = SKLabelNode(fontNamed: "PPNeueMontreal-Bold")
         bonusLabel.text = "+\(Int(seconds))s"
         bonusLabel.fontSize = 24

@@ -624,9 +624,11 @@ extension MemorizeState {
             // Hide confirm button when deselecting
             confirmButton?.removeFromParent()
             confirmButton = nil
+            SoundManager.shared.playSound(.deselect)
         } else if selectedPowerUps.count < 2 {
             selectedPowerUps.insert(type)
             icon.alpha = 1.0
+            SoundManager.shared.playSound(.select)
 
             // Show confirm button when we have 2 selections
             if selectedPowerUps.count == 2 {

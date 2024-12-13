@@ -36,6 +36,8 @@ class SoundManager {
             "freeze":"freeze.mp3",
             "shutter-click":"shutter-click.mp3",
             "shuffle":"shuffle.mp3",
+            "select": "select.mp3",
+            "deselect": "deselect.mp3"
         ]
 
         // Preload each sound
@@ -135,5 +137,7 @@ enum GameSound: String {
     case freeze = "freeze"
     case shutter = "shutter-click"
     case shuffle = "shuffle"
+    case select = "select"
+    case deselect = "deselect"
 }
 
