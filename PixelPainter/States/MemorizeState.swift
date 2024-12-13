@@ -7,6 +7,7 @@
 
 import GameplayKit
 import SpriteKit
+import AVFoundation
 
 class MemorizeState: GKState {
     unowned let gameScene: GameScene
@@ -21,6 +22,8 @@ class MemorizeState: GKState {
     private var currentInfoModal: SKNode?
     private var confirmButton: SKNode?
     private var infoButtons: [SKSpriteNode] = []
+    
+    private var tutorialVideoLooper: AVPlayerLooper?
 
     init(gameScene: GameScene) {
         self.gameScene = gameScene
@@ -485,10 +488,19 @@ extension MemorizeState {
         maskNode.fillColor = .white
         cropNode.maskNode = maskNode
         cropNode.position = CGPoint(x: 0, y: 50)
-
+        
+        // Make the videos loop
+        guard let url = Bundle.main.url(forResource: "\(type.videoFileName)", withExtension: "mp4") else {
+            print("Video is missing!")
+            return
+        }
+        
+        let item = AVPlayerItem(url: url)
+        let player = AVQueuePlayer()
+        tutorialVideoLooper = AVPlayerLooper(player: player, templateItem: item)
+        
         // Video player
-        let fileName = "\(type.videoFileName).mp4"
-        let videoNode = SKVideoNode(fileNamed: fileName)
+        let videoNode = SKVideoNode(avPlayer: player)
         videoNode.size = videoContainerSize
         cropNode.addChild(videoNode)
         videoNode.play()
