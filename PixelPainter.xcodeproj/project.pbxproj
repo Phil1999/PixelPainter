@@ -24,6 +24,10 @@
 		D46D0FA72CCB1B6200E8D37C /* PPNeueMontreal-Medium.otf in Resources */ = {isa = PBXBuildFile; fileRef = D46D0F9E2CCB1B6200E8D37C /* PPNeueMontreal-Medium.otf */; };
 		D46D0FA82CCB1B6200E8D37C /* PPNeueMontreal-Thin.otf in Resources */ = {isa = PBXBuildFile; fileRef = D46D0FA12CCB1B6200E8D37C /* PPNeueMontreal-Thin.otf */; };
 		D46D0FA92CCB1B6200E8D37C /* PPNeueMontreal-Book.otf in Resources */ = {isa = PBXBuildFile; fileRef = D46D0F9C2CCB1B6200E8D37C /* PPNeueMontreal-Book.otf */; };
+		D48261FC2D0CD6D30010AC43 /* select.mp3 in Resources */ = {isa = PBXBuildFile; fileRef = D48261FB2D0CD6D30010AC43 /* select.mp3 */; };
+		D48261FD2D0CD6D30010AC43 /* deselect.mp3 in Resources */ = {isa = PBXBuildFile; fileRef = D48261FA2D0CD6D30010AC43 /* deselect.mp3 */; };
+		D48262012D0CD84B0010AC43 /* incorrect-placement.mp3 in Resources */ = {isa = PBXBuildFile; fileRef = D48262002D0CD84B0010AC43 /* incorrect-placement.mp3 */; };
+		D48262032D0CD8E30010AC43 /* confirm.mp3 in Resources */ = {isa = PBXBuildFile; fileRef = D48262022D0CD8E30010AC43 /* confirm.mp3 */; };
 		D4AC0F9A2CBEF294004FF844 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = D4AC0F992CBEF294004FF844 /* Assets.xcassets */; };
 		D4D2E6522CD4721000E713B5 /* GameConstants.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4D2E6512CD4721000E713B5 /* GameConstants.swift */; };
 		D4F4F8082CFAC46B00AF05F5 /* game-bg.mp3 in Resources */ = {isa = PBXBuildFile; fileRef = D4F4F8032CFAC46B00AF05F5 /* game-bg.mp3 */; };
@@ -69,6 +73,10 @@
 		D46D0F9F2CCB1B6200E8D37C /* PPNeueMontreal-SemiBold.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "PPNeueMontreal-SemiBold.ttf"; sourceTree = "<group>"; };
 		D46D0FA02CCB1B6200E8D37C /* PPNeueMontreal-SemiBolditalic.otf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "PPNeueMontreal-SemiBolditalic.otf"; sourceTree = "<group>"; };
 		D46D0FA12CCB1B6200E8D37C /* PPNeueMontreal-Thin.otf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "PPNeueMontreal-Thin.otf"; sourceTree = "<group>"; };
+		D48261FA2D0CD6D30010AC43 /* deselect.mp3 */ = {isa = PBXFileReference; lastKnownFileType = audio.mp3; path = deselect.mp3; sourceTree = "<group>"; };
+		D48261FB2D0CD6D30010AC43 /* select.mp3 */ = {isa = PBXFileReference; lastKnownFileType = audio.mp3; path = select.mp3; sourceTree = "<group>"; };
+		D48262002D0CD84B0010AC43 /* incorrect-placement.mp3 */ = {isa = PBXFileReference; lastKnownFileType = audio.mp3; path = "incorrect-placement.mp3"; sourceTree = "<group>"; };
+		D48262022D0CD8E30010AC43 /* confirm.mp3 */ = {isa = PBXFileReference; lastKnownFileType = audio.mp3; path = confirm.mp3; sourceTree = "<group>"; };
 		D4AC0F892CBEF292004FF844 /* PixelPainter.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = PixelPainter.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		D4AC0F992CBEF294004FF844 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		D4AC0FA22CBEF294004FF844 /* PixelPainterTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = PixelPainterTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -175,6 +183,10 @@
 				D4F4F8052CFAC46B00AF05F5 /* level_complete.wav */,
 				A9BA149E2D09165000F1C5BE /* shuffle.mp3 */,
 				A9BA149C2D0914ED00F1C5BE /* shutter-click.mp3 */,
+				D48262002D0CD84B0010AC43 /* incorrect-placement.mp3 */,
+				D48262022D0CD8E30010AC43 /* confirm.mp3 */,
+				D48261FA2D0CD6D30010AC43 /* deselect.mp3 */,
+				D48261FB2D0CD6D30010AC43 /* select.mp3 */,
 				D4F4F8062CFAC46B00AF05F5 /* piece_placed.wav */,
 				A9BA149A2D09138800F1C5BE /* freeze.mp3 */,
 			);
@@ -306,7 +318,10 @@
 				D4F4F80D2CFAC56300AF05F5 /* game-over-no-puzzle.wav in Resources */,
 				D46D0FA32CCB1B6200E8D37C /* PPNeueMontreal-Bold.otf in Resources */,
 				A9BA14972D090C4000F1C5BE /* game-end-incomplete-puzzle.mp3 in Resources */,
+				D48261FC2D0CD6D30010AC43 /* select.mp3 in Resources */,
+				D48261FD2D0CD6D30010AC43 /* deselect.mp3 in Resources */,
 				A9BA149B2D09138800F1C5BE /* freeze.mp3 in Resources */,
+				D48262032D0CD8E30010AC43 /* confirm.mp3 in Resources */,
 				D46D0FA42CCB1B6200E8D37C /* PPNeueMontreal-Italic.otf in Resources */,
 				D46D0FA52CCB1B6200E8D37C /* PPNeueMontreal-SemiBold.ttf in Resources */,
 				D4F4F97F2D07CF4200AF05F5 /* flash_demo.mp4 in Resources */,
@@ -318,6 +333,7 @@
 				D46D0FA62CCB1B6200E8D37C /* PPNeueMontreal-SemiBolditalic.otf in Resources */,
 				A9BA149D2D0914ED00F1C5BE /* shutter-click.mp3 in Resources */,
 				D46D0FA72CCB1B6200E8D37C /* PPNeueMontreal-Medium.otf in Resources */,
+				D48262012D0CD84B0010AC43 /* incorrect-placement.mp3 in Resources */,
 				A9BA149F2D09165000F1C5BE /* shuffle.mp3 in Resources */,
 				D46D0FA82CCB1B6200E8D37C /* PPNeueMontreal-Thin.otf in Resources */,
 				D46D0FA92CCB1B6200E8D37C /* PPNeueMontreal-Book.otf in Resources */,

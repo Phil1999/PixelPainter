@@ -677,6 +677,7 @@ extension MemorizeState {
     }
 
     private func completePowerUpSelection() {
+        SoundManager.shared.playSound(.confirm)
         if let playState = gameScene.context.stateMachine?.state(
             forClass: PlayState.self) as? PlayState
         {

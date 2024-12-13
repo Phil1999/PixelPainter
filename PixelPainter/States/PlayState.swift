@@ -236,6 +236,7 @@ class PlayState: GKState {
     }
 
     private func showWrongPlacementAnimation(for piece: SKSpriteNode) {
+        SoundManager.shared.playSound(.incorrectPiecePlaced)
         EffectManager.shared.temporarilyDisableInteraction(
             for: GameConstants.GeneralGamePlay.wrongPlacementBufferTime)
         if let cropNode = piece.children.first as? SKCropNode {
