@@ -489,21 +489,33 @@ extension MemorizeState {
         cropNode.maskNode = maskNode
         cropNode.position = CGPoint(x: 0, y: 50)
         
-        // Make the videos loop
+        // Make the tutorial videos loop
         guard let url = Bundle.main.url(forResource: "\(type.videoFileName)", withExtension: "mp4") else {
             print("Video is missing!")
             return
         }
-        
+
         let item = AVPlayerItem(url: url)
         let player = AVQueuePlayer()
-        tutorialVideoLooper = AVPlayerLooper(player: player, templateItem: item)
-        
-        // Video player
+
+        // player properties to optimize performance
+        player.automaticallyWaitsToMinimizeStalling = false
+        player.preventsDisplaySleepDuringVideoPlayback = false
+
+        // Create video node
         let videoNode = SKVideoNode(avPlayer: player)
         videoNode.size = videoContainerSize
-        cropNode.addChild(videoNode)
-        videoNode.play()
+
+        // Set the looper on appropriate queue to avoid priority inversion
+        DispatchQueue.global(qos: .userInteractive).async {
+            self.tutorialVideoLooper = AVPlayerLooper(player: player, templateItem: item)
+        }
+
+        // Add to view hierarchy on main thread
+        DispatchQueue.main.async {
+            cropNode.addChild(videoNode)
+            videoNode.play()
+        }
 
         // Border container
         let videoContainer = SKShapeNode(
