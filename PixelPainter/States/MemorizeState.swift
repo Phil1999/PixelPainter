@@ -192,6 +192,23 @@ class MemorizeState: GKState {
             x: gameScene.size.width / 2, y: gameScene.size.height / 1.85)
         gameScene.addChild(imageNode)
 
+        // Add blur over the image
+        let blurOverlay = SKEffectNode()
+        blurOverlay.filter = CIFilter(
+            name: "CIGaussianBlur", parameters: ["inputRadius": 25.0])
+        blurOverlay.name = "blurImageNode"
+
+        let blurredImage = SKSpriteNode(texture: SKTexture(image: image))
+        blurredImage.size = CGSize(
+            width: imageNode.size.width + 10,
+            height: imageNode.size.height + 10)
+        blurredImage.position = .zero
+        blurOverlay.addChild(blurredImage)
+
+        blurOverlay.position = imageNode.position
+        blurOverlay.zPosition = imageNode.zPosition + 1
+        gameScene.addChild(blurOverlay)
+
         let frameSize = CGSize(
             width: imageNode.size.width + 15,
             height: imageNode.size.height + 15)
@@ -202,16 +219,19 @@ class MemorizeState: GKState {
         frameNode.zPosition = imageNode.zPosition - 1
         frameNode.name = "frameNode"
         gameScene.addChild(frameNode)
-        
+
         // level label container
         let levelContainer = SKNode()
 
-        if let imageNode = gameScene.childNode(withName: "imageNode") as? SKSpriteNode {
+        if let imageNode = gameScene.childNode(withName: "imageNode")
+            as? SKSpriteNode
+        {
             // Position the container above the image with some padding
             let verticalPadding: CGFloat = 70
             levelContainer.position = CGPoint(
                 x: gameScene.size.width / 2,
-                y: imageNode.position.y + (imageNode.size.height / 2) + verticalPadding
+                y: imageNode.position.y + (imageNode.size.height / 2)
+                    + verticalPadding
             )
         }
 
@@ -305,6 +325,17 @@ class MemorizeState: GKState {
     }
 
     private func blinkCountdownLabel(readyLabel: SKLabelNode, blinkCount: Int) {
+        // Remove the blur effect from image
+        if let blurNode = self.gameScene.childNode(withName: "blurImageNode")
+            as? SKEffectNode
+        {
+            let fadeOut = SKAction.sequence([
+                SKAction.fadeOut(withDuration: 1),
+                SKAction.removeFromParent(),
+            ])
+            blurNode.run(fadeOut)
+        }
+
         let countdownSequence = ["3", "2", "1", "Go!"]
         var currentIndex = 0
 
