@@ -166,7 +166,7 @@ class PowerUpManager {
                         / (2 * gridDimension),
                     y: CGFloat(Int(gridDimension - 1 - correctPosition.y))
                         * gridNode.size.height / gridDimension - gridNode.size
-                        .height / 2.5
+                        .height / 2
                         + gridNode.size.height / (2 * gridDimension)
                 )
 
