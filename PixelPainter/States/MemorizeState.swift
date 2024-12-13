@@ -16,6 +16,7 @@ class MemorizeState: GKState {
     private var powerUpSelectionNodes: [PowerUpIcon] = []
     private var selectedPowerUps: Set<PowerUpType> = []
     private var chooseTwoLabel: SKLabelNode?
+    private var levelLabelContainer: SKNode?
     private var countdownStarted = false
     private var currentInfoModal: SKNode?
     private var confirmButton: SKNode?
@@ -201,20 +202,59 @@ class MemorizeState: GKState {
         frameNode.zPosition = imageNode.zPosition - 1
         frameNode.name = "frameNode"
         gameScene.addChild(frameNode)
+        
+        // level label container
+        let levelContainer = SKNode()
 
-        let levelLabel =
-            isFirstLevel
-            ? SKLabelNode(text: "Level 1")
-            : SKLabelNode(
-                text: "Level \(Int(gameScene.context.gameInfo.level))")
+        if let imageNode = gameScene.childNode(withName: "imageNode") as? SKSpriteNode {
+            // Position the container above the image with some padding
+            let verticalPadding: CGFloat = 70
+            levelContainer.position = CGPoint(
+                x: gameScene.size.width / 2,
+                y: imageNode.position.y + (imageNode.size.height / 2) + verticalPadding
+            )
+        }
 
-        levelLabel.fontName = "PPNeueMontreal-Bold"
-        levelLabel.fontSize = 36
-        levelLabel.fontColor = .white
-        levelLabel.position = CGPoint(
-            x: gameScene.size.width / 2, y: gameScene.size.height - 100)
-        levelLabel.name = "levelLabel"
-        gameScene.addChild(levelLabel)
+        let numberFontSize: CGFloat = 56
+        let levelFontSize: CGFloat = 20
+
+        // Calculate max number width
+        let tempLabel = SKLabelNode(fontNamed: "PPNeueMontreal-Bold")
+        tempLabel.fontSize = numberFontSize
+        tempLabel.text = "1000"  // reference number
+        let maxNumberWidth = tempLabel.frame.width
+
+        let levelText = SKLabelNode()
+        levelText.fontName = "PPNeueMontreal-Bold"
+        levelText.fontSize = levelFontSize
+        levelText.text = "LEVEL"
+        levelText.fontColor = .white.withAlphaComponent(0.75)
+        levelText.verticalAlignmentMode = .center
+        levelText.horizontalAlignmentMode = .center
+        levelText.position = CGPoint(x: 5, y: 15)
+
+        let levelNum = isFirstLevel ? 1 : Int(gameScene.context.gameInfo.level)
+        let numberLabel = SKLabelNode(fontNamed: "PPNeueMontreal-Bold")
+        numberLabel.fontSize = numberFontSize
+        numberLabel.text = "\(levelNum)"
+        numberLabel.fontColor = .white
+        numberLabel.verticalAlignmentMode = .center
+        numberLabel.horizontalAlignmentMode = .center
+        numberLabel.position = CGPoint(x: 0, y: -20)
+
+        let underline = SKShapeNode(
+            rectOf: CGSize(width: maxNumberWidth, height: 2)
+        )
+        underline.fillColor = .white
+        underline.strokeColor = .clear
+        underline.alpha = 0.3
+        underline.position = CGPoint(x: 0, y: -45)
+
+        levelContainer.addChild(levelText)
+        levelContainer.addChild(numberLabel)
+        levelContainer.addChild(underline)
+        self.levelLabelContainer = levelContainer
+        gameScene.addChild(levelContainer)
 
         if !isFirstLevel {
             // score is not shown on first round
@@ -238,7 +278,7 @@ class MemorizeState: GKState {
         } else {
             let chooseLabel = SKLabelNode(text: "Choose two")
             chooseLabel.fontName = "PPNeueMontreal-Bold"
-            chooseLabel.fontSize = 32
+            chooseLabel.fontSize = 28
             chooseLabel.position = CGPoint(
                 x: gameScene.size.width / 2,
                 y: gameScene.size.height / 2 - 200
@@ -252,7 +292,7 @@ class MemorizeState: GKState {
         readyLabel.fontSize = 48
         readyLabel.fontColor = .white
         readyLabel.position = CGPoint(
-            x: gameScene.size.width / 2, y: gameScene.size.height - 180)
+            x: gameScene.size.width / 2, y: gameScene.size.height / 2 - 260)
         readyLabel.name = "readyLabel"
         readyLabel.alpha = 0  // Start hidden
         gameScene.addChild(readyLabel)
@@ -360,10 +400,14 @@ class MemorizeState: GKState {
             let dx = randomDistance * cos(randomAngle)
             let dy = randomDistance * sin(randomAngle)
 
-            let moveAction = SKAction.move(by: CGVector(dx: dx, dy: dy), duration: 0.5)
+            let moveAction = SKAction.move(
+                by: CGVector(dx: dx, dy: dy), duration: 0.5)
             let fadeOutAction = SKAction.fadeOut(withDuration: 0.5)
-            let rotateAction = SKAction.rotate(byAngle: .pi * 2 * CGFloat.random(in: -1...1), duration: 0.5)
-            let group = SKAction.group([moveAction, fadeOutAction, rotateAction])
+            let rotateAction = SKAction.rotate(
+                byAngle: .pi * 2 * CGFloat.random(in: -1...1), duration: 0.5)
+            let group = SKAction.group([
+                moveAction, fadeOutAction, rotateAction,
+            ])
 
             piece.run(group)
         }
@@ -403,7 +447,7 @@ extension MemorizeState {
         modal.addChild(titleLabel)
 
         // Video container
-        let videoContainerSize = CGSize(width: 225, height: 250)
+        let videoContainerSize = CGSize(width: 119.35, height: 250)
 
         let cropNode = SKCropNode()
         let maskNode = SKShapeNode(rectOf: videoContainerSize, cornerRadius: 12)
@@ -462,28 +506,19 @@ extension MemorizeState {
         )
         modal.addChild(descLabel)
 
-        // Uses and cooldown info
+        // Uses
         let usesLabel = SKLabelNode(fontNamed: "PPNeueMontreal-Medium")
         usesLabel.text = "Uses: \(type.uses)"
         usesLabel.fontSize = 16
         usesLabel.fontColor = .white
-        usesLabel.horizontalAlignmentMode = .left
-        usesLabel.position = CGPoint(x: -backgroundSize.width / 2 + 65, y: -200)
+        usesLabel.horizontalAlignmentMode = .center
+        usesLabel.position = CGPoint(x: 0, y: -208)
         modal.addChild(usesLabel)
-
-        let cooldownLabel = SKLabelNode(fontNamed: "PPNeueMontreal-Medium")
-        cooldownLabel.text = "Cooldown: \(getCooldownText(type))"
-        cooldownLabel.fontSize = 16
-        cooldownLabel.fontColor = .white
-        cooldownLabel.horizontalAlignmentMode = .right
-        cooldownLabel.position = CGPoint(
-            x: backgroundSize.width / 2 - 75, y: -200)
-        modal.addChild(cooldownLabel)
 
         let dividerLine = SKShapeNode()
         let path = CGMutablePath()
-        path.move(to: CGPoint(x: -backgroundSize.width / 2 + 20, y: -210))
-        path.addLine(to: CGPoint(x: backgroundSize.width / 2 - 20, y: -210))
+        path.move(to: CGPoint(x: -backgroundSize.width / 2 + 20, y: -220))
+        path.addLine(to: CGPoint(x: backgroundSize.width / 2 - 20, y: -220))
         dividerLine.path = path
         dividerLine.strokeColor = UIColor(white: 0.3, alpha: 1)
         dividerLine.lineWidth = 1
@@ -492,15 +527,15 @@ extension MemorizeState {
         let instructionLabel = SKLabelNode(fontNamed: "PPNeueMontreal-Regular")
         instructionLabel.text =
             "Tap the power-up icon during gameplay to activate"
-        instructionLabel.fontSize = 12
+        instructionLabel.fontSize = 10
         instructionLabel.fontColor = UIColor(white: 0.7, alpha: 1)
         instructionLabel.horizontalAlignmentMode = .center
-        instructionLabel.position = CGPoint(x: 0, y: -235)
+        instructionLabel.position = CGPoint(x: 0, y: -240)
         modal.addChild(instructionLabel)
 
         // Close button
-        let closeButton = SKSpriteNode(imageNamed: "close-button")
-        closeButton.size = CGSize(width: 12, height: 12)
+        let closeButton = SKSpriteNode(imageNamed: "close-icon")
+        closeButton.size = CGSize(width: 18, height: 18)
         closeButton.position = CGPoint(x: 135, y: 225)
         closeButton.name = "close_info"
         modal.addChild(closeButton)
@@ -522,7 +557,8 @@ extension MemorizeState {
             return
                 "Automatically places the leftmost unplaced piece in its correct position."
         case .flash:
-            return "Briefly flashes the complete image over the grid."
+            return
+                "Briefly flashes the complete image for 5 seconds over the grid."
         case .shuffle:
             return
                 "Immediately refreshes the piece bank helping you find the pieces you need."
@@ -650,6 +686,7 @@ extension MemorizeState {
         infoButtons.forEach { $0.removeFromParent() }
         confirmButton?.removeFromParent()
         chooseTwoLabel?.removeFromParent()
+        levelLabelContainer?.removeFromParent()
         chooseTwoLabel = nil
 
         if !countdownStarted {
