@@ -16,7 +16,7 @@ class MemorizeState: GKState {
     private var powerUpSelectionNodes: [PowerUpIcon] = []
     private var selectedPowerUps: Set<PowerUpType> = []
     private var chooseTwoLabel: SKLabelNode?
-    private var levelLabel: SKLabelNode?
+    private var levelLabelContainer: SKNode?
     private var countdownStarted = false
     private var currentInfoModal: SKNode?
     private var confirmButton: SKNode?
@@ -202,21 +202,59 @@ class MemorizeState: GKState {
         frameNode.zPosition = imageNode.zPosition - 1
         frameNode.name = "frameNode"
         gameScene.addChild(frameNode)
+        
+        // level label container
+        let levelContainer = SKNode()
 
-        let levelLabel =
-            isFirstLevel
-            ? SKLabelNode(text: "Level 1")
-            : SKLabelNode(
-                text: "Level \(Int(gameScene.context.gameInfo.level))")
+        if let imageNode = gameScene.childNode(withName: "imageNode") as? SKSpriteNode {
+            // Position the container above the image with some padding
+            let verticalPadding: CGFloat = 70
+            levelContainer.position = CGPoint(
+                x: gameScene.size.width / 2,
+                y: imageNode.position.y + (imageNode.size.height / 2) + verticalPadding
+            )
+        }
 
-        levelLabel.fontName = "PPNeueMontreal-Bold"
-        levelLabel.fontSize = 36
-        levelLabel.fontColor = .white
-        levelLabel.position = CGPoint(
-            x: gameScene.size.width / 2, y: gameScene.size.height - 100)
-        levelLabel.name = "levelLabel"
-        self.levelLabel = levelLabel
-        gameScene.addChild(levelLabel)
+        let numberFontSize: CGFloat = 56
+        let levelFontSize: CGFloat = 20
+
+        // Calculate max number width
+        let tempLabel = SKLabelNode(fontNamed: "PPNeueMontreal-Bold")
+        tempLabel.fontSize = numberFontSize
+        tempLabel.text = "1000"  // reference number
+        let maxNumberWidth = tempLabel.frame.width
+
+        let levelText = SKLabelNode()
+        levelText.fontName = "PPNeueMontreal-Bold"
+        levelText.fontSize = levelFontSize
+        levelText.text = "LEVEL"
+        levelText.fontColor = .white.withAlphaComponent(0.75)
+        levelText.verticalAlignmentMode = .center
+        levelText.horizontalAlignmentMode = .center
+        levelText.position = CGPoint(x: 5, y: 15)
+
+        let levelNum = isFirstLevel ? 1 : Int(gameScene.context.gameInfo.level)
+        let numberLabel = SKLabelNode(fontNamed: "PPNeueMontreal-Bold")
+        numberLabel.fontSize = numberFontSize
+        numberLabel.text = "\(levelNum)"
+        numberLabel.fontColor = .white
+        numberLabel.verticalAlignmentMode = .center
+        numberLabel.horizontalAlignmentMode = .center
+        numberLabel.position = CGPoint(x: 0, y: -20)
+
+        let underline = SKShapeNode(
+            rectOf: CGSize(width: maxNumberWidth, height: 2)
+        )
+        underline.fillColor = .white
+        underline.strokeColor = .clear
+        underline.alpha = 0.3
+        underline.position = CGPoint(x: 0, y: -45)
+
+        levelContainer.addChild(levelText)
+        levelContainer.addChild(numberLabel)
+        levelContainer.addChild(underline)
+        self.levelLabelContainer = levelContainer
+        gameScene.addChild(levelContainer)
 
         if !isFirstLevel {
             // score is not shown on first round
@@ -648,7 +686,7 @@ extension MemorizeState {
         infoButtons.forEach { $0.removeFromParent() }
         confirmButton?.removeFromParent()
         chooseTwoLabel?.removeFromParent()
-        levelLabel?.removeFromParent()
+        levelLabelContainer?.removeFromParent()
         chooseTwoLabel = nil
 
         if !countdownStarted {
