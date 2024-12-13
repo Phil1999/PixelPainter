@@ -200,8 +200,8 @@ class MemorizeState: GKState {
 
         let blurredImage = SKSpriteNode(texture: SKTexture(image: image))
         blurredImage.size = CGSize(
-            width: imageNode.size.width + 10,
-            height: imageNode.size.height + 10)
+            width: imageNode.size.width + 5,
+            height: imageNode.size.height + 5)
         blurredImage.position = .zero
         blurOverlay.addChild(blurredImage)
 
@@ -227,7 +227,7 @@ class MemorizeState: GKState {
             as? SKSpriteNode
         {
             // Position the container above the image with some padding
-            let verticalPadding: CGFloat = 70
+            let verticalPadding: CGFloat = 80
             levelContainer.position = CGPoint(
                 x: gameScene.size.width / 2,
                 y: imageNode.position.y + (imageNode.size.height / 2)
@@ -268,7 +268,7 @@ class MemorizeState: GKState {
         underline.fillColor = .white
         underline.strokeColor = .clear
         underline.alpha = 0.3
-        underline.position = CGPoint(x: 0, y: -45)
+        underline.position = CGPoint(x: 0, y: -50)
 
         levelContainer.addChild(levelText)
         levelContainer.addChild(numberLabel)
@@ -330,7 +330,7 @@ class MemorizeState: GKState {
             as? SKEffectNode
         {
             let fadeOut = SKAction.sequence([
-                SKAction.fadeOut(withDuration: 1),
+                SKAction.fadeOut(withDuration: 1.5),
                 SKAction.removeFromParent(),
             ])
             blurNode.run(fadeOut)
