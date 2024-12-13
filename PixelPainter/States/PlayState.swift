@@ -181,16 +181,13 @@ class PlayState: GKState {
     private func handleGameOver() {
 
         EffectManager.shared.temporarilyDisableInteraction()
+        EffectManager.shared.triggerGameOverVibrations()
         
         stopHintTimer()
         stopIdleHintTimer()
         gridManager.hideHint()
         self.bankManager.clearSelection()
         SoundManager.shared.stopBackgroundMusic()
-        
-        let impactHeavy = UIImpactFeedbackGenerator(style: .heavy)
-        impactHeavy.prepare()
-        impactHeavy.impactOccurred()
 
         if let gridNode = gameScene.childNode(withName: "grid")
             as? SKSpriteNode,
