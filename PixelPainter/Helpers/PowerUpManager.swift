@@ -183,7 +183,7 @@ class PowerUpManager {
                     if playState?.gridManager.tryPlacePiece(
                         pieceInBank, at: gridPosition) == true
                     {
-                        playState?.notifyPiecePlaced()
+                        playState?.notifyPiecePlaced(from: true)
                     }
                 }
             }

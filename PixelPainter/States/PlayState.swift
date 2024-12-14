@@ -18,6 +18,8 @@ class PlayState: GKState {
     private var hintTimer: Timer?
     private var idleHintTimer: Timer?
     
+    private var piecePlacedFromPowerup: Bool = false
+    
 
     init(gameScene: GameScene) {
         self.gameScene = gameScene
@@ -83,8 +85,10 @@ class PlayState: GKState {
         startIdleHintTimer()
     }
 
-    func notifyPiecePlaced() {
+    func notifyPiecePlaced(from powerup: Bool = false) {
+        piecePlacedFromPowerup = powerup
         didSuccessfullyPlacePiece()
+        piecePlacedFromPowerup = false
     }
 
     func updateTime(by seconds: Double) {
@@ -102,7 +106,10 @@ class PlayState: GKState {
         updateTime(by: 2)
 
         // Clear hint effects on successful placement
-        stopHintTimer()
+        if !piecePlacedFromPowerup {
+            gridManager.hideHint()
+            stopHintTimer()
+        }
         stopIdleHintTimer()
         gridManager.hideHint()
 
