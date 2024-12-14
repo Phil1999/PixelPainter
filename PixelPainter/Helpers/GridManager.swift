@@ -253,7 +253,9 @@ class GridManager {
                         == pieceName
                 })
         else { return }
-
+        
+        SoundManager.shared.playSound(.notifyHint)
+        
         let puzzlePiece = gameScene.context.gameInfo.pieces[pieceIndex]
         let row = Int(puzzlePiece.correctPosition.y)
         let col = Int(puzzlePiece.correctPosition.x)

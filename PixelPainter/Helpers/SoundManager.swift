@@ -39,7 +39,8 @@ class SoundManager {
             "shuffle":"shuffle.mp3",
             "select": "select.mp3",
             "deselect": "deselect.mp3",
-            "confirm": "confirm.mp3"
+            "confirm": "confirm.mp3",
+            "notify_hint": "hint-notification.mp3"
         ]
 
         // Preload each sound
@@ -143,5 +144,6 @@ enum GameSound: String {
     case select = "select"
     case deselect = "deselect"
     case confirm = "confirm"
+    case notifyHint = "notify_hint"
 }
 
