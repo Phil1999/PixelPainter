@@ -288,7 +288,7 @@ class GridManager {
 
             // Hovering hand
             let handNode = SKSpriteNode(imageNamed: "hand-down")
-            handNode.size = CGSize(width: 70, height: 70)
+            handNode.size = CGSize(width: 50, height: 50)
             handNode.position = CGPoint(
                 x: frameNode.position.x, y: frameNode.position.y + 20)
             handNode.zPosition = 99999
@@ -309,7 +309,7 @@ class GridManager {
             let pieceImageNode = SKSpriteNode(texture: pieceTexture)
             pieceImageNode.size = frameNode.size
             pieceImageNode.position = frameNode.position
-            pieceImageNode.alpha = 0.5
+            pieceImageNode.alpha = 0.3
             pieceImageNode.name = "hint_piece_image"
             gridNode.addChild(pieceImageNode)
 
