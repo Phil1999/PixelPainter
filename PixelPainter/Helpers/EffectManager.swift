@@ -214,6 +214,25 @@ class EffectManager {
            snow.removeFromParent()
        }
     }
+    
+    func triggerGameOverVibrations() {
+        let vibrationPattern: [TimeInterval] = [0.1, 0.2, 0.1, 0.3]
+        var vibrationIndex = 0
+        
+        func vibrateNext() {
+            if vibrationIndex < vibrationPattern.count {
+                DispatchQueue.main.asyncAfter(deadline: .now() + vibrationPattern[vibrationIndex]) {
+                    let generator = UIImpactFeedbackGenerator(style: .heavy)
+                    generator.prepare()
+                    generator.impactOccurred()
+                    vibrationIndex += 1
+                    vibrateNext()
+                }
+            }
+        }
+        
+        vibrateNext()
+    }
 
 }
 
