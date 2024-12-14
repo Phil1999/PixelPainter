@@ -148,13 +148,17 @@ class PowerUpManager {
 
         case .place:
             showPowerUpAnimation(type)
-            if let selectedPiece = gameScene.context.gameInfo.pieces.first(
-                where: { !$0.isPlaced }),
+            if let nextPiece = gameScene.context.gameInfo.pieces.first(where: {
+                // Basically the behavior works like:
+                // places the leftmost non-selected piece.
+                !$0.isPlaced && (playState?.bankManager.getSelectedPiece()?.name == nil ||
+                                 "piece_\(Int($0.correctPosition.y))_\(Int($0.correctPosition.x))" != playState?.bankManager.getSelectedPiece()?.name)
+            }),
                 let gridNode = gameScene.childNode(withName: "grid")
                     as? SKSpriteNode
             {
 
-                let correctPosition = selectedPiece.correctPosition
+                let correctPosition = nextPiece.correctPosition
                 let gridDimension = CGFloat(
                     gameScene.context.layoutInfo.gridDimension)
 

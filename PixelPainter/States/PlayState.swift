@@ -17,6 +17,7 @@ class PlayState: GKState {
 
     private var hintTimer: Timer?
     private var idleHintTimer: Timer?
+    
 
     init(gameScene: GameScene) {
         self.gameScene = gameScene
