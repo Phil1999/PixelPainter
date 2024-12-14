@@ -219,7 +219,8 @@ class PlayState: GKState {
     private func handleGameOver() {
 
         EffectManager.shared.temporarilyDisableInteraction()
-
+        EffectManager.shared.triggerGameOverVibrations()
+        
         stopHintTimer()
         stopIdleHintTimer()
         gridManager.hideHint()
