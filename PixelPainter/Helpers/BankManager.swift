@@ -181,6 +181,10 @@ class BankManager {
         return visiblePieces.randomElement()
     }
     
+    func getVisiblePieces() -> [SKSpriteNode] {
+        return visiblePieces
+    }
+    
     private func cropImage(_ image: UIImage, toRect rect: CGRect) -> UIImage {
         let scale = image.scale
         let scaledRect = CGRect(x: rect.origin.x * scale, y: rect.origin.y * scale,

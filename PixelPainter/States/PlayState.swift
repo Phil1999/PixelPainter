@@ -17,9 +17,8 @@ class PlayState: GKState {
 
     private var hintTimer: Timer?
     private var idleHintTimer: Timer?
-    
+
     private var piecePlacedFromPowerup: Bool = false
-    
 
     init(gameScene: GameScene) {
         self.gameScene = gameScene
@@ -106,10 +105,7 @@ class PlayState: GKState {
         updateTime(by: 2)
 
         // Clear hint effects on successful placement
-        if !piecePlacedFromPowerup {
-            gridManager.hideHint()
-            stopHintTimer()
-        }
+        stopHintTimer()
         stopIdleHintTimer()
         gridManager.hideHint()
 

@@ -155,7 +155,7 @@ class MemorizeState: GKState {
         let newGameTime: TimeInterval
         switch level {
         case 1...2:
-            newGameTime = 10  // 3x3 grid
+            newGameTime = 10000  // 3x3 grid
         case 3...5:
             newGameTime = 10  // 4x4 grid
         case 6...9:

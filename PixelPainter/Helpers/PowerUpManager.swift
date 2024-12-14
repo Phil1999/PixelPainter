@@ -1,5 +1,5 @@
-import SpriteKit
 import AVFoundation
+import SpriteKit
 
 class PowerUpManager {
     weak var gameScene: GameScene?
@@ -13,7 +13,6 @@ class PowerUpManager {
         self.gameScene = gameScene
         self.playState = playState
     }
-
 
     func setupPowerUps() {
         guard let gameScene = gameScene else { return }
@@ -43,8 +42,6 @@ class PowerUpManager {
         powerUpUses = Dictionary(
             uniqueKeysWithValues: types.map { ($0, $0.uses) })
     }
-
-
 
     private func updatePowerUpVisual(type: PowerUpType) {
         guard let powerUpIcon = powerUps[type] else { return }
@@ -82,22 +79,24 @@ class PowerUpManager {
         }
         return type
     }
-    
+
     private func showPowerUpAnimation(_ type: PowerUpType) {
-       guard let gameScene = gameScene else { return }
-       
-       let iconTexture = SKTexture(imageNamed: type.iconName)
-       let iconNode = SKSpriteNode(texture: iconTexture, size: CGSize(width: 80, height: 80))
-       iconNode.position = CGPoint(x: gameScene.size.width/2, y: gameScene.size.height/2)
-       iconNode.alpha = 0
-       iconNode.zPosition = 99999
-       gameScene.addChild(iconNode)
-       
-       let fadeIn = SKAction.fadeIn(withDuration: 0.2)
-       let fadeOut = SKAction.fadeOut(withDuration: 0.2)
-       let remove = SKAction.removeFromParent()
-       
-       iconNode.run(SKAction.sequence([fadeIn, fadeOut, remove]))
+        guard let gameScene = gameScene else { return }
+
+        let iconTexture = SKTexture(imageNamed: type.iconName)
+        let iconNode = SKSpriteNode(
+            texture: iconTexture, size: CGSize(width: 80, height: 80))
+        iconNode.position = CGPoint(
+            x: gameScene.size.width / 2, y: gameScene.size.height / 2)
+        iconNode.alpha = 0
+        iconNode.zPosition = 99999
+        gameScene.addChild(iconNode)
+
+        let fadeIn = SKAction.fadeIn(withDuration: 0.2)
+        let fadeOut = SKAction.fadeOut(withDuration: 0.2)
+        let remove = SKAction.removeFromParent()
+
+        iconNode.run(SKAction.sequence([fadeIn, fadeOut, remove]))
     }
 
     private func activatePowerUp(_ type: PowerUpType) {
@@ -113,7 +112,7 @@ class PowerUpManager {
 
         // check if power-up is in cooldown
         if powerUpsInCooldown.contains(type) { return }
-        
+
         let impactLight = UIImpactFeedbackGenerator(style: .light)
         impactLight.prepare()
         impactLight.impactOccurred()
@@ -135,7 +134,7 @@ class PowerUpManager {
                 timerNode.setFrozenState(active: true)
 
                 EffectManager.shared.playFreezeEffect()
-                
+
                 DispatchQueue.main.asyncAfter(
                     deadline: .now()
                         + GameConstants.PowerUpTimers.timeStopCooldown
@@ -148,43 +147,56 @@ class PowerUpManager {
 
         case .place:
             showPowerUpAnimation(type)
-            if let nextPiece = gameScene.context.gameInfo.pieces.first(where: {
-                // Basically the behavior works like:
-                // places the leftmost non-selected piece.
-                !$0.isPlaced && (playState?.bankManager.getSelectedPiece()?.name == nil ||
-                                 "piece_\(Int($0.correctPosition.y))_\(Int($0.correctPosition.x))" != playState?.bankManager.getSelectedPiece()?.name)
-            }),
+            guard
                 let gridNode = gameScene.childNode(withName: "grid")
-                    as? SKSpriteNode
-            {
+                    as? SKSpriteNode,
+                let bankManager = playState?.bankManager
+            else { return }
 
-                let correctPosition = nextPiece.correctPosition
-                let gridDimension = CGFloat(
-                    gameScene.context.layoutInfo.gridDimension)
+            let pieces = gameScene.context.gameInfo.pieces
 
-                // Calculate correct position based on grid dimension
-                let gridPosition = CGPoint(
-                    x: CGFloat(Int(correctPosition.x)) * gridNode.size.width
-                        / gridDimension
-                        - gridNode.size.width / 2 + gridNode.size.width
-                        / (2 * gridDimension),
-                    y: CGFloat(Int(gridDimension - 1 - correctPosition.y))
-                        * gridNode.size.height / gridDimension - gridNode.size
-                        .height / 2.5
-                        + gridNode.size.height / (2 * gridDimension)
-                )
+            // Get the currently selected piece if any
+            let selectedPiece = bankManager.getSelectedPiece()
+            let selectedPieceName = selectedPiece?.name
 
-                if let bankNode = playState?.bankManager.bankNode,
-                    let pieceInBank = bankNode.childNode(
-                        withName:
-                            "piece_\(Int(correctPosition.y))_\(Int(correctPosition.x))"
-                    ) as? SKSpriteNode
-                {
-                    if playState?.gridManager.tryPlacePiece(
-                        pieceInBank, at: gridPosition) == true
+            // Get all visible unplaced pieces
+            let visibleUnplacedPieces = bankManager.getVisiblePieces().filter {
+                node in
+                guard let pieceName = node.name else { return false }
+                return pieces.contains {
+                    !$0.isPlaced
+                        && "piece_\(Int($0.correctPosition.y))_\(Int($0.correctPosition.x))"
+                            == pieceName
+                }
+            }
+
+            // If there are no visible unplaced pieces, return early
+            guard !visibleUnplacedPieces.isEmpty else { return }
+
+            // If there's only one unplaced piece, use it regardless of selection
+            if visibleUnplacedPieces.count == 1 {
+                if let pieceNode = visibleUnplacedPieces.first {
+                    if let puzzlePiece = nodeToPuzzlePiece(
+                        pieceNode, from: pieces)
                     {
-                        playState?.notifyPiecePlaced(from: true)
+                        placePieceAtCorrectPosition(
+                            puzzlePiece, gridNode: gridNode,
+                            bankNode: bankManager.bankNode)
                     }
+                }
+                return
+            }
+
+            // Find the first visible unplaced piece that isn't currently selected
+            if let pieceNodeToPlace = visibleUnplacedPieces.first(where: {
+                $0.name != selectedPieceName
+            }) {
+                if let puzzlePiece = nodeToPuzzlePiece(
+                    pieceNodeToPlace, from: pieces)
+                {
+                    placePieceAtCorrectPosition(
+                        puzzlePiece, gridNode: gridNode,
+                        bankNode: bankManager.bankNode)
                 }
             }
 
@@ -251,11 +263,58 @@ class PowerUpManager {
         powerUpUses[type] = uses - 1
         updatePowerUpVisual(type: type)
     }
-    
+
+    private func placePieceAtCorrectPosition(
+        _ piece: PuzzlePiece, gridNode: SKSpriteNode, bankNode: SKSpriteNode?
+    ) {
+        let correctPosition = piece.correctPosition
+        let gridDimension = CGFloat(
+            gameScene?.context.layoutInfo.gridDimension ?? 3)
+
+        // Calculate correct position based on grid dimension
+        let gridPosition = CGPoint(
+            x: CGFloat(Int(correctPosition.x)) * gridNode.size.width
+                / gridDimension
+                - gridNode.size.width / 2 + gridNode.size.width
+                / (2 * gridDimension),
+            y: CGFloat(Int(gridDimension - 1 - correctPosition.y))
+                * gridNode.size.height / gridDimension
+                - gridNode.size.height / 2 + gridNode.size.height
+                / (2 * gridDimension)
+        )
+
+        // Find and try to place the piece from the bank
+        if let bankNode = bankNode,
+            let pieceInBank = bankNode.childNode(
+                withName:
+                    "piece_\(Int(correctPosition.y))_\(Int(correctPosition.x))"
+            ) as? SKSpriteNode
+        {
+            if playState?.gridManager.tryPlacePiece(
+                pieceInBank, at: gridPosition) == true
+            {
+                playState?.notifyPiecePlaced()
+            }
+        }
+    }
+
+    private func nodeToPuzzlePiece(
+        _ node: SKSpriteNode, from pieces: [PuzzlePiece]
+    ) -> PuzzlePiece? {
+        guard let name = node.name else { return nil }
+        let components = name.split(separator: "_").compactMap { Int($0) }
+        guard components.count == 2 else { return nil }
+
+        // Match the coordinates in the name to the correct position of the puzzle piece
+        return pieces.first(where: {
+            Int($0.correctPosition.y) == components[0]
+                && Int($0.correctPosition.x) == components[1]
+        })
+    }
+
     func removeFlashImage() {
         gameScene?.enumerateChildNodes(withName: "flashImage") { node, _ in
             node.removeFromParent()
         }
     }
 }
-
