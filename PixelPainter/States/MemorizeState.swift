@@ -22,6 +22,7 @@ class MemorizeState: GKState {
     private var currentInfoModal: SKNode?
     private var confirmButton: SKNode?
     private var infoButtons: [SKSpriteNode] = []
+    private var scoreCounter: ScoreCounter?
     
     private var tutorialVideoLooper: AVPlayerLooper?
 
@@ -286,6 +287,8 @@ class MemorizeState: GKState {
             scoreCounter.position = CGPoint(
                 x: gameScene.size.width / 6, y: gameScene.size.height - 90)
             gameScene.addChild(scoreCounter)
+            
+            self.scoreCounter = scoreCounter
 
             // add "choose two" label every round for consistency
             let chooseLabel = SKLabelNode(text: "Choose two")
@@ -745,6 +748,7 @@ extension MemorizeState {
         confirmButton?.removeFromParent()
         chooseTwoLabel?.removeFromParent()
         levelLabelContainer?.removeFromParent()
+        scoreCounter?.removeFromParent()
         chooseTwoLabel = nil
 
         if !countdownStarted {
