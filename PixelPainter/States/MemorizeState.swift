@@ -200,6 +200,7 @@ class MemorizeState: GKState {
         let blurOverlay = SKEffectNode()
         blurOverlay.filter = CIFilter(
             name: "CIGaussianBlur", parameters: ["inputRadius": 25.0])
+        blurOverlay.shouldRasterize = true
         blurOverlay.name = "blurImageNode"
 
         let blurredImage = SKSpriteNode(texture: SKTexture(image: image))
