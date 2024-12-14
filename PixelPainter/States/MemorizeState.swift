@@ -613,7 +613,7 @@ extension MemorizeState {
                 "Freezes the timer for 5 seconds, giving you extra time to think and place pieces."
         case .place:
             return
-                "Automatically places the leftmost unselected piece in its correct position."
+                "Automatically places the leftmost unplaced piece in its correct position."
         case .flash:
             return
                 "Briefly flashes the complete image for 5 seconds over the grid."
