@@ -84,9 +84,20 @@ class PlayState: GKState {
         startIdleHintTimer()
     }
 
-    func notifyPiecePlaced(from powerup: Bool = false) {
+    // This function is only used from the place powerup.
+    func notifyPiecePlaced(from powerup: Bool) {
+        // Will always be true when called
         piecePlacedFromPowerup = powerup
-        didSuccessfullyPlacePiece()
+
+        // If only one visible piece left place normally
+        // This is necessary because in our place logic we will always place down
+        // the final visible piece no matter what.
+        if bankManager.getVisiblePieces().count > 1 {
+            placePieceWithPowerUp()
+        } else {
+            didSuccessfullyPlacePiece()
+        }
+
         piecePlacedFromPowerup = false
     }
 
@@ -120,6 +131,28 @@ class PlayState: GKState {
         if bankManager.isBankEmpty() {
             handleLevelComplete()
         }
+        let impactLight = UIImpactFeedbackGenerator(style: .light)
+        impactLight.prepare()
+        impactLight.impactOccurred()
+    }
+
+    private func placePieceWithPowerUp() {
+        print("placed with powerup")
+        SoundManager.shared.playSound(.piecePlaced)
+        updateTime(by: 2)
+
+        // Update score and refresh the bank
+        gameScene.context.gameInfo.score += 30
+        hudManager.updateScore(withAnimation: true)
+
+        startIdleHintTimer()
+
+        bankManager.refreshBankIfNeeded()
+
+        if bankManager.isBankEmpty() {
+            handleLevelComplete()
+        }
+
         let impactLight = UIImpactFeedbackGenerator(style: .light)
         impactLight.prepare()
         impactLight.impactOccurred()

@@ -156,8 +156,7 @@ class PowerUpManager {
             let pieces = gameScene.context.gameInfo.pieces
 
             // Get the currently selected piece if any
-            let selectedPiece = bankManager.getSelectedPiece()
-            let selectedPieceName = selectedPiece?.name
+            let selectedPieceName = bankManager.getSelectedPiece()?.name
 
             // Get all visible unplaced pieces
             let visibleUnplacedPieces = bankManager.getVisiblePieces().filter {
@@ -173,30 +172,30 @@ class PowerUpManager {
             // If there are no visible unplaced pieces, return early
             guard !visibleUnplacedPieces.isEmpty else { return }
 
-            // If there's only one unplaced piece, use it regardless of selection
-            if visibleUnplacedPieces.count == 1 {
-                if let pieceNode = visibleUnplacedPieces.first {
-                    if let puzzlePiece = nodeToPuzzlePiece(
-                        pieceNode, from: pieces)
-                    {
-                        placePieceAtCorrectPosition(
-                            puzzlePiece, gridNode: gridNode,
-                            bankNode: bankManager.bankNode)
-                    }
-                }
-                return
-            }
-
-            // Find the first visible unplaced piece that isn't currently selected
-            if let pieceNodeToPlace = visibleUnplacedPieces.first(where: {
-                $0.name != selectedPieceName
-            }) {
-                if let puzzlePiece = nodeToPuzzlePiece(
-                    pieceNodeToPlace, from: pieces)
+            // Handle the last piece case
+            if visibleUnplacedPieces.count == 1,
+                let pieceNode = visibleUnplacedPieces.first
+            {
+                if let puzzlePiece = nodeToPuzzlePiece(pieceNode, from: pieces)
                 {
                     placePieceAtCorrectPosition(
                         puzzlePiece, gridNode: gridNode,
-                        bankNode: bankManager.bankNode)
+                        bankNode: bankManager.bankNode
+                    )
+                }
+            } else {
+                // Handle the case where multiple unplaced pieces exist
+                if let pieceNodeToPlace = visibleUnplacedPieces.first(where: {
+                    $0.name != selectedPieceName
+                }) {
+                    if let puzzlePiece = nodeToPuzzlePiece(
+                        pieceNodeToPlace, from: pieces)
+                    {
+                        placePieceAtCorrectPosition(
+                            puzzlePiece, gridNode: gridNode,
+                            bankNode: bankManager.bankNode
+                        )
+                    }
                 }
             }
 
@@ -293,7 +292,7 @@ class PowerUpManager {
             if playState?.gridManager.tryPlacePiece(
                 pieceInBank, at: gridPosition) == true
             {
-                playState?.notifyPiecePlaced()
+                playState?.notifyPiecePlaced(from: true)
             }
         }
     }
