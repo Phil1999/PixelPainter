@@ -7,6 +7,7 @@
 
 import GameplayKit
 import SpriteKit
+import AVFoundation
 
 class MemorizeState: GKState {
     unowned let gameScene: GameScene
@@ -21,6 +22,9 @@ class MemorizeState: GKState {
     private var currentInfoModal: SKNode?
     private var confirmButton: SKNode?
     private var infoButtons: [SKSpriteNode] = []
+    private var scoreCounter: ScoreCounter?
+    
+    private var tutorialVideoLooper: AVPlayerLooper?
 
     init(gameScene: GameScene) {
         self.gameScene = gameScene
@@ -192,6 +196,24 @@ class MemorizeState: GKState {
             x: gameScene.size.width / 2, y: gameScene.size.height / 1.85)
         gameScene.addChild(imageNode)
 
+        // Add blur over the image
+        let blurOverlay = SKEffectNode()
+        blurOverlay.filter = CIFilter(
+            name: "CIGaussianBlur", parameters: ["inputRadius": 25.0])
+        blurOverlay.shouldRasterize = true
+        blurOverlay.name = "blurImageNode"
+
+        let blurredImage = SKSpriteNode(texture: SKTexture(image: image))
+        blurredImage.size = CGSize(
+            width: imageNode.size.width + 5,
+            height: imageNode.size.height + 5)
+        blurredImage.position = .zero
+        blurOverlay.addChild(blurredImage)
+
+        blurOverlay.position = imageNode.position
+        blurOverlay.zPosition = imageNode.zPosition + 1
+        gameScene.addChild(blurOverlay)
+
         let frameSize = CGSize(
             width: imageNode.size.width + 15,
             height: imageNode.size.height + 15)
@@ -202,16 +224,19 @@ class MemorizeState: GKState {
         frameNode.zPosition = imageNode.zPosition - 1
         frameNode.name = "frameNode"
         gameScene.addChild(frameNode)
-        
+
         // level label container
         let levelContainer = SKNode()
 
-        if let imageNode = gameScene.childNode(withName: "imageNode") as? SKSpriteNode {
+        if let imageNode = gameScene.childNode(withName: "imageNode")
+            as? SKSpriteNode
+        {
             // Position the container above the image with some padding
-            let verticalPadding: CGFloat = 70
+            let verticalPadding: CGFloat = 80
             levelContainer.position = CGPoint(
                 x: gameScene.size.width / 2,
-                y: imageNode.position.y + (imageNode.size.height / 2) + verticalPadding
+                y: imageNode.position.y + (imageNode.size.height / 2)
+                    + verticalPadding
             )
         }
 
@@ -248,7 +273,7 @@ class MemorizeState: GKState {
         underline.fillColor = .white
         underline.strokeColor = .clear
         underline.alpha = 0.3
-        underline.position = CGPoint(x: 0, y: -45)
+        underline.position = CGPoint(x: 0, y: -50)
 
         levelContainer.addChild(levelText)
         levelContainer.addChild(numberLabel)
@@ -263,6 +288,8 @@ class MemorizeState: GKState {
             scoreCounter.position = CGPoint(
                 x: gameScene.size.width / 6, y: gameScene.size.height - 90)
             gameScene.addChild(scoreCounter)
+            
+            self.scoreCounter = scoreCounter
 
             // add "choose two" label every round for consistency
             let chooseLabel = SKLabelNode(text: "Choose two")
@@ -305,6 +332,17 @@ class MemorizeState: GKState {
     }
 
     private func blinkCountdownLabel(readyLabel: SKLabelNode, blinkCount: Int) {
+        // Remove the blur effect from image
+        if let blurNode = self.gameScene.childNode(withName: "blurImageNode")
+            as? SKEffectNode
+        {
+            let fadeOut = SKAction.sequence([
+                SKAction.fadeOut(withDuration: 1.5),
+                SKAction.removeFromParent(),
+            ])
+            blurNode.run(fadeOut)
+        }
+
         let countdownSequence = ["3", "2", "1", "Go!"]
         var currentIndex = 0
 
@@ -454,13 +492,34 @@ extension MemorizeState {
         maskNode.fillColor = .white
         cropNode.maskNode = maskNode
         cropNode.position = CGPoint(x: 0, y: 50)
+        
+        // Make the tutorial videos loop
+        guard let url = Bundle.main.url(forResource: "\(type.videoFileName)", withExtension: "mp4") else {
+            print("Video is missing!")
+            return
+        }
 
-        // Video player
-        let fileName = "\(type.videoFileName).mp4"
-        let videoNode = SKVideoNode(fileNamed: fileName)
+        let item = AVPlayerItem(url: url)
+        let player = AVQueuePlayer()
+
+        // player properties to optimize performance
+        player.automaticallyWaitsToMinimizeStalling = false
+        player.preventsDisplaySleepDuringVideoPlayback = false
+
+        // Create video node
+        let videoNode = SKVideoNode(avPlayer: player)
         videoNode.size = videoContainerSize
-        cropNode.addChild(videoNode)
-        videoNode.play()
+
+        // Set the looper on appropriate queue to avoid priority inversion
+        DispatchQueue.global(qos: .userInteractive).async {
+            self.tutorialVideoLooper = AVPlayerLooper(player: player, templateItem: item)
+        }
+
+        // Add to view hierarchy on main thread
+        DispatchQueue.main.async {
+            cropNode.addChild(videoNode)
+            videoNode.play()
+        }
 
         // Border container
         let videoContainer = SKShapeNode(
@@ -624,9 +683,11 @@ extension MemorizeState {
             // Hide confirm button when deselecting
             confirmButton?.removeFromParent()
             confirmButton = nil
+            SoundManager.shared.playSound(.deselect)
         } else if selectedPowerUps.count < 2 {
             selectedPowerUps.insert(type)
             icon.alpha = 1.0
+            SoundManager.shared.playSound(.select)
 
             // Show confirm button when we have 2 selections
             if selectedPowerUps.count == 2 {
@@ -675,6 +736,7 @@ extension MemorizeState {
     }
 
     private func completePowerUpSelection() {
+        SoundManager.shared.playSound(.confirm)
         if let playState = gameScene.context.stateMachine?.state(
             forClass: PlayState.self) as? PlayState
         {
@@ -687,6 +749,7 @@ extension MemorizeState {
         confirmButton?.removeFromParent()
         chooseTwoLabel?.removeFromParent()
         levelLabelContainer?.removeFromParent()
+        scoreCounter?.removeFromParent()
         chooseTwoLabel = nil
 
         if !countdownStarted {

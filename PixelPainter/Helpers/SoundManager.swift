@@ -30,12 +30,17 @@ class SoundManager {
         // Sound file names and their associated filename
         let soundFiles = [
             "piece_placed": "piece_placed.wav",
+            "incorrect_piece_placed": "incorrect-placement.mp3",
             "level_complete": "level_complete.wav",
             "game_over_incomplete_puzzle": "game-end-incomplete-puzzle.mp3",
             "game_over_no_puzzle": "game-over-no-puzzle.wav",
             "freeze":"freeze.mp3",
             "shutter-click":"shutter-click.mp3",
             "shuffle":"shuffle.mp3",
+            "select": "select.mp3",
+            "deselect": "deselect.mp3",
+            "confirm": "confirm.mp3",
+            "notify_hint": "hint-notification.mp3"
         ]
 
         // Preload each sound
@@ -129,11 +134,16 @@ class SoundManager {
 // Enum for all available game sounds
 enum GameSound: String {
     case piecePlaced = "piece_placed"
+    case incorrectPiecePlaced = "incorrect_piece_placed"
     case levelComplete = "level_complete"
     case gameOverWithPieces = "game_over_incomplete_puzzle"
     case gameOverNoPieces = "game_over_no_puzzle"
     case freeze = "freeze"
     case shutter = "shutter-click"
     case shuffle = "shuffle"
+    case select = "select"
+    case deselect = "deselect"
+    case confirm = "confirm"
+    case notifyHint = "notify_hint"
 }
 

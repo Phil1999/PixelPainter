@@ -18,6 +18,8 @@ class PlayState: GKState {
     private var hintTimer: Timer?
     private var idleHintTimer: Timer?
 
+    private var piecePlacedFromPowerup: Bool = false
+
     init(gameScene: GameScene) {
         self.gameScene = gameScene
         self.gridManager = GridManager(gameScene: gameScene)
@@ -39,7 +41,6 @@ class PlayState: GKState {
         stopHintTimer()
         stopIdleHintTimer()
         gridManager.hideHint()
-        
 
         if let timerNode = gameScene.childNode(withName: "//circularTimer")
             as? CircularTimer
@@ -83,9 +84,21 @@ class PlayState: GKState {
         startIdleHintTimer()
     }
 
+    // This function is only used from the place powerup.
+    func notifyPiecePlaced(from powerup: Bool) {
+        // Will always be true when called
+        piecePlacedFromPowerup = powerup
 
-    func notifyPiecePlaced() {
-        didSuccessfullyPlacePiece()
+        // If only one visible piece left place normally
+        // This is necessary because in our place logic we will always place down
+        // the final visible piece no matter what.
+        if bankManager.getVisiblePieces().count > 1 {
+            placePieceWithPowerUp()
+        } else {
+            didSuccessfullyPlacePiece()
+        }
+
+        piecePlacedFromPowerup = false
     }
 
     func updateTime(by seconds: Double) {
@@ -123,16 +136,39 @@ class PlayState: GKState {
         impactLight.impactOccurred()
     }
 
+    private func placePieceWithPowerUp() {
+        print("placed with powerup")
+        SoundManager.shared.playSound(.piecePlaced)
+        updateTime(by: 2)
+
+        // Update score and refresh the bank
+        gameScene.context.gameInfo.score += 30
+        hudManager.updateScore(withAnimation: true)
+
+        startIdleHintTimer()
+
+        bankManager.refreshBankIfNeeded()
+
+        if bankManager.isBankEmpty() {
+            handleLevelComplete()
+        }
+
+        let impactLight = UIImpactFeedbackGenerator(style: .light)
+        impactLight.prepare()
+        impactLight.impactOccurred()
+    }
+
     private func handleLevelComplete() {
         // Stop timers immediately
         stopHintTimer()
         stopIdleHintTimer()
-        
 
-        if let timerNode = gameScene.childNode(withName: "//circularTimer") as? CircularTimer {
+        if let timerNode = gameScene.childNode(withName: "//circularTimer")
+            as? CircularTimer
+        {
             timerNode.stopTimer()
         }
-        
+
         SoundManager.shared.stopBackgroundMusic()
         SoundManager.shared.playSound(.levelComplete)
 
@@ -147,13 +183,14 @@ class PlayState: GKState {
         if let backgroundNode = gameScene.childNode(withName: "backgroundNode")
             as? Background
         {
-            
+
             if let snow = gameScene.childNode(withName: "snowEffect"),
-               let overlay = gameScene.childNode(withName: "freezeOverlay") {
+                let overlay = gameScene.childNode(withName: "freezeOverlay")
+            {
                 snow.removeFromParent()
                 overlay.removeFromParent()
             }
-            
+
             backgroundNode.fadeOutWarningOverlay {
                 backgroundNode.playVictoryAnimation { [weak self] in
                     guard let self = self else { return }
@@ -167,9 +204,10 @@ class PlayState: GKState {
                             "board size is now: ",
                             self.gameScene.context.gameInfo.boardSize)
                     }
-                    
+
                     // Transition to memorize state after animation completes
-                    self.gameScene.context.stateMachine?.enter(MemorizeState.self)
+                    self.gameScene.context.stateMachine?.enter(
+                        MemorizeState.self)
                 }
             }
         } else {
@@ -177,7 +215,7 @@ class PlayState: GKState {
             gameScene.context.stateMachine?.enter(MemorizeState.self)
         }
     }
-    
+
     private func handleGameOver() {
 
         EffectManager.shared.temporarilyDisableInteraction()
@@ -188,6 +226,10 @@ class PlayState: GKState {
         gridManager.hideHint()
         self.bankManager.clearSelection()
         SoundManager.shared.stopBackgroundMusic()
+
+        let impactHeavy = UIImpactFeedbackGenerator(style: .heavy)
+        impactHeavy.prepare()
+        impactHeavy.impactOccurred()
 
         if let gridNode = gameScene.childNode(withName: "grid")
             as? SKSpriteNode,
@@ -232,10 +274,17 @@ class PlayState: GKState {
     }
 
     private func showWrongPlacementAnimation(for piece: SKSpriteNode) {
-        EffectManager.shared.temporarilyDisableInteraction(for: GameConstants.GeneralGamePlay.wrongPlacementBufferTime)
-        EffectManager.shared.cooldown(piece, duration: GameConstants.GeneralGamePlay.wrongPlacementBufferTime)
+        SoundManager.shared.playSound(.incorrectPiecePlaced)
+        EffectManager.shared.temporarilyDisableInteraction(
+            for: GameConstants.GeneralGamePlay.wrongPlacementBufferTime)
+        if let cropNode = piece.children.first as? SKCropNode {
+            EffectManager.shared.cooldown(
+                cropNode,
+                duration: GameConstants.GeneralGamePlay.wrongPlacementBufferTime
+            )
+        }
         EffectManager.shared.shakeNode(piece)
-        
+
         let impactMedium = UIImpactFeedbackGenerator(style: .medium)
         impactMedium.prepare()
         impactMedium.impactOccurred()
@@ -280,7 +329,6 @@ class PlayState: GKState {
 
     func touchesEnded(_ touches: Set<UITouch>, with event: UIEvent?) {
     }
-
 
     // MARK: - Hint System
     private func startHintTimer() {
@@ -337,7 +385,9 @@ extension PlayState: CircularTimerDelegate {
 
     func timerDidUpdate(currentTime: TimeInterval) {
         gameScene.context.gameInfo.timeRemaining = currentTime
-        if let background = gameScene.childNode(withName: "backgroundNode") as? Background {
+        if let background = gameScene.childNode(withName: "backgroundNode")
+            as? Background
+        {
             background.updateWarningLevel(timeRemaining: currentTime)
         }
     }

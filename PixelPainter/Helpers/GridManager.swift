@@ -253,7 +253,9 @@ class GridManager {
                         == pieceName
                 })
         else { return }
-
+        
+        SoundManager.shared.playSound(.notifyHint)
+        
         let puzzlePiece = gameScene.context.gameInfo.pieces[pieceIndex]
         let row = Int(puzzlePiece.correctPosition.y)
         let col = Int(puzzlePiece.correctPosition.x)
@@ -261,59 +263,79 @@ class GridManager {
         if let frameNode = gridNode.childNode(withName: "frame_\(row)_\(col)")
             as? SKSpriteNode
         {
+
+            // Create the outline for the grid piece
+            let outlinePath = UIBezierPath(
+                rect: CGRect(
+                    x: -frameNode.size.width / 2,
+                    y: -frameNode.size.height / 2,
+                    width: frameNode.size.width,
+                    height: frameNode.size.height
+                ))
+
+            let outlineNode = SKShapeNode(path: outlinePath.cgPath)
+            outlineNode.position = .zero
+            outlineNode.strokeColor = UIColor.white
+            outlineNode.fillColor = .clear
+            outlineNode.lineWidth = 0.2
+            outlineNode.glowWidth = 4
+            outlineNode.zPosition = 99999  // Above all elements
+            outlineNode.name = "hint_outline"
+
+            frameNode.addChild(outlineNode)
+
             hintNode = frameNode
 
-            let size = frameNode.size
-            let rect = CGRect(origin: .zero, size: size)
-            let cornerRadius: CGFloat = 30
+            // Hovering hand
+            let handNode = SKSpriteNode(imageNamed: "hand-down")
+            handNode.size = CGSize(width: 50, height: 50)
+            handNode.position = CGPoint(
+                x: frameNode.position.x, y: frameNode.position.y + 20)
+            handNode.zPosition = 99999
+            handNode.name = "hint_hand"
+            gridNode.addChild(handNode)
 
-            let path = UIBezierPath(
-                roundedRect: rect,
-                byRoundingCorners: getRoundedCorners(
-                    row: row, col: col,
-                    dimension: gameScene.context.layoutInfo.gridDimension),
-                cornerRadii: CGSize(width: cornerRadius, height: cornerRadius)
-            )
-
-            let shape = CAShapeLayer()
-            shape.path = path.cgPath
-            shape.fillColor =
-                UIColor(red: 0.0, green: 0.4, blue: 1.0, alpha: 0.9).cgColor
-            shape.strokeColor = UIColor.white.cgColor
-            shape.lineWidth = 4
-
-            UIGraphicsBeginImageContextWithOptions(size, false, 0)
-            if let context = UIGraphicsGetCurrentContext() {
-                shape.render(in: context)
-            }
-            let image = UIGraphicsGetImageFromCurrentImageContext()
-            UIGraphicsEndImageContext()
-
-            // Create a new node for the hint effect that will be above everything
-            let hintEffectNode = SKSpriteNode(texture: SKTexture(image: image!))
-            hintEffectNode.position = frameNode.position
-            hintEffectNode.zPosition = 10
-            hintEffectNode.name = "hint_effect"
-            gridNode.addChild(hintEffectNode)
-
-            hintNode = hintEffectNode
-
-            // Add pulsing animation
-            let scaleAction = SKAction.sequence([
-                SKAction.scale(to: 1.05, duration: 0.5),
-                SKAction.scale(to: 1.0, duration: 0.5),
+            // Bobbing animation
+            let bobbingAction = SKAction.sequence([
+                SKAction.moveBy(x: 0, y: -10, duration: 0.5),
+                SKAction.moveBy(x: 0, y: 10, duration: 0.5),
             ])
+            handNode.run(
+                SKAction.repeatForever(bobbingAction),
+                withKey: "bobbingAnimation")
 
-            hintEffectNode.run(
-                SKAction.repeatForever(scaleAction), withKey: "hintAnimation")
+            // Show the image on the grid.
+            let pieceTexture = SKTexture(image: puzzlePiece.image)
+            let pieceImageNode = SKSpriteNode(texture: pieceTexture)
+            pieceImageNode.size = frameNode.size
+            pieceImageNode.position = frameNode.position
+            pieceImageNode.alpha = 0.3
+            pieceImageNode.name = "hint_piece_image"
+            gridNode.addChild(pieceImageNode)
+
         }
     }
 
     func hideHint() {
-        if let hintNode = hintNode {
-            hintNode.removeAction(forKey: "hintAnimation")
-            hintNode.removeFromParent()
+        guard let gameScene = gameScene,
+            let gridNode = gameScene.childNode(withName: "grid")
+                as? SKSpriteNode
+        else { return }
+
+        if let handNode = gridNode.childNode(withName: "hint_hand") {
+            handNode.removeFromParent()
         }
-        hintNode = nil
+
+        if let hintPieceNode = gridNode.childNode(withName: "hint_piece_image")
+        {
+            hintPieceNode.removeFromParent()
+        }
+
+        if let hintNode = hintNode,
+            let hintOutline = hintNode.childNode(withName: "hint_outline")
+        {
+            hintOutline.removeFromParent()
+        }
+
     }
 }
