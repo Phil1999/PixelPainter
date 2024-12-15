@@ -12,6 +12,24 @@ class BankManager {
         self.gameScene = gameScene
     }
     
+    func applyHoverEffect(to piece: SKSpriteNode) {
+        // Remove any existing hover effects
+        clearHoverEffects()
+        
+        // Apply a subtle scale effect to the hovered piece
+        let hoverAction = SKAction.scale(to: 1.05, duration: 0.1) // Updated scale
+        piece.run(hoverAction, withKey: "hoverEffect")
+    }
+
+    func clearHoverEffects() {
+        visiblePieces.forEach { piece in // Updated to use visiblePieces
+            if piece.action(forKey: "hoverEffect") != nil {
+                piece.removeAction(forKey: "hoverEffect")
+                piece.setScale(1.0)
+            }
+        }
+    }
+    
     func createPictureBank() {
         guard let gameScene = gameScene,
               let image = gameScene.queueManager.getCurrentImage() else { return }

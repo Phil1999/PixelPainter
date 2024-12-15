@@ -89,7 +89,7 @@ extension ScoreCounter {
         let bonusLabel = SKLabelNode(fontNamed: "PPNeueMontreal-Bold")
         bonusLabel.text = "+\(points)"
         bonusLabel.fontSize = 20
-        bonusLabel.fontColor = .yellow
+        bonusLabel.fontColor = .lightGray
         bonusLabel.position = CGPoint(x: 35, y: 0)
         bonusLabel.alpha = 0
         addChild(bonusLabel)

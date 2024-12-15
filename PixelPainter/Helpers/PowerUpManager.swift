@@ -120,7 +120,7 @@ class PowerUpManager {
         switch type {
         case .timeStop:
             showPowerUpAnimation(type)
-            SoundManager.shared.playSound(.freeze)
+            SoundManager.shared.fadeInSound(.freeze, duration: 0.1)
             if uses > 1 {
                 powerUpsInCooldown.insert(type)
                 EffectManager.shared.cooldown(
@@ -147,6 +147,10 @@ class PowerUpManager {
 
         case .place:
             showPowerUpAnimation(type)
+            if uses > 1 {
+                powerUpsInCooldown.insert(type)
+                EffectManager.shared.cooldown(powerUpIcon, duration: 0.5)
+            }
             guard
                 let gridNode = gameScene.childNode(withName: "grid")
                     as? SKSpriteNode,
@@ -197,6 +201,9 @@ class PowerUpManager {
                         )
                     }
                 }
+            }
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
+                self.powerUpsInCooldown.remove(type)
             }
 
         case .flash:
@@ -284,15 +291,41 @@ class PowerUpManager {
 
         // Find and try to place the piece from the bank
         if let bankNode = bankNode,
-            let pieceInBank = bankNode.childNode(
-                withName:
-                    "piece_\(Int(correctPosition.y))_\(Int(correctPosition.x))"
-            ) as? SKSpriteNode
+           let pieceInBank = bankNode.childNode(
+            withName:
+                "piece_\(Int(correctPosition.y))_\(Int(correctPosition.x))"
+           ) as? SKSpriteNode,
+           let gameScene = self.gameScene
         {
-            if playState?.gridManager.tryPlacePiece(
-                pieceInBank, at: gridPosition) == true
-            {
-                playState?.notifyPiecePlaced(from: true)
+            // Store the initial position of the piece in the bank
+            let initialPosition = pieceInBank.position
+
+            // Calculate the final position in the scene's coordinate system
+            let finalPosition = gameScene.convert(gridPosition, from: gridNode)
+
+            let moveToGridPosition = SKAction.move(to: finalPosition, duration: 0.5)
+            let sequence = SKAction.sequence([moveToGridPosition])
+            sequence.timingMode = .easeInEaseOut
+
+            // Temporarily reparent the piece to the scene for the animation
+            let pieceStartPosition = bankNode.convert(pieceInBank.position, to: gameScene)
+            pieceInBank.removeFromParent()
+            gameScene.addChild(pieceInBank)
+            pieceInBank.position = pieceStartPosition
+
+            // Run the animation
+            pieceInBank.run(sequence) { [weak self] in
+                // After the animation completes, try to place the piece
+                if self?.playState?.gridManager.tryPlacePiece(
+                    pieceInBank, at: gridPosition) == true
+                {
+                    self?.playState?.notifyPiecePlaced(from: true)
+                } else {
+                    // If placement fails, move the piece back to its original position in the bank
+                    pieceInBank.removeFromParent()
+                    bankNode.addChild(pieceInBank)
+                    pieceInBank.position = initialPosition
+                }
             }
         }
     }
@@ -317,3 +350,4 @@ class PowerUpManager {
         }
     }
 }
+

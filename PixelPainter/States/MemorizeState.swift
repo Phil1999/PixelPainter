@@ -8,6 +8,7 @@
 import GameplayKit
 import SpriteKit
 import AVFoundation
+import UIKit
 
 class MemorizeState: GKState {
     unowned let gameScene: GameScene
@@ -23,6 +24,7 @@ class MemorizeState: GKState {
     private var confirmButton: SKNode?
     private var infoButtons: [SKSpriteNode] = []
     private var scoreCounter: ScoreCounter?
+    private var powerUpSelectionComplete = false
     
     private var tutorialVideoLooper: AVPlayerLooper?
 
@@ -55,10 +57,14 @@ class MemorizeState: GKState {
         currentInfoModal = nil
         infoButtons.removeAll()
         countdownStarted = false
+        powerUpSelectionComplete = false
+        resetPulsatingAnimations()
     }
 
     func handleTouch(at location: CGPoint) {
-
+        if powerUpSelectionComplete {
+            return
+        }
         // Handle info modal close button
         if let modal = currentInfoModal {
             let modalLocation = modal.convert(location, from: gameScene)
@@ -449,7 +455,7 @@ class MemorizeState: GKState {
 
             piece.run(group)
         }
-
+        SoundManager.shared.playSound(.memorizeBreak)
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.6) { [weak self] in
             piecesContainer.removeFromParent()
             self?.transitionToPlayState()
@@ -653,6 +659,7 @@ extension MemorizeState {
             icon.alpha = 0.5
             gameScene.addChild(icon)
             powerUpSelectionNodes.append(icon)
+            startPulsatingAnimation(for: icon)
 
             // Add info button
             let infoButton = SKSpriteNode(imageNamed: "info-icon")
@@ -683,15 +690,43 @@ extension MemorizeState {
             // Hide confirm button when deselecting
             confirmButton?.removeFromParent()
             confirmButton = nil
+            let impact = UIImpactFeedbackGenerator(style: .light)
+            impact.impactOccurred()
             SoundManager.shared.playSound(.deselect)
+
+            // Pulsate all unselected icons
+            powerUpSelectionNodes.forEach { node in
+                if !selectedPowerUps.contains(PowerUpType(rawValue: node.name?.replacingOccurrences(of: "powerup_", with: "") ?? "") ?? .timeStop) {
+                    startPulsatingAnimation(for: node)
+                }
+            }
         } else if selectedPowerUps.count < 2 {
             selectedPowerUps.insert(type)
             icon.alpha = 1.0
+            icon.removeAction(forKey: "pulsate")
+            icon.setScale(1.0)  // Reset to default size when selected
+            let impact = UIImpactFeedbackGenerator(style: .light)
+            impact.impactOccurred()
             SoundManager.shared.playSound(.select)
 
             // Show confirm button when we have 2 selections
             if selectedPowerUps.count == 2 {
                 showConfirmButton()
+                // Stop pulsating for all icons
+                powerUpSelectionNodes.forEach {
+                    $0.removeAction(forKey: "pulsate")
+                    $0.setScale(1.0)  // Reset all to default size
+                }
+            } else {
+                // Pulsate only unselected icons
+                powerUpSelectionNodes.forEach { node in
+                    if !selectedPowerUps.contains(PowerUpType(rawValue: node.name?.replacingOccurrences(of: "powerup_", with: "") ?? "") ?? .timeStop) {
+                        startPulsatingAnimation(for: node)
+                    } else {
+                        node.removeAction(forKey: "pulsate")
+                        node.setScale(1.0)  // Reset to default size
+                    }
+                }
             }
         }
     }
@@ -729,10 +764,7 @@ extension MemorizeState {
         gameScene.addChild(button)
         confirmButton = button
 
-        let scaleUp = SKAction.scale(to: 1.1, duration: 0.5)
-        let scaleDown = SKAction.scale(to: 1.0, duration: 0.5)
-        let pulse = SKAction.sequence([scaleUp, scaleDown])
-        button.run(SKAction.repeatForever(pulse))
+        startPulsatingAnimation(for: button)
     }
 
     private func completePowerUpSelection() {
@@ -742,6 +774,7 @@ extension MemorizeState {
         {
             playState.powerUpManager.setPowerUps(Array(selectedPowerUps))
         }
+        powerUpSelectionComplete = true
 
         // Clean up all UI elements
         powerUpSelectionNodes.forEach { $0.removeFromParent() }
@@ -763,4 +796,20 @@ extension MemorizeState {
             }
         }
     }
+
+    private func startPulsatingAnimation(for node: SKNode) {
+        let scaleUp = SKAction.scale(to: 1.1, duration: 0.5)
+        let scaleDown = SKAction.scale(to: 1.0, duration: 0.5)
+        let pulse = SKAction.sequence([scaleUp, scaleDown])
+        node.setScale(1.0)  // Start from default scale
+        node.run(SKAction.repeatForever(pulse), withKey: "pulsate")
+    }
+
+    private func resetPulsatingAnimations() {
+        powerUpSelectionNodes.forEach { node in
+            node.removeAction(forKey: "pulsate")
+            startPulsatingAnimation(for: node)
+        }
+    }
 }
+

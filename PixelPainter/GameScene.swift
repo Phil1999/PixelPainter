@@ -22,7 +22,11 @@ class GameScene: SKScene {
         super.init(size: size)
         SoundManager.shared.setGameScene(self)
         EffectManager.shared.setGameScene(self)
-        SoundManager.shared.playBackgroundMusic("game-bg", fileType: "mp3")
+        
+        // Use a short delay to ensure the scene is fully loaded before playing music
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
+            SoundManager.shared.playBackgroundMusic("game-bg", fileType: "mp3")
+        }
     }
 
     required init?(coder aDecoder: NSCoder) {

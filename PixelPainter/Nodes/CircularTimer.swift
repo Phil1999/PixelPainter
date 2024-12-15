@@ -19,7 +19,7 @@ enum TimerState {
         case .frozen:
             return .cyan
         case .overtime:
-            return .orange
+            return .green
         case.warning:
             return .red
         }
@@ -32,7 +32,7 @@ enum TimerState {
         case .frozen:
             return .cyan
         case .overtime:
-            return .orange
+            return .green
         case .warning:
             return .green
         }
