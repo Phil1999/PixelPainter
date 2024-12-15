@@ -19,6 +19,7 @@ class PlayState: GKState {
     private var idleHintTimer: Timer?
 
     private var piecePlacedFromPowerup: Bool = false
+    private var isLevelComplete: Bool = false
 
     init(gameScene: GameScene) {
         self.gameScene = gameScene
@@ -49,6 +50,7 @@ class PlayState: GKState {
         }
 
         gameScene.removeAllChildren()
+        isLevelComplete = false
     }
 
     private func setupPlayScene() {
@@ -159,6 +161,7 @@ class PlayState: GKState {
     }
 
     private func handleLevelComplete() {
+        isLevelComplete = true
         // Stop timers immediately
         stopHintTimer()
         stopIdleHintTimer()
@@ -294,8 +297,8 @@ class PlayState: GKState {
         guard let touch = touches.first else { return }
         let location = touch.location(in: gameScene)
 
-        // Check for power-up touches
-        if powerUpManager.handleTouch(at: location) {
+        // Check for power-up touches first, before any other processing
+        if !isLevelComplete && powerUpManager.handleTouch(at: location) {
             return
         }
 
@@ -325,6 +328,9 @@ class PlayState: GKState {
     }
 
     func touchesMoved(_ touches: Set<UITouch>, with event: UIEvent?) {
+        guard let touch = touches.first else { return }
+        let location = touch.location(in: gameScene)
+        handlePieceHovering(at: location)
     }
 
     func touchesEnded(_ touches: Set<UITouch>, with event: UIEvent?) {
@@ -375,6 +381,24 @@ class PlayState: GKState {
         idleHintTimer = nil
     }
 
+    private func handlePieceHovering(at location: CGPoint) {
+        guard let bankNode = bankManager.bankNode,
+              bankNode.contains(location) else {
+            // If not hovering over bank, clear any existing hover effects
+            bankManager.clearHoverEffects()
+            return
+        }
+
+        let bankLocation = bankNode.convert(location, from: gameScene)
+        if let touchedPiece = bankNode.nodes(at: bankLocation)
+            .first(where: { $0.name?.starts(with: "piece_") == true })
+            as? SKSpriteNode
+        {
+            bankManager.applyHoverEffect(to: touchedPiece)
+        } else {
+            bankManager.clearHoverEffects()
+        }
+    }
 }
 
 // MARK: - CircularTimerDelegate
