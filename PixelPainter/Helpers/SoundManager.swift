@@ -62,6 +62,20 @@ class SoundManager {
         }
     }
 
+    func fadeInSound(_ sound: GameSound, duration: TimeInterval = 0.1) {
+        guard isSoundEnabled,
+            let scene = gameScene,
+            let action = soundActions[sound.rawValue] else { return }
+
+        let fadeInAction = SKAction.sequence([
+            SKAction.changeVolume(to: 0, duration: 0),
+            action,
+            SKAction.changeVolume(to: 1, duration: duration)
+        ])
+        
+        scene.run(fadeInAction)
+    }
+
     func playBackgroundMusic(
         _ fileName: String, fileType: String = "mp3", loop: Bool = true
     ) {
@@ -77,9 +91,12 @@ class SoundManager {
             do {
                 backgroundMusicPlayer = try AVAudioPlayer(contentsOf: url)
                 backgroundMusicPlayer?.numberOfLoops = loop ? -1 : 0  // Infinite loop if true
-                backgroundMusicPlayer?.volume = 0.5
+                backgroundMusicPlayer?.volume = 0
                 backgroundMusicPlayer?.prepareToPlay()
                 backgroundMusicPlayer?.play()
+                
+                // Fade in the background music
+                fadeInBackgroundMusic(duration: 0.5)
             } catch {
                 print(
                     "Error loading background music: \(error.localizedDescription)"
@@ -87,6 +104,22 @@ class SoundManager {
             }
         } else {
             print("Background music file not found: \(fileName).\(fileType)")
+        }
+    }
+
+    private func fadeInBackgroundMusic(duration: TimeInterval) {
+        guard let player = backgroundMusicPlayer else { return }
+        
+        let fadeInterval: TimeInterval = 0.1
+        let volumeIncrement = Float(fadeInterval / duration)
+        
+        Timer.scheduledTimer(withTimeInterval: fadeInterval, repeats: true) { timer in
+            if player.volume < 0.5 {
+                player.volume += volumeIncrement
+            } else {
+                player.volume = 0.5
+                timer.invalidate()
+            }
         }
     }
 
