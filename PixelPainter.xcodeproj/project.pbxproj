@@ -11,6 +11,7 @@
 		A95E258F2CC7F3FD00163C5C /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A95E258E2CC7F3FD00163C5C /* ContentView.swift */; };
 		A95E25912CC7F46400163C5C /* GameContext.swift in Sources */ = {isa = PBXBuildFile; fileRef = A95E25902CC7F46400163C5C /* GameContext.swift */; };
 		A95E25932CC7F56D00163C5C /* GameScene.swift in Sources */ = {isa = PBXBuildFile; fileRef = A95E25922CC7F56D00163C5C /* GameScene.swift */; };
+		A996B21C2D0EAB3F006A8F8D /* memorize-break.mp3 in Resources */ = {isa = PBXBuildFile; fileRef = A996B21B2D0EAB3F006A8F8D /* memorize-break.mp3 */; };
 		A9BA14972D090C4000F1C5BE /* game-end-incomplete-puzzle.mp3 in Resources */ = {isa = PBXBuildFile; fileRef = A9BA14962D090C4000F1C5BE /* game-end-incomplete-puzzle.mp3 */; };
 		A9BA14982D090C4000F1C5BE /* game-end-incomplete-puzzle.mp3 in Resources */ = {isa = PBXBuildFile; fileRef = A9BA14962D090C4000F1C5BE /* game-end-incomplete-puzzle.mp3 */; };
 		A9BA14992D090C4000F1C5BE /* game-end-incomplete-puzzle.mp3 in Resources */ = {isa = PBXBuildFile; fileRef = A9BA14962D090C4000F1C5BE /* game-end-incomplete-puzzle.mp3 */; };
@@ -63,6 +64,7 @@
 		A95E258E2CC7F3FD00163C5C /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
 		A95E25902CC7F46400163C5C /* GameContext.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GameContext.swift; sourceTree = "<group>"; };
 		A95E25922CC7F56D00163C5C /* GameScene.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GameScene.swift; sourceTree = "<group>"; };
+		A996B21B2D0EAB3F006A8F8D /* memorize-break.mp3 */ = {isa = PBXFileReference; lastKnownFileType = audio.mp3; path = "memorize-break.mp3"; sourceTree = "<group>"; };
 		A9BA14962D090C4000F1C5BE /* game-end-incomplete-puzzle.mp3 */ = {isa = PBXFileReference; lastKnownFileType = audio.mp3; path = "game-end-incomplete-puzzle.mp3"; sourceTree = "<group>"; };
 		A9BA149A2D09138800F1C5BE /* freeze.mp3 */ = {isa = PBXFileReference; lastKnownFileType = audio.mp3; path = freeze.mp3; sourceTree = "<group>"; };
 		A9BA149C2D0914ED00F1C5BE /* shutter-click.mp3 */ = {isa = PBXFileReference; lastKnownFileType = audio.mp3; path = "shutter-click.mp3"; sourceTree = "<group>"; };
@@ -187,6 +189,7 @@
 				A9BA149C2D0914ED00F1C5BE /* shutter-click.mp3 */,
 				D48262002D0CD84B0010AC43 /* incorrect-placement.mp3 */,
 				D48262022D0CD8E30010AC43 /* confirm.mp3 */,
+				A996B21B2D0EAB3F006A8F8D /* memorize-break.mp3 */,
 				D48261FA2D0CD6D30010AC43 /* deselect.mp3 */,
 				D48262042D0D07590010AC43 /* hint-notification.mp3 */,
 				D48261FB2D0CD6D30010AC43 /* select.mp3 */,
@@ -338,6 +341,7 @@
 				D46D0FA72CCB1B6200E8D37C /* PPNeueMontreal-Medium.otf in Resources */,
 				D48262012D0CD84B0010AC43 /* incorrect-placement.mp3 in Resources */,
 				A9BA149F2D09165000F1C5BE /* shuffle.mp3 in Resources */,
+				A996B21C2D0EAB3F006A8F8D /* memorize-break.mp3 in Resources */,
 				D46D0FA82CCB1B6200E8D37C /* PPNeueMontreal-Thin.otf in Resources */,
 				D46D0FA92CCB1B6200E8D37C /* PPNeueMontreal-Book.otf in Resources */,
 				D48F2E1B2D0DF91C00C168F2 /* flash_demo.mp4 in Resources */,

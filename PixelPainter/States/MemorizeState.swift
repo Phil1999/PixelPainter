@@ -23,6 +23,7 @@ class MemorizeState: GKState {
     private var confirmButton: SKNode?
     private var infoButtons: [SKSpriteNode] = []
     private var scoreCounter: ScoreCounter?
+    private var powerUpSelectionComplete = false
     
     private var tutorialVideoLooper: AVPlayerLooper?
 
@@ -55,10 +56,13 @@ class MemorizeState: GKState {
         currentInfoModal = nil
         infoButtons.removeAll()
         countdownStarted = false
+        powerUpSelectionComplete = false
     }
 
     func handleTouch(at location: CGPoint) {
-
+        if powerUpSelectionComplete {
+            return
+        }
         // Handle info modal close button
         if let modal = currentInfoModal {
             let modalLocation = modal.convert(location, from: gameScene)
@@ -449,7 +453,7 @@ class MemorizeState: GKState {
 
             piece.run(group)
         }
-
+        SoundManager.shared.playSound(.memorizeBreak)
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.6) { [weak self] in
             piecesContainer.removeFromParent()
             self?.transitionToPlayState()
@@ -742,6 +746,7 @@ extension MemorizeState {
         {
             playState.powerUpManager.setPowerUps(Array(selectedPowerUps))
         }
+        powerUpSelectionComplete = true
 
         // Clean up all UI elements
         powerUpSelectionNodes.forEach { $0.removeFromParent() }
