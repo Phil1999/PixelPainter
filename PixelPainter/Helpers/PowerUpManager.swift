@@ -31,7 +31,36 @@ class PowerUpManager {
             powerUpIcon.position = CGPoint(x: xPos, y: yPosition)
             gameScene.addChild(powerUpIcon)
             powerUps[type] = powerUpIcon
+        
+            if uses > 0 {
+                startSmoothPulsatingAnimation(for: powerUpIcon)
+            }
         }
+    }
+
+    private func startSmoothPulsatingAnimation(for node: SKNode) {
+        // Remove any existing actions
+        node.removeAllActions()
+        
+        // Create a single pulse action
+        let scaleUp = SKAction.scale(to: 1.1, duration: 0.15)
+        let scaleDown = SKAction.scale(to: 1.0, duration: 0.15)
+        let singlePulse = SKAction.sequence([scaleUp, scaleDown])
+        
+        // Create a sequence of 3 pulses
+        let threePulses = SKAction.repeat(singlePulse, count: 3)
+        
+        // Add a wait action for the remaining time to make it 4 seconds total
+        let waitDuration = 4.0 - (0.3 * 3) // 4 seconds minus the time for 3 pulses
+        let wait = SKAction.wait(forDuration: waitDuration)
+        
+        // Combine the three pulses and the wait into a single sequence
+        let pulseSequence = SKAction.sequence([threePulses, wait])
+        
+        // Repeat the entire sequence forever
+        let repeatForever = SKAction.repeatForever(pulseSequence)
+        
+        node.run(repeatForever, withKey: "smoothPulsate")
     }
 
     func setPowerUps(_ types: [PowerUpType]) {
@@ -49,7 +78,15 @@ class PowerUpManager {
         let uses = powerUpUses[type] ?? 0
 
         powerUpIcon.updateUses(uses)
-
+        
+        if uses > 0 {
+            if powerUpIcon.action(forKey: "smoothPulsate") == nil {
+                startSmoothPulsatingAnimation(for: powerUpIcon)
+            }
+        } else {
+            powerUpIcon.removeAction(forKey: "smoothPulsate")
+            powerUpIcon.setScale(1.0)  // Reset to default size
+        }
     }
 
     func handleTouch(at location: CGPoint) -> Bool {
