@@ -58,7 +58,6 @@ class CircularTimer: SKNode {
     // Visual states
     private var currentState: TimerState = .normal
     private var isFrozen = false
-    private var isWarningActive = false
     private var isOvertime = false
     private var glowNode: SKShapeNode?
     private var pulseAction: SKAction?
@@ -186,35 +185,43 @@ class CircularTimer: SKNode {
     }
 
     private func updateTimerState() {
-            // Determine the new state
-            if isFrozen {
-                currentState = .frozen
-            } else if isOvertime {
-                currentState = .overtime
-            } else if currentTime <= GameConstants.GeneralGamePlay.timeWarningThreshold {
-                currentState = .warning
-            } else {
-                currentState = .normal
-            }
-
-            // Update visuals based on current state
-            timerCircle.strokeColor = currentState.color
-            timeLabel.fontColor = currentState.color
-
-            // Handle state-specific effects
-            switch currentState {
-            case .overtime:
-                setupOvertimeEffects()
-            case .warning:
-                if !isWarningActive {
-                    triggerWarningAnimation()
-                }
-            case .frozen:
-                break  // Frozen state is handled separately in setFrozenState
-            case .normal:
-                removeOvertimeEffects()
-            }
+        let previousState = currentState
+        
+        // Determine the new state
+        if isFrozen {
+            currentState = .frozen
+        } else if isOvertime {
+            currentState = .overtime
+        } else if currentTime <= GameConstants.GeneralGamePlay.timeWarningThreshold {
+            currentState = .warning
+        } else {
+            currentState = .normal
         }
+
+        // Update visuals based on current state
+        timerCircle.strokeColor = currentState.color
+        timeLabel.fontColor = currentState.color
+
+        // Handle state-specific effects
+        switch currentState {
+        case .overtime:
+            setupOvertimeEffects()
+        case .warning:
+            if !isFrozen && timeLabel.action(forKey: "warningAnimation") == nil {
+                triggerWarningAnimation()
+            }
+        case .frozen:
+            stopWarningAnimation()
+        case .normal:
+            removeOvertimeEffects()
+            stopWarningAnimation()
+        }
+        
+        // Stop warning animation if we're exiting the warning state
+        if previousState == .warning && currentState != .warning {
+            stopWarningAnimation()
+        }
+    }
 
     func setFrozen(active: Bool) {
         isFrozen = active
@@ -248,6 +255,11 @@ class CircularTimer: SKNode {
     }
 
     func setFrozenState(active: Bool) {
+        if active {
+            stopWarningAnimation()
+        } else {
+            updateTimerState()
+        }
         print("Setting frozen state: \(active)")
         isFrozen = active
 
@@ -315,29 +327,24 @@ class CircularTimer: SKNode {
     }
 
     private func triggerWarningAnimation() {
-        guard !isWarningActive else { return }
-        isWarningActive = true
+        guard !isFrozen else { return }
         
-        timeLabel.setScale(1.0)
-
+        timeLabel.removeAllActions()
+        
         timerCircle.strokeColor = TimerState.warning.color
         timeLabel.fontColor = TimerState.warning.color
 
-        let minDuration: Double = 0.05
-        let maxDuration: Double = 0.6
-
-        let scaleDuration =
-            minDuration + (maxDuration - minDuration)
-            * sin(Double(currentTime) / 5.0 * .pi / 2)
-
-        let scaleUp = SKAction.scale(to: 1.5, duration: scaleDuration / 2)
-        let scaleDown = SKAction.scale(to: 1.0, duration: scaleDuration / 2)
-        let resetState = SKAction.run { [weak self] in
-            self?.isWarningActive = false
-            self?.timeLabel.setScale(1.0)
-        }
-        timeLabel.removeAllActions()
-        timeLabel.run(SKAction.sequence([scaleUp, scaleDown, resetState]))
+        let scaleUp = SKAction.scale(to: 1.8, duration: 0.3)
+        let scaleDown = SKAction.scale(to: 1.0, duration: 0.3)
+        let sequence = SKAction.sequence([scaleUp, scaleDown])
+        let repeatForever = SKAction.repeatForever(sequence)
+        
+        timeLabel.run(repeatForever, withKey: "warningAnimation")
+    }
+    
+    private func stopWarningAnimation() {
+        timeLabel.removeAction(forKey: "warningAnimation")
+        timeLabel.setScale(1.0)
     }
 }
 
@@ -375,3 +382,4 @@ protocol CircularTimerDelegate: AnyObject {
     func timerDidComplete()
     func timerDidUpdate(currentTime: TimeInterval)
 }
+
