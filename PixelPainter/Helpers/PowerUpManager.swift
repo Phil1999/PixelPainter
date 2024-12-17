@@ -19,19 +19,31 @@ class PowerUpManager {
 
         let centerX = gameScene.size.width / 2
         let spacing: CGFloat = 40 * 2.3
-        let powerUpTypes = Array(powerUpUses.keys)
-        let totalWidth = CGFloat(powerUpTypes.count - 1) * spacing
-        let startX = centerX - (totalWidth / 2)
         let yPosition: CGFloat = 210 + 5
+        
+        // Get all possible positions based on PowerUpType order
+        let allPositions = PowerUpType.all.enumerated().reduce(into: [PowerUpType: Int]()) { dict, item in
+            dict[item.element] = item.offset
+        }
+        
+        // Get selected powerups and their fixed positions
+        let selectedPowerUpPositions = powerUpUses.keys.map { type -> (PowerUpType, Int) in
+            return (type, allPositions[type] ?? 0)
+        }.sorted { $0.1 < $1.1 }  // Sort by their fixed position
+        
+        // Calculate layout
+        let totalWidth = spacing  // Only need one spacing for 2 powerups
+        let startX = centerX - (totalWidth / 2)
 
-        for (index, type) in powerUpTypes.enumerated() {
+        // Display only selected powerups in their fixed positions
+        for (index, (type, _)) in selectedPowerUpPositions.enumerated() {
             let uses = powerUpUses[type] ?? 0
             let powerUpIcon = PowerUpIcon(type: type, uses: uses)
             let xPos = startX + CGFloat(index) * spacing
             powerUpIcon.position = CGPoint(x: xPos, y: yPosition)
             gameScene.addChild(powerUpIcon)
             powerUps[type] = powerUpIcon
-        
+
             if uses > 0 {
                 startSmoothPulsatingAnimation(for: powerUpIcon)
             }
@@ -41,25 +53,25 @@ class PowerUpManager {
     private func startSmoothPulsatingAnimation(for node: SKNode) {
         // Remove any existing actions
         node.removeAllActions()
-        
+
         // Create a single pulse action
         let scaleUp = SKAction.scale(to: 1.1, duration: 0.15)
         let scaleDown = SKAction.scale(to: 1.0, duration: 0.15)
         let singlePulse = SKAction.sequence([scaleUp, scaleDown])
-        
+
         // Create a sequence of 3 pulses
         let threePulses = SKAction.repeat(singlePulse, count: 3)
-        
+
         // Add a wait action for the remaining time to make it 4 seconds total
-        let waitDuration = 4.0 - (0.3 * 3) // 4 seconds minus the time for 3 pulses
+        let waitDuration = 4.0 - (0.3 * 3)  // 4 seconds minus the time for 3 pulses
         let wait = SKAction.wait(forDuration: waitDuration)
-        
+
         // Combine the three pulses and the wait into a single sequence
         let pulseSequence = SKAction.sequence([threePulses, wait])
-        
+
         // Repeat the entire sequence forever
         let repeatForever = SKAction.repeatForever(pulseSequence)
-        
+
         node.run(repeatForever, withKey: "smoothPulsate")
     }
 
@@ -78,7 +90,7 @@ class PowerUpManager {
         let uses = powerUpUses[type] ?? 0
 
         powerUpIcon.updateUses(uses)
-        
+
         if uses > 0 {
             if powerUpIcon.action(forKey: "smoothPulsate") == nil {
                 startSmoothPulsatingAnimation(for: powerUpIcon)
@@ -157,7 +169,7 @@ class PowerUpManager {
         switch type {
         case .timeStop:
             showPowerUpAnimation(type)
-            SoundManager.shared.fadeInSound(.freeze, duration: 0.1)
+            SoundManager.shared.playSound(.freeze)
             if uses > 1 {
                 powerUpsInCooldown.insert(type)
                 EffectManager.shared.cooldown(
@@ -254,15 +266,30 @@ class PowerUpManager {
             }
 
             if let image = gameScene.context.gameInfo.currentImage {
-                let imageNode = SKSpriteNode(texture: SKTexture(image: image))
-                imageNode.size = gameScene.context.layoutInfo.gridSize
-                imageNode.position = CGPoint(
+                // Create shape node with rounded corners
+                let shapeNode = SKShapeNode()
+                let size = gameScene.context.layoutInfo.gridSize
+                let rect = CGRect(
+                    x: -size.width / 2, y: -size.height / 2, width: size.width,
+                    height: size.height)
+                shapeNode.path =
+                    UIBezierPath(roundedRect: rect, cornerRadius: 30).cgPath
+
+                // Set up the image as fill texture
+                shapeNode.fillTexture = SKTexture(image: image)
+                shapeNode.fillColor = .white  // Needed for texture to show
+                shapeNode.strokeColor = .white
+                shapeNode.lineWidth = 2
+
+                // Position and properties
+                shapeNode.position = CGPoint(
                     x: gameScene.size.width / 2,
                     y: gameScene.size.height / 2 + 15)
-                imageNode.zPosition = 9999
-                imageNode.alpha = 0.6
-                imageNode.name = "flashImage"
-                gameScene.addChild(imageNode)
+                shapeNode.zPosition = 9999
+                shapeNode.alpha = 0.6
+                shapeNode.name = "flashImage"
+
+                gameScene.addChild(shapeNode)
 
                 DispatchQueue.main.asyncAfter(
                     deadline: .now() + GameConstants.PowerUpTimers.flashCooldown
@@ -328,11 +355,11 @@ class PowerUpManager {
 
         // Find and try to place the piece from the bank
         if let bankNode = bankNode,
-           let pieceInBank = bankNode.childNode(
-            withName:
-                "piece_\(Int(correctPosition.y))_\(Int(correctPosition.x))"
-           ) as? SKSpriteNode,
-           let gameScene = self.gameScene
+            let pieceInBank = bankNode.childNode(
+                withName:
+                    "piece_\(Int(correctPosition.y))_\(Int(correctPosition.x))"
+            ) as? SKSpriteNode,
+            let gameScene = self.gameScene
         {
             // Store the initial position of the piece in the bank
             let initialPosition = pieceInBank.position
@@ -340,12 +367,14 @@ class PowerUpManager {
             // Calculate the final position in the scene's coordinate system
             let finalPosition = gameScene.convert(gridPosition, from: gridNode)
 
-            let moveToGridPosition = SKAction.move(to: finalPosition, duration: 0.5)
+            let moveToGridPosition = SKAction.move(
+                to: finalPosition, duration: 0.5)
             let sequence = SKAction.sequence([moveToGridPosition])
             sequence.timingMode = .easeInEaseOut
 
             // Temporarily reparent the piece to the scene for the animation
-            let pieceStartPosition = bankNode.convert(pieceInBank.position, to: gameScene)
+            let pieceStartPosition = bankNode.convert(
+                pieceInBank.position, to: gameScene)
             pieceInBank.removeFromParent()
             gameScene.addChild(pieceInBank)
             pieceInBank.position = pieceStartPosition
@@ -387,4 +416,3 @@ class PowerUpManager {
         }
     }
 }
-

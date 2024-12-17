@@ -88,19 +88,19 @@ extension ScoreCounter {
     func showScoreBonus(points: Int) {
         let bonusLabel = SKLabelNode(fontNamed: "PPNeueMontreal-Bold")
         bonusLabel.text = "+\(points)"
-        bonusLabel.fontSize = 20
-        bonusLabel.fontColor = .lightGray
-        bonusLabel.position = CGPoint(x: 35, y: 0)
+        bonusLabel.fontSize = 16
+        bonusLabel.fontColor = UIColor(hex: "DAA520").withAlphaComponent(0.95)
+        bonusLabel.position = CGPoint(x: 35, y: -15)
         bonusLabel.alpha = 0
         addChild(bonusLabel)
         
         let fadeIn = SKAction.fadeIn(withDuration: 0.2)
-        let moveUp = SKAction.moveBy(x: 0, y: 30, duration: 0.8)
-        let fadeOut = SKAction.fadeOut(withDuration: 0.3)
-        let group = SKAction.group([
-            moveUp,
-            SKAction.sequence([fadeIn, SKAction.wait(forDuration: 0.5), fadeOut])
-        ])
+                let moveUpRight = SKAction.moveBy(x: 22, y: 25, duration: 0.7)
+                let fadeOut = SKAction.fadeOut(withDuration: 0.3)
+                let group = SKAction.group([
+                    moveUpRight,
+                    SKAction.sequence([fadeIn, SKAction.wait(forDuration: 0.5), fadeOut])
+                ])
         
         bonusLabel.run(SKAction.sequence([
             group,

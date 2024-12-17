@@ -24,7 +24,7 @@ class GameOverState: GKState {
     override func willExit(to nextState: GKState) {
         gameScene.removeAllChildren()
         // May not need this later on (only used for restarting game)
-        SoundManager.shared.playBackgroundMusic("game-bg", fileType: "mp3")
+        SoundManager.shared.playBackgroundMusic("game-bg")
     }
     
     override func isValidNextState(_ stateClass: AnyClass) -> Bool {

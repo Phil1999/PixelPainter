@@ -197,7 +197,7 @@ class PlayState: GKState {
             backgroundNode.fadeOutWarningOverlay {
                 backgroundNode.playVictoryAnimation { [weak self] in
                     guard let self = self else { return }
-                    SoundManager.shared.resumeBackgroundMusic()
+                    SoundManager.shared.playBackgroundMusic("game-bg")
                     // Update board size if needed
                     if self.gameScene.context.gameInfo.level % 4 == 0
                         && self.gameScene.context.gameInfo.boardSize < 6
@@ -223,7 +223,7 @@ class PlayState: GKState {
 
         EffectManager.shared.temporarilyDisableInteraction()
         EffectManager.shared.triggerGameOverVibrations()
-        
+
         stopHintTimer()
         stopIdleHintTimer()
         gridManager.hideHint()
@@ -272,11 +272,13 @@ class PlayState: GKState {
         if gridManager.tryPlacePiece(selectedPiece, at: gridLocation) {
             didSuccessfullyPlacePiece()
         } else {
-            showWrongPlacementAnimation(for: selectedPiece)
+            showWrongPlacementAnimation(for: selectedPiece, at: location)
         }
     }
 
-    private func showWrongPlacementAnimation(for piece: SKSpriteNode) {
+    private func showWrongPlacementAnimation(
+        for piece: SKSpriteNode, at location: CGPoint
+    ) {
         SoundManager.shared.playSound(.incorrectPiecePlaced)
         EffectManager.shared.temporarilyDisableInteraction(
             for: GameConstants.GeneralGamePlay.wrongPlacementBufferTime)
@@ -291,6 +293,53 @@ class PlayState: GKState {
         let impactMedium = UIImpactFeedbackGenerator(style: .medium)
         impactMedium.prepare()
         impactMedium.impactOccurred()
+
+        // Locate the grid slot based on touch location
+        guard
+            let gridNode = gameScene.childNode(withName: "grid")
+                as? SKSpriteNode
+        else { return }
+
+        let gridDimension = gameScene.context.layoutInfo.gridDimension
+        let pieceSize = gameScene.context.layoutInfo.pieceSize
+
+        // Convert touch location to grid coordinates
+        let gridLocation = gridNode.convert(location, from: gameScene)
+        let col = Int(
+            (gridLocation.x + gridNode.size.width / 2) / pieceSize.width)
+        let row =
+            gridDimension - 1
+            - Int(
+                (gridLocation.y + gridNode.size.height / 2) / pieceSize.height)
+
+        // Validate grid slot
+        guard row >= 0, row < gridDimension, col >= 0, col < gridDimension
+        else { return }
+        let gridSlotName = "frame_\(row)_\(col)"
+
+        if let gridSlot = gridNode.childNode(withName: gridSlotName)
+            as? SKSpriteNode
+        {
+            flashGridSlotRed(gridSlot)
+        }
+    }
+
+    private func flashGridSlotRed(_ slot: SKSpriteNode) {
+        let originalColor = slot.color
+        let flashAction = SKAction.sequence([
+            SKAction.group([
+                SKAction.colorize(
+                    with: .red, colorBlendFactor: 1.0, duration: 0.15),
+                SKAction.scale(to: 1.05, duration: 0.15),  // Slight scale up
+            ]),
+            SKAction.wait(forDuration: 0.1),
+            SKAction.group([
+                SKAction.colorize(
+                    with: originalColor, colorBlendFactor: 0.0, duration: 0.15),
+                SKAction.scale(to: 1.0, duration: 0.15),  // Return to normal size
+            ]),
+        ])
+        slot.run(flashAction, withKey: "flashRedEffect")
     }
 
     func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
@@ -383,7 +432,8 @@ class PlayState: GKState {
 
     private func handlePieceHovering(at location: CGPoint) {
         guard let bankNode = bankManager.bankNode,
-              bankNode.contains(location) else {
+            bankNode.contains(location)
+        else {
             // If not hovering over bank, clear any existing hover effects
             bankManager.clearHoverEffects()
             return

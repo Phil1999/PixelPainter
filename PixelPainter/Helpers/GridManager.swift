@@ -146,7 +146,6 @@ class GridManager {
                         == pieceName
                 })
         {
-
             let puzzlePiece = gameScene.context.gameInfo.pieces[pieceIndex]
 
             if puzzlePiece.correctPosition == CGPoint(x: col, y: row) {
@@ -161,24 +160,63 @@ class GridManager {
                 if let cropNode = piece.children.first as? SKCropNode,
                     let pieceSprite = cropNode.children.first as? SKSpriteNode
                 {
-                    let placedPiece = SKSpriteNode(texture: pieceSprite.texture)
-                    placedPiece.size = pieceSize  // This will make it larger to fit the grid
-                    placedPiece.position = targetPosition
-                    placedPiece.name = piece.name
-                    gridNode.addChild(placedPiece)
+                    // Create the main container sprite node with grid cell size
+                    let containerNode = SKSpriteNode(
+                        color: .clear, size: pieceSize)
+                    containerNode.position = targetPosition
+                    containerNode.name = piece.name
+
+                    // Create rounded rectangle path for the mask
+                    let roundedRect = CGRect(
+                        x: -pieceSize.width / 2, y: -pieceSize.height / 2,
+                        width: pieceSize.width, height: pieceSize.height)
+                    
+                    // Get the corners that should be rounded based on position
+                    var corners: UIRectCorner = []
+                    if row == 0 && col == 0 {
+                        corners.insert(.bottomLeft)
+                    } else if row == 0 && col == gridDimension - 1 {
+                        corners.insert(.bottomRight)
+                    } else if row == gridDimension - 1 && col == 0 {
+                        corners.insert(.topLeft)
+                    } else if row == gridDimension - 1 && col == gridDimension - 1 {
+                        corners.insert(.topRight)
+                    }
+
+                    // Create rounded path only for corner pieces
+                    let cornerRadius: CGFloat = 30
+                    let roundedRectPath =
+                        !corners.isEmpty
+                        ? UIBezierPath(
+                            roundedRect: roundedRect, byRoundingCorners: corners,
+                            cornerRadii: CGSize(width: cornerRadius, height: cornerRadius)
+                        ).cgPath : UIBezierPath(rect: roundedRect).cgPath
+
+                    // Create crop node for the rounded corners
+                    let newCropNode = SKCropNode()
+                    let maskNode = SKShapeNode(path: roundedRectPath)
+                    maskNode.fillColor = .white
+                    newCropNode.maskNode = maskNode
+
+                    // Create the piece sprite with the original texture at grid cell size
+                    let pieceNode = SKSpriteNode(texture: pieceSprite.texture)
+                    pieceNode.size = pieceSize
+
+                    // Assemble the piece
+                    newCropNode.addChild(pieceNode)
+                    containerNode.addChild(newCropNode)
+
+                    gridNode.addChild(containerNode)
                 }
 
                 piece.removeFromParent()
-
                 gameScene.context.gameInfo.pieces[pieceIndex].isPlaced = true
-
                 return true
             }
         }
 
         return false
     }
-
     func highlightGridSpace(at point: CGPoint) {
         guard let gameScene = gameScene,
             let gridNode = gameScene.childNode(withName: "grid")
@@ -253,37 +291,55 @@ class GridManager {
                         == pieceName
                 })
         else { return }
-        
+
         SoundManager.shared.playSound(.notifyHint)
-        
+
         let puzzlePiece = gameScene.context.gameInfo.pieces[pieceIndex]
         let row = Int(puzzlePiece.correctPosition.y)
         let col = Int(puzzlePiece.correctPosition.x)
+        let gridDimension = gameScene.context.layoutInfo.gridDimension
 
         if let frameNode = gridNode.childNode(withName: "frame_\(row)_\(col)")
             as? SKSpriteNode
         {
+            // Create the outline with proper corner rounding
+            let outlineNode = SKShapeNode()
+            let rect = CGRect(
+                x: -frameNode.size.width / 2,
+                y: -frameNode.size.height / 2,
+                width: frameNode.size.width,
+                height: frameNode.size.height
+            )
 
-            // Create the outline for the grid piece
-            let outlinePath = UIBezierPath(
-                rect: CGRect(
-                    x: -frameNode.size.width / 2,
-                    y: -frameNode.size.height / 2,
-                    width: frameNode.size.width,
-                    height: frameNode.size.height
-                ))
+            // Determine which corner should be rounded based on position
+            var corners: UIRectCorner = []
+            if row == 0 && col == 0 {
+                corners.insert(.bottomLeft)
+            } else if row == 0 && col == gridDimension - 1 {
+                corners.insert(.bottomRight)
+            } else if row == gridDimension - 1 && col == 0 {
+                corners.insert(.topLeft)
+            } else if row == gridDimension - 1 && col == gridDimension - 1 {
+                corners.insert(.topRight)
+            }
 
-            let outlineNode = SKShapeNode(path: outlinePath.cgPath)
-            outlineNode.position = .zero
+            // Create rounded path only for corner pieces
+            let path =
+                !corners.isEmpty
+                ? UIBezierPath(
+                    roundedRect: rect, byRoundingCorners: corners,
+                    cornerRadii: CGSize(width: 30, height: 30)
+                ).cgPath : UIBezierPath(rect: rect).cgPath
+
+            outlineNode.path = path
             outlineNode.strokeColor = UIColor.white
             outlineNode.fillColor = .clear
             outlineNode.lineWidth = 0.2
             outlineNode.glowWidth = 4
-            outlineNode.zPosition = 99999  // Above all elements
+            outlineNode.zPosition = 99999
             outlineNode.name = "hint_outline"
 
             frameNode.addChild(outlineNode)
-
             hintNode = frameNode
 
             // Hovering hand
@@ -304,15 +360,15 @@ class GridManager {
                 SKAction.repeatForever(bobbingAction),
                 withKey: "bobbingAnimation")
 
-            // Show the image on the grid.
-            let pieceTexture = SKTexture(image: puzzlePiece.image)
-            let pieceImageNode = SKSpriteNode(texture: pieceTexture)
-            pieceImageNode.size = frameNode.size
-            pieceImageNode.position = frameNode.position
-            pieceImageNode.alpha = 0.3
-            pieceImageNode.name = "hint_piece_image"
-            gridNode.addChild(pieceImageNode)
-
+            let pieceShapeNode = SKShapeNode()
+            pieceShapeNode.path = path
+            pieceShapeNode.fillTexture = SKTexture(image: puzzlePiece.image)
+            pieceShapeNode.fillColor = .white
+            pieceShapeNode.strokeColor = .clear
+            pieceShapeNode.alpha = 0.3
+            pieceShapeNode.name = "hint_piece_image"
+            pieceShapeNode.position = frameNode.position
+            gridNode.addChild(pieceShapeNode)
         }
     }
 
@@ -339,3 +395,5 @@ class GridManager {
 
     }
 }
+
+
