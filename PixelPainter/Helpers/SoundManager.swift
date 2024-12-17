@@ -9,145 +9,92 @@ import AVFoundation
 import SpriteKit
 
 class SoundManager {
-    // Implement as a singleton, use this shared SoundManager
     static let shared = SoundManager()
-    private var soundActions: [String: SKAction] = [:]
-    private var isSoundEnabled = true
-    private weak var gameScene: SKScene?
 
+    private var soundPlayers: [String: AVAudioPlayer] = [:]
     private var backgroundMusicPlayer: AVAudioPlayer?
+    private var isSoundEnabled = true
     private var isBgMusicEnabled = true
 
     private init() {
         preloadSounds()
     }
 
-    func setGameScene(_ scene: SKScene) {
-        self.gameScene = scene
-    }
-
     private func preloadSounds() {
-        // Sound file names and their associated filename
         let soundFiles = [
             "piece_placed": "piece_placed.wav",
             "incorrect_piece_placed": "incorrect-placement.mp3",
             "level_complete": "level_complete.wav",
             "game_over_incomplete_puzzle": "game-end-incomplete-puzzle.mp3",
             "game_over_no_puzzle": "game-over-no-puzzle.wav",
-            "freeze":"freeze.mp3",
-            "shutter-click":"shutter-click.mp3",
-            "shuffle":"shuffle.mp3",
+            "freeze": "freeze.mp3",
+            "shutter-click": "shutter-click.mp3",
+            "shuffle": "shuffle.mp3",
             "select": "select.mp3",
             "deselect": "deselect.mp3",
             "confirm": "confirm.mp3",
             "notify_hint": "hint-notification.mp3",
-            "memorize_break": "memorize-break.mp3",
+            "memorize_break": "memorize-break.mp3"
         ]
 
-        // Preload each sound
         for (key, filename) in soundFiles {
-            soundActions[key] = SKAction.playSoundFileNamed(
-                filename, waitForCompletion: false)
+            if let url = Bundle.main.url(forResource: filename, withExtension: nil) {
+                do {
+                    let player = try AVAudioPlayer(contentsOf: url)
+                    player.prepareToPlay()
+                    soundPlayers[key] = player
+                } catch {
+                    print("Failed to load sound \(filename): \(error.localizedDescription)")
+                }
+            }
         }
     }
 
     func playSound(_ sound: GameSound) {
-        guard isSoundEnabled,
-            let scene = gameScene
-        else { return }
-
-        if let action = soundActions[sound.rawValue] {
-            scene.run(action)
-
-        }
+        guard isSoundEnabled, let player = soundPlayers[sound.rawValue] else { return }
+        player.currentTime = 0  // Rewind to the start for reuse
+        player.play()
     }
 
-    func fadeInSound(_ sound: GameSound, duration: TimeInterval = 0.1) {
-        guard isSoundEnabled,
-            let scene = gameScene,
-            let action = soundActions[sound.rawValue] else { return }
-
-        let fadeInAction = SKAction.sequence([
-            SKAction.changeVolume(to: 0, duration: 0),
-            action,
-            SKAction.changeVolume(to: 1, duration: duration)
-        ])
-        
-        scene.run(fadeInAction)
-    }
-
-    func playBackgroundMusic(
-        _ fileName: String, fileType: String = "mp3", loop: Bool = true
-    ) {
+    func playBackgroundMusic(_ fileName: String, loop: Bool = true) {
         guard isBgMusicEnabled else { return }
 
         if backgroundMusicPlayer?.isPlaying == true {
-            return  // Avoid reloading and restarting if already playing
-        }
-
-        if let url = Bundle.main.url(
-            forResource: fileName, withExtension: fileType)
-        {
-            do {
-                backgroundMusicPlayer = try AVAudioPlayer(contentsOf: url)
-                backgroundMusicPlayer?.numberOfLoops = loop ? -1 : 0  // Infinite loop if true
-                backgroundMusicPlayer?.volume = 0
-                backgroundMusicPlayer?.prepareToPlay()
-                backgroundMusicPlayer?.play()
-                
-                // Fade in the background music
-                fadeInBackgroundMusic(duration: 0.5)
-            } catch {
-                print(
-                    "Error loading background music: \(error.localizedDescription)"
-                )
-            }
-        } else {
-            print("Background music file not found: \(fileName).\(fileType)")
-        }
-    }
-
-    private func fadeInBackgroundMusic(duration: TimeInterval) {
-        guard let player = backgroundMusicPlayer else { return }
-        
-        let fadeInterval: TimeInterval = 0.1
-        let volumeIncrement = Float(fadeInterval / duration)
-        
-        Timer.scheduledTimer(withTimeInterval: fadeInterval, repeats: true) { timer in
-            if player.volume < 0.5 {
-                player.volume += volumeIncrement
-            } else {
-                player.volume = 0.5
-                timer.invalidate()
-            }
-        }
-    }
-
-    func stopBackgroundMusic(
-        fadeOut: Bool = false, duration: TimeInterval = 0
-    ) {
-        guard let player = backgroundMusicPlayer, player.isPlaying else {
             return
         }
 
+        if let url = Bundle.main.url(forResource: fileName, withExtension: "mp3") {
+            do {
+                backgroundMusicPlayer = try AVAudioPlayer(contentsOf: url)
+                backgroundMusicPlayer?.numberOfLoops = loop ? -1 : 0
+                backgroundMusicPlayer?.volume = 0.5
+                backgroundMusicPlayer?.prepareToPlay()
+                backgroundMusicPlayer?.play()
+            } catch {
+                print("Error loading background music: \(error.localizedDescription)")
+            }
+        } else {
+            print("Background music file not found: \(fileName)")
+        }
+    }
+
+    func stopBackgroundMusic(fadeOut: Bool = true, duration: TimeInterval = 1.0) {
+        guard let player = backgroundMusicPlayer, player.isPlaying else { return }
+
         if fadeOut {
-            Timer.scheduledTimer(withTimeInterval: 0.1, repeats: true) {
-                timer in
-                if player.volume > 0.0 {
-                    player.volume -= Float(0.1 / duration)
-                } else {
+            var volume = player.volume
+            Timer.scheduledTimer(withTimeInterval: 0.1, repeats: true) { timer in
+                volume -= Float(0.1 / duration)
+                if volume <= 0.0 {
                     player.stop()
                     timer.invalidate()
+                } else {
+                    player.volume = volume
                 }
             }
         } else {
             player.stop()
         }
-    }
-
-    func resumeBackgroundMusic() {
-        guard let player = backgroundMusicPlayer else { return }
-        player.play()
     }
 
     func toggleSound() {
@@ -162,7 +109,6 @@ class SoundManager {
             backgroundMusicPlayer?.pause()
         }
     }
-
 }
 
 // Enum for all available game sounds

@@ -169,7 +169,7 @@ class PowerUpManager {
         switch type {
         case .timeStop:
             showPowerUpAnimation(type)
-            SoundManager.shared.fadeInSound(.freeze, duration: 0.1)
+            SoundManager.shared.playSound(.freeze)
             if uses > 1 {
                 powerUpsInCooldown.insert(type)
                 EffectManager.shared.cooldown(
