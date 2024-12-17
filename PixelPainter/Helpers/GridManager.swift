@@ -170,7 +170,7 @@ class GridManager {
                     let roundedRect = CGRect(
                         x: -pieceSize.width / 2, y: -pieceSize.height / 2,
                         width: pieceSize.width, height: pieceSize.height)
-                    
+
                     // Get the corners that should be rounded based on position
                     var corners: UIRectCorner = []
                     if row == 0 && col == 0 {
@@ -179,7 +179,9 @@ class GridManager {
                         corners.insert(.bottomRight)
                     } else if row == gridDimension - 1 && col == 0 {
                         corners.insert(.topLeft)
-                    } else if row == gridDimension - 1 && col == gridDimension - 1 {
+                    } else if row == gridDimension - 1
+                        && col == gridDimension - 1
+                    {
                         corners.insert(.topRight)
                     }
 
@@ -188,8 +190,10 @@ class GridManager {
                     let roundedRectPath =
                         !corners.isEmpty
                         ? UIBezierPath(
-                            roundedRect: roundedRect, byRoundingCorners: corners,
-                            cornerRadii: CGSize(width: cornerRadius, height: cornerRadius)
+                            roundedRect: roundedRect,
+                            byRoundingCorners: corners,
+                            cornerRadii: CGSize(
+                                width: cornerRadius, height: cornerRadius)
                         ).cgPath : UIBezierPath(rect: roundedRect).cgPath
 
                     // Create crop node for the rounded corners
@@ -248,17 +252,22 @@ class GridManager {
     func isCellEmpty(at point: CGPoint) -> Bool {
         guard
             let gridNode = gameScene?.childNode(withName: "grid")
-                as? SKSpriteNode
+                as? SKSpriteNode,
+            let gameScene = gameScene
         else { return false }
 
+        let gridDimension = gameScene.context.layoutInfo.gridDimension
         let pieceSize = CGSize(
-            width: gridNode.size.width / 3, height: gridNode.size.height / 3)
+            width: gridNode.size.width / CGFloat(gridDimension),
+            height: gridNode.size.height / CGFloat(gridDimension))
+
         let col = Int((point.x + gridNode.size.width / 2) / pieceSize.width)
         let row =
-            2 - Int((point.y + gridNode.size.height / 2) / pieceSize.height)
+            gridDimension - 1
+            - Int((point.y + gridNode.size.height / 2) / pieceSize.height)
 
         // Check valid coords
-        if row < 0 || row > 2 || col < 0 || col > 2 {
+        if row < 0 || row >= gridDimension || col < 0 || col >= gridDimension {
             return false
         }
 
@@ -266,18 +275,23 @@ class GridManager {
         let cellPos = CGPoint(
             x: CGFloat(col) * pieceSize.width - gridNode.size.width / 2
                 + pieceSize.width / 2,
-            y: CGFloat(2 - row) * pieceSize.height - gridNode.size.height / 2
+            y: CGFloat(gridDimension - 1 - row) * pieceSize.height - gridNode
+                .size.height / 2
                 + pieceSize.height / 2
         )
 
         // Check if there is already a piece in this position
         let piecesAtPosition = gridNode.children.filter { node in
-            node.name?.starts(with: "piece_") == true
-                && node.position == cellPos
+            guard node.name?.starts(with: "piece_") == true else {
+                return false
+            }
+            // Use a small threshold for position comparison to account for floating point imprecision
+            let threshold: CGFloat = 0.1
+            return abs(node.position.x - cellPos.x) < threshold
+                && abs(node.position.y - cellPos.y) < threshold
         }
 
         return piecesAtPosition.isEmpty
-
     }
 
     func showHintForPiece(_ piece: SKSpriteNode) {
@@ -395,5 +409,3 @@ class GridManager {
 
     }
 }
-
-
