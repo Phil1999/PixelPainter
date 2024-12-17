@@ -5,9 +5,9 @@
 //  Created by Tim Hsieh on 10/22/24.
 //
 
+import AVFoundation
 import GameplayKit
 import SpriteKit
-import AVFoundation
 import UIKit
 
 class MemorizeState: GKState {
@@ -25,7 +25,8 @@ class MemorizeState: GKState {
     private var infoButtons: [SKSpriteNode] = []
     private var scoreCounter: ScoreCounter?
     private var powerUpSelectionComplete = false
-    
+    private var iconInstructionLabel: SKNode?
+
     private var tutorialVideoLooper: AVPlayerLooper?
 
     init(gameScene: GameScene) {
@@ -287,6 +288,29 @@ class MemorizeState: GKState {
         self.levelLabelContainer = levelContainer
         gameScene.addChild(levelContainer)
 
+        let chooseLabel = SKLabelNode(text: "Choose two")
+        chooseLabel.fontName = "PPNeueMontreal-Bold"
+        chooseLabel.fontSize = 32
+        chooseLabel.position = CGPoint(
+            x: gameScene.size.width / 2,
+            y: gameScene.size.height / 2 - 200
+        )
+        self.chooseTwoLabel = chooseLabel
+        gameScene.addChild(chooseLabel)
+
+        // Instruction message
+        let iconInstructionLabel = SKLabelNode(
+            text: "Tap the info icon to learn about each power-up!")
+        iconInstructionLabel.fontName = "PPNeueMontreal-Regular"
+        iconInstructionLabel.fontSize = 12
+        iconInstructionLabel.fontColor = .lightGray
+        iconInstructionLabel.verticalAlignmentMode = .center
+        iconInstructionLabel.position = CGPoint(
+            x: gameScene.size.width / 2,
+            y: gameScene.size.height / 2 - 220)
+        gameScene.addChild(iconInstructionLabel)
+        self.iconInstructionLabel = iconInstructionLabel
+
         if !isFirstLevel {
             // score is not shown on first round
             let scoreCounter = ScoreCounter(
@@ -294,30 +318,8 @@ class MemorizeState: GKState {
             scoreCounter.position = CGPoint(
                 x: gameScene.size.width / 6, y: gameScene.size.height - 90)
             gameScene.addChild(scoreCounter)
-            
+
             self.scoreCounter = scoreCounter
-
-            // add "choose two" label every round for consistency
-            let chooseLabel = SKLabelNode(text: "Choose two")
-            chooseLabel.fontName = "PPNeueMontreal-Bold"
-            chooseLabel.fontSize = 32
-            chooseLabel.position = CGPoint(
-                x: gameScene.size.width / 2,
-                y: gameScene.size.height / 2 - 200
-            )
-            self.chooseTwoLabel = chooseLabel
-            gameScene.addChild(chooseLabel)
-
-        } else {
-            let chooseLabel = SKLabelNode(text: "Choose two")
-            chooseLabel.fontName = "PPNeueMontreal-Bold"
-            chooseLabel.fontSize = 28
-            chooseLabel.position = CGPoint(
-                x: gameScene.size.width / 2,
-                y: gameScene.size.height / 2 - 200
-            )
-            self.chooseTwoLabel = chooseLabel
-            gameScene.addChild(chooseLabel)
         }
 
         let readyLabel = SKLabelNode(text: "")
@@ -498,9 +500,12 @@ extension MemorizeState {
         maskNode.fillColor = .white
         cropNode.maskNode = maskNode
         cropNode.position = CGPoint(x: 0, y: 50)
-        
+
         // Make the tutorial videos loop
-        guard let url = Bundle.main.url(forResource: "\(type.videoFileName)", withExtension: "mp4") else {
+        guard
+            let url = Bundle.main.url(
+                forResource: "\(type.videoFileName)", withExtension: "mp4")
+        else {
             print("Video is missing!")
             return
         }
@@ -518,7 +523,8 @@ extension MemorizeState {
 
         // Set the looper on appropriate queue to avoid priority inversion
         DispatchQueue.global(qos: .userInteractive).async {
-            self.tutorialVideoLooper = AVPlayerLooper(player: player, templateItem: item)
+            self.tutorialVideoLooper = AVPlayerLooper(
+                player: player, templateItem: item)
         }
 
         // Add to view hierarchy on main thread
@@ -654,7 +660,7 @@ extension MemorizeState {
                 type: type, uses: type.uses, minimal: true)
             icon.position = CGPoint(
                 x: startX + CGFloat(index) * spacing,
-                y: gameScene.size.height / 2 - 260
+                y: gameScene.size.height / 2 - 275
             )
             icon.alpha = 0.5
             gameScene.addChild(icon)
@@ -674,6 +680,7 @@ extension MemorizeState {
 
             gameScene.addChild(infoButton)
             infoButtons.append(infoButton)
+
         }
     }
 
@@ -696,7 +703,11 @@ extension MemorizeState {
 
             // Pulsate all unselected icons
             powerUpSelectionNodes.forEach { node in
-                if !selectedPowerUps.contains(PowerUpType(rawValue: node.name?.replacingOccurrences(of: "powerup_", with: "") ?? "") ?? .timeStop) {
+                if !selectedPowerUps.contains(
+                    PowerUpType(
+                        rawValue: node.name?.replacingOccurrences(
+                            of: "powerup_", with: "") ?? "") ?? .timeStop)
+                {
                     startPulsatingAnimation(for: node)
                 }
             }
@@ -720,7 +731,11 @@ extension MemorizeState {
             } else {
                 // Pulsate only unselected icons
                 powerUpSelectionNodes.forEach { node in
-                    if !selectedPowerUps.contains(PowerUpType(rawValue: node.name?.replacingOccurrences(of: "powerup_", with: "") ?? "") ?? .timeStop) {
+                    if !selectedPowerUps.contains(
+                        PowerUpType(
+                            rawValue: node.name?.replacingOccurrences(
+                                of: "powerup_", with: "") ?? "") ?? .timeStop)
+                    {
                         startPulsatingAnimation(for: node)
                     } else {
                         node.removeAction(forKey: "pulsate")
@@ -783,6 +798,7 @@ extension MemorizeState {
         chooseTwoLabel?.removeFromParent()
         levelLabelContainer?.removeFromParent()
         scoreCounter?.removeFromParent()
+        iconInstructionLabel?.removeFromParent()
         chooseTwoLabel = nil
 
         if !countdownStarted {
@@ -812,4 +828,3 @@ extension MemorizeState {
         }
     }
 }
-
