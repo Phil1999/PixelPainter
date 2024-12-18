@@ -314,9 +314,12 @@ class MemorizeState: GKState {
         if !isFirstLevel {
             
             // Adjust position for iPhone SE to match PlayState
-            let isIPhoneSE = gameScene.size.height <= GameConstants.DeviceSizes.SE_HEIGHT
-            let yPosition = isIPhoneSE ? gameScene.size.height - 55 : gameScene.size.height - 90
-            
+            let isIPhoneSE =
+                gameScene.size.height <= GameConstants.DeviceSizes.SE_HEIGHT
+            let yPosition =
+                isIPhoneSE
+                ? gameScene.size.height - 55 : gameScene.size.height - 90
+
             // score is not shown on first round
             let scoreCounter = ScoreCounter(
                 text: "\(gameScene.context.gameInfo.score)")
@@ -338,7 +341,6 @@ class MemorizeState: GKState {
         gameScene.addChild(readyLabel)
         
         adjustLayoutForIPhoneSE()
-
     }
 
     private func transitionToPlayState() {
@@ -508,34 +510,28 @@ extension MemorizeState {
         cropNode.maskNode = maskNode
         cropNode.position = CGPoint(x: 0, y: 50)
 
-        // Make the tutorial videos loop
-        guard
-            let url = Bundle.main.url(
-                forResource: "\(type.videoFileName)", withExtension: "mp4")
-        else {
-            print("Video is missing!")
-            return
-        }
+        // video player
+        if let url = Bundle.main.url(
+            forResource: "\(type.videoFileName)", withExtension: "mp4")
+        {
+            let asset = AVAsset(url: url)
+            let playerItem = AVPlayerItem(asset: asset)
+            let player = AVQueuePlayer()
 
-        let item = AVPlayerItem(url: url)
-        let player = AVQueuePlayer()
+            player.automaticallyWaitsToMinimizeStalling = false
+            player.preventsDisplaySleepDuringVideoPlayback = false
+            player.isMuted = true
 
-        // player properties to optimize performance
-        player.automaticallyWaitsToMinimizeStalling = false
-        player.preventsDisplaySleepDuringVideoPlayback = false
+            // Video should loop
+            DispatchQueue.global(qos: .userInteractive).async { [weak self] in
+                self?.tutorialVideoLooper = AVPlayerLooper(
+                    player: player, templateItem: playerItem)
+            }
 
-        // Create video node
-        let videoNode = SKVideoNode(avPlayer: player)
-        videoNode.size = videoContainerSize
+            // Create and configure video node
+            let videoNode = SKVideoNode(avPlayer: player)
+            videoNode.size = videoContainerSize
 
-        // Set the looper on appropriate queue to avoid priority inversion
-        DispatchQueue.global(qos: .userInteractive).async {
-            self.tutorialVideoLooper = AVPlayerLooper(
-                player: player, templateItem: item)
-        }
-
-        // Add to view hierarchy on main thread
-        DispatchQueue.main.async {
             cropNode.addChild(videoNode)
             videoNode.play()
         }
@@ -828,10 +824,10 @@ extension MemorizeState {
         let screenSize = UIScreen.main.bounds.size
         return screenSize.height <= GameConstants.DeviceSizes.SE_HEIGHT
     }
-    
+
     private func adjustLayoutForIPhoneSE() {
         guard isIPhoneSE else { return }
-        
+
         // Adjust "Choose two" label position
         if let chooseLabel = chooseTwoLabel {
             chooseLabel.position.y = gameScene.size.height / 2 - 155
@@ -853,7 +849,7 @@ extension MemorizeState {
                 infoButton.position.y = icon.position.y + 25
             }
         }
-        
+
         // Adjust confirm button when it appears
         if let confirmButton = confirmButton {
             confirmButton.position.y = gameScene.size.height / 2 - 300
@@ -875,7 +871,9 @@ extension MemorizeState {
     }
     
     // Call this when showing power-up selection
-    private func positionPowerUpIcon(_ icon: PowerUpIcon, at index: Int, totalPowerUps: Int) {
+    private func positionPowerUpIcon(
+        _ icon: PowerUpIcon, at index: Int, totalPowerUps: Int
+    ) {
         let centerX = gameScene.size.width / 2
         let spacing: CGFloat = 100
         let totalWidth = CGFloat(totalPowerUps - 1) * spacing
@@ -885,9 +883,11 @@ extension MemorizeState {
             gameScene.size.height / 2 - 225 : // Adjusted for SE
             gameScene.size.height / 2 - 275   // Original position
             
+
         icon.position = CGPoint(
             x: startX + CGFloat(index) * spacing,
             y: baseY
         )
     }
 }
+
