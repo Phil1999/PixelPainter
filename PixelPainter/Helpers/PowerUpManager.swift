@@ -48,6 +48,8 @@ class PowerUpManager {
                 startSmoothPulsatingAnimation(for: powerUpIcon)
             }
         }
+        
+        adjustPowerUpsForIPhoneSE()
     }
 
     private func startSmoothPulsatingAnimation(for node: SKNode) {
@@ -413,6 +415,20 @@ class PowerUpManager {
     func removeFlashImage() {
         gameScene?.enumerateChildNodes(withName: "flashImage") { node, _ in
             node.removeFromParent()
+        }
+    }
+}
+
+extension PowerUpManager {
+    func adjustPowerUpsForIPhoneSE() {
+        guard let gameScene = gameScene else { return }
+        
+        let isIPhoneSE = gameScene.size.height <= GameConstants.DeviceSizes.SE_HEIGHT
+        guard isIPhoneSE else { return }
+        
+        // Adjust Y-position for all power-ups
+        for (_, powerUpIcon) in powerUps {
+            powerUpIcon.position.y -= 30  // Move them down for smaller screens
         }
     }
 }

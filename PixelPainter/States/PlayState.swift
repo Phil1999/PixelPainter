@@ -73,6 +73,8 @@ class PlayState: GKState {
         {
             timerNode.delegate = self
         }
+        
+        adjustLayoutForIPhoneSE()
     }
 
     private func startGame() {
@@ -464,5 +466,28 @@ extension PlayState: CircularTimerDelegate {
         {
             background.updateWarningLevel(timeRemaining: currentTime)
         }
+    }
+}
+
+extension PlayState {
+    private var isIPhoneSE: Bool {
+        let screenSize = UIScreen.main.bounds.size
+        return screenSize.height <= GameConstants.DeviceSizes.SE_HEIGHT
+    }
+    
+    func adjustLayoutForIPhoneSE() {
+        guard isIPhoneSE else { return }
+        
+        // Adjust timer position
+        if let timerNode = gameScene.childNode(withName: "//circularTimer") {
+            // Move timer up by adjusting its parent (HUD) position
+            if let hudNode = timerNode.parent {
+                // Original position is gameScene.size.height - 100
+                hudNode.position = CGPoint(x: 0, y: gameScene.size.height - 45)
+            }
+        }
+        
+        // Adjust power-up positions
+        powerUpManager.adjustPowerUpsForIPhoneSE()
     }
 }

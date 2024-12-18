@@ -21,4 +21,8 @@ enum GameConstants {
         static let idleHintWaitTime = 3.5
         static let wrongPlacementBufferTime = 0.5
     }
+    
+    enum DeviceSizes {
+        static let SE_HEIGHT: CGFloat = 667
+    }
 }
