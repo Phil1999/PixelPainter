@@ -312,11 +312,16 @@ class MemorizeState: GKState {
         self.iconInstructionLabel = iconInstructionLabel
 
         if !isFirstLevel {
+            
+            // Adjust position for iPhone SE to match PlayState
+            let isIPhoneSE = gameScene.size.height <= GameConstants.DeviceSizes.SE_HEIGHT
+            let yPosition = isIPhoneSE ? gameScene.size.height - 55 : gameScene.size.height - 90
+            
             // score is not shown on first round
             let scoreCounter = ScoreCounter(
                 text: "\(gameScene.context.gameInfo.score)")
             scoreCounter.position = CGPoint(
-                x: gameScene.size.width / 6, y: gameScene.size.height - 90)
+                x: gameScene.size.width / 6, y: yPosition)
             gameScene.addChild(scoreCounter)
 
             self.scoreCounter = scoreCounter
@@ -331,6 +336,8 @@ class MemorizeState: GKState {
         readyLabel.name = "readyLabel"
         readyLabel.alpha = 0  // Start hidden
         gameScene.addChild(readyLabel)
+        
+        adjustLayoutForIPhoneSE()
 
     }
 
@@ -648,25 +655,16 @@ extension MemorizeState {
     // Add power-up selection UI
     private func showPowerUpSelection() {
 
-        let centerX = gameScene.size.width / 2
-        let spacing: CGFloat = 100
         let powerUps = PowerUpType.allCases
-        let totalWidth = CGFloat(powerUps.count - 1) * spacing
-        let startX = centerX - (totalWidth / 2)
 
         for (index, type) in powerUps.enumerated() {
-            // Create power-up icon with minimal mode (no use bubble)
-            let icon = PowerUpIcon(
-                type: type, uses: type.uses, minimal: true)
-            icon.position = CGPoint(
-                x: startX + CGFloat(index) * spacing,
-                y: gameScene.size.height / 2 - 275
-            )
+            let icon = PowerUpIcon(type: type, uses: type.uses, minimal: true)
+            positionPowerUpIcon(icon, at: index, totalPowerUps: powerUps.count)
             icon.alpha = 0.5
             gameScene.addChild(icon)
             powerUpSelectionNodes.append(icon)
             startPulsatingAnimation(for: icon)
-
+            
             // Add info button
             let infoButton = SKSpriteNode(imageNamed: "info-icon")
             infoButton.size = CGSize(width: 20, height: 20)
@@ -677,10 +675,9 @@ extension MemorizeState {
             infoButton.colorBlendFactor = 1.0
             infoButton.color = type.themeColor
             infoButton.name = "info_\(type.rawValue)"
-
+            
             gameScene.addChild(infoButton)
             infoButtons.append(infoButton)
-
         }
     }
 
@@ -770,10 +767,7 @@ extension MemorizeState {
         button.addChild(label)
 
         // Position below power-up icons
-        button.position = CGPoint(
-            x: gameScene.size.width / 2,
-            y: gameScene.size.height / 2 - 350  // Below the power-up icons
-        )
+        positionConfirmButton(button)
         button.name = "confirm_button"
 
         gameScene.addChild(button)
@@ -826,5 +820,74 @@ extension MemorizeState {
             node.removeAction(forKey: "pulsate")
             startPulsatingAnimation(for: node)
         }
+    }
+}
+
+extension MemorizeState {
+    private var isIPhoneSE: Bool {
+        let screenSize = UIScreen.main.bounds.size
+        return screenSize.height <= GameConstants.DeviceSizes.SE_HEIGHT
+    }
+    
+    private func adjustLayoutForIPhoneSE() {
+        guard isIPhoneSE else { return }
+        
+        // Adjust "Choose two" label position
+        if let chooseLabel = chooseTwoLabel {
+            chooseLabel.position.y = gameScene.size.height / 2 - 155
+        }
+        
+        // Adjust instruction text
+        if let instructionLabel = iconInstructionLabel {
+            instructionLabel.position.y = gameScene.size.height / 2 - 170
+        }
+        
+        // Adjust power-up icons and info buttons
+        for (index, icon) in powerUpSelectionNodes.enumerated() {
+            // Move power-ups up by 50 points
+            icon.position.y = gameScene.size.height / 2 - 225
+            
+            // Adjust associated info button
+            if index < infoButtons.count {
+                let infoButton = infoButtons[index]
+                infoButton.position.y = icon.position.y + 25
+            }
+        }
+        
+        // Adjust confirm button when it appears
+        if let confirmButton = confirmButton {
+            confirmButton.position.y = gameScene.size.height / 2 - 300
+        }
+    }
+}
+
+extension MemorizeState {
+    // Call this after creating the confirm button
+    private func positionConfirmButton(_ button: SKNode) {
+        let baseY = isIPhoneSE ?
+            gameScene.size.height / 2 - 300 : // Adjusted for SE
+            gameScene.size.height / 2 - 350   // Original position
+            
+        button.position = CGPoint(
+            x: gameScene.size.width / 2,
+            y: baseY
+        )
+    }
+    
+    // Call this when showing power-up selection
+    private func positionPowerUpIcon(_ icon: PowerUpIcon, at index: Int, totalPowerUps: Int) {
+        let centerX = gameScene.size.width / 2
+        let spacing: CGFloat = 100
+        let totalWidth = CGFloat(totalPowerUps - 1) * spacing
+        let startX = centerX - (totalWidth / 2)
+        
+        let baseY = isIPhoneSE ?
+            gameScene.size.height / 2 - 225 : // Adjusted for SE
+            gameScene.size.height / 2 - 275   // Original position
+            
+        icon.position = CGPoint(
+            x: startX + CGFloat(index) * spacing,
+            y: baseY
+        )
     }
 }
