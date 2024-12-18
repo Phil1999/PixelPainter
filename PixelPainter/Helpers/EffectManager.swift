@@ -187,10 +187,9 @@ class EffectManager {
         ])
     }
 
-    // Optimized frozen overlay nodes
     private var frozenOverlay: SKSpriteNode?
     private var snowflakes: [SKSpriteNode] = []
-    private let maxSnowflakes = 10  // Reduced from particle system
+    private let maxSnowflakes = 15
 
     func playFreezeEffect() {
         guard let gameScene = gameScene,
@@ -201,7 +200,6 @@ class EffectManager {
         // Dim the bg music
         SoundManager.shared.dimBackgroundMusic()
 
-        // Add cyan overlay with reduced alpha
         let freezeOverlay = SKSpriteNode(
             color: UIColor.cyan.withAlphaComponent(0.15), size: gameScene.size)
         freezeOverlay.position = CGPoint(
@@ -211,7 +209,6 @@ class EffectManager {
         gameScene.addChild(freezeOverlay)
         self.frozenOverlay = freezeOverlay
 
-        // Add simplified snow effect using sprites
         addSnowflakeSprites(to: gameScene)
     }
 
