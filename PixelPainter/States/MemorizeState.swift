@@ -312,11 +312,23 @@ class MemorizeState: GKState {
         self.iconInstructionLabel = iconInstructionLabel
 
         if !isFirstLevel {
+<<<<<<< Updated upstream
             
             // Adjust position for iPhone SE to match PlayState
             let isIPhoneSE = gameScene.size.height <= GameConstants.DeviceSizes.SE_HEIGHT
             let yPosition = isIPhoneSE ? gameScene.size.height - 55 : gameScene.size.height - 90
             
+=======
+
+
+            // Adjust position for iPhone SE to match PlayState
+            let isIPhoneSE =
+                gameScene.size.height <= GameConstants.DeviceSizes.SE_HEIGHT
+            let yPosition =
+                isIPhoneSE
+                ? gameScene.size.height - 55 : gameScene.size.height - 90
+
+>>>>>>> Stashed changes
             // score is not shown on first round
             let scoreCounter = ScoreCounter(
                 text: "\(gameScene.context.gameInfo.score)")
@@ -337,6 +349,8 @@ class MemorizeState: GKState {
         readyLabel.alpha = 0  // Start hidden
         gameScene.addChild(readyLabel)
         
+        adjustLayoutForIPhoneSE()
+
         adjustLayoutForIPhoneSE()
 
     }
@@ -508,34 +522,28 @@ extension MemorizeState {
         cropNode.maskNode = maskNode
         cropNode.position = CGPoint(x: 0, y: 50)
 
-        // Make the tutorial videos loop
-        guard
-            let url = Bundle.main.url(
-                forResource: "\(type.videoFileName)", withExtension: "mp4")
-        else {
-            print("Video is missing!")
-            return
-        }
+        // video player
+        if let url = Bundle.main.url(
+            forResource: "\(type.videoFileName)", withExtension: "mp4")
+        {
+            let asset = AVAsset(url: url)
+            let playerItem = AVPlayerItem(asset: asset)
+            let player = AVQueuePlayer()
 
-        let item = AVPlayerItem(url: url)
-        let player = AVQueuePlayer()
+            player.automaticallyWaitsToMinimizeStalling = false
+            player.preventsDisplaySleepDuringVideoPlayback = false
+            player.isMuted = true
 
-        // player properties to optimize performance
-        player.automaticallyWaitsToMinimizeStalling = false
-        player.preventsDisplaySleepDuringVideoPlayback = false
+            // Video should loop
+            DispatchQueue.global(qos: .userInteractive).async { [weak self] in
+                self?.tutorialVideoLooper = AVPlayerLooper(
+                    player: player, templateItem: playerItem)
+            }
 
-        // Create video node
-        let videoNode = SKVideoNode(avPlayer: player)
-        videoNode.size = videoContainerSize
+            // Create and configure video node
+            let videoNode = SKVideoNode(avPlayer: player)
+            videoNode.size = videoContainerSize
 
-        // Set the looper on appropriate queue to avoid priority inversion
-        DispatchQueue.global(qos: .userInteractive).async {
-            self.tutorialVideoLooper = AVPlayerLooper(
-                player: player, templateItem: item)
-        }
-
-        // Add to view hierarchy on main thread
-        DispatchQueue.main.async {
             cropNode.addChild(videoNode)
             videoNode.play()
         }
@@ -828,32 +836,55 @@ extension MemorizeState {
         let screenSize = UIScreen.main.bounds.size
         return screenSize.height <= GameConstants.DeviceSizes.SE_HEIGHT
     }
+<<<<<<< Updated upstream
     
     private func adjustLayoutForIPhoneSE() {
         guard isIPhoneSE else { return }
         
+=======
+
+    private func adjustLayoutForIPhoneSE() {
+        guard isIPhoneSE else { return }
+
+>>>>>>> Stashed changes
         // Adjust "Choose two" label position
         if let chooseLabel = chooseTwoLabel {
             chooseLabel.position.y = gameScene.size.height / 2 - 155
         }
+<<<<<<< Updated upstream
         
+=======
+
+>>>>>>> Stashed changes
         // Adjust instruction text
         if let instructionLabel = iconInstructionLabel {
             instructionLabel.position.y = gameScene.size.height / 2 - 170
         }
+<<<<<<< Updated upstream
         
+=======
+
+>>>>>>> Stashed changes
         // Adjust power-up icons and info buttons
         for (index, icon) in powerUpSelectionNodes.enumerated() {
             // Move power-ups up by 50 points
             icon.position.y = gameScene.size.height / 2 - 225
+<<<<<<< Updated upstream
             
+=======
+
+>>>>>>> Stashed changes
             // Adjust associated info button
             if index < infoButtons.count {
                 let infoButton = infoButtons[index]
                 infoButton.position.y = icon.position.y + 25
             }
         }
+<<<<<<< Updated upstream
         
+=======
+
+>>>>>>> Stashed changes
         // Adjust confirm button when it appears
         if let confirmButton = confirmButton {
             confirmButton.position.y = gameScene.size.height / 2 - 300
@@ -864,30 +895,61 @@ extension MemorizeState {
 extension MemorizeState {
     // Call this after creating the confirm button
     private func positionConfirmButton(_ button: SKNode) {
+<<<<<<< Updated upstream
         let baseY = isIPhoneSE ?
             gameScene.size.height / 2 - 300 : // Adjusted for SE
             gameScene.size.height / 2 - 350   // Original position
             
+=======
+        let baseY =
+            isIPhoneSE
+            ? gameScene.size.height / 2 - 300
+            :  // Adjusted for SE
+            gameScene.size.height / 2 - 350  // Original position
+
+>>>>>>> Stashed changes
         button.position = CGPoint(
             x: gameScene.size.width / 2,
             y: baseY
         )
     }
+<<<<<<< Updated upstream
     
     // Call this when showing power-up selection
     private func positionPowerUpIcon(_ icon: PowerUpIcon, at index: Int, totalPowerUps: Int) {
+=======
+
+    // Call this when showing power-up selection
+    private func positionPowerUpIcon(
+        _ icon: PowerUpIcon, at index: Int, totalPowerUps: Int
+    ) {
+>>>>>>> Stashed changes
         let centerX = gameScene.size.width / 2
         let spacing: CGFloat = 100
         let totalWidth = CGFloat(totalPowerUps - 1) * spacing
         let startX = centerX - (totalWidth / 2)
+<<<<<<< Updated upstream
         
         let baseY = isIPhoneSE ?
             gameScene.size.height / 2 - 225 : // Adjusted for SE
             gameScene.size.height / 2 - 275   // Original position
             
+=======
+
+        let baseY =
+            isIPhoneSE
+            ? gameScene.size.height / 2 - 225
+            :  // Adjusted for SE
+            gameScene.size.height / 2 - 275  // Original position
+
+>>>>>>> Stashed changes
         icon.position = CGPoint(
             x: startX + CGFloat(index) * spacing,
             y: baseY
         )
     }
 }
+<<<<<<< Updated upstream
+=======
+
+>>>>>>> Stashed changes

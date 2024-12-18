@@ -183,7 +183,8 @@ class PowerUpManager {
                 as? CircularTimer
             {
                 timerNode.setFrozenState(active: true)
-
+            
+                
                 EffectManager.shared.playFreezeEffect()
 
                 DispatchQueue.main.asyncAfter(

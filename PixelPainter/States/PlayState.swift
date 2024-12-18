@@ -199,7 +199,7 @@ class PlayState: GKState {
             backgroundNode.fadeOutWarningOverlay {
                 backgroundNode.playVictoryAnimation { [weak self] in
                     guard let self = self else { return }
-                    SoundManager.shared.playBackgroundMusic("game-bg")
+                    SoundManager.shared.ensureBackgroundMusic()
                     // Update board size if needed
                     if self.gameScene.context.gameInfo.level % 4 == 0
                         && self.gameScene.context.gameInfo.boardSize < 6
