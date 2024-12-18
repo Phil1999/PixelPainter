@@ -116,7 +116,7 @@ class PlayState: GKState {
     private func didSuccessfullyPlacePiece() {
         SoundManager.shared.playSound(.piecePlaced)
 
-        updateTime(by: 2)
+        updateTime(by: getTimeBonusForCurrentGrid())
 
         // Clear hint effects on successful placement
         stopHintTimer()
@@ -142,7 +142,7 @@ class PlayState: GKState {
     private func placePieceWithPowerUp() {
         print("placed with powerup")
         SoundManager.shared.playSound(.piecePlaced)
-        updateTime(by: 2)
+        updateTime(by: getTimeBonusForCurrentGrid())
 
         // Update score and refresh the bank
         gameScene.context.gameInfo.score += 30
@@ -159,6 +159,20 @@ class PlayState: GKState {
         let impactLight = UIImpactFeedbackGenerator(style: .light)
         impactLight.prepare()
         impactLight.impactOccurred()
+    }
+    
+    func getTimeBonusForCurrentGrid() -> TimeInterval {
+        let gridDimension = gameScene.context.layoutInfo.gridDimension
+        switch gridDimension {
+        case 3:
+            return 1.0  // 3x3: +1s per piece
+        case 4:
+            return 1.0  // 4x4: +1s per piece
+        case 5:
+            return 2 // 5x5: +2s per piece
+        default:
+            return 2  // 6x6: +2s per piece
+        }
     }
 
     private func handleLevelComplete() {
