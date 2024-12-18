@@ -32,7 +32,6 @@ class PlayState: GKState {
     }
 
     override func didEnter(from previousState: GKState?) {
-        print("Entering Play State")
         setupPlayScene()
         startGame()
     }

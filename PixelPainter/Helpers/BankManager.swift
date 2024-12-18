@@ -103,8 +103,6 @@ class BankManager {
             .filter { !$0.element.isPlaced }
         remainingPiecesIndices = unplacedPieces.map { $0.offset }
 
-        print("Remaining pieces indices: \(remainingPiecesIndices)")
-
         if remainingPiecesIndices.isEmpty {
             return
         }
@@ -117,8 +115,6 @@ class BankManager {
         let startX = -totalWidth / 2
 
         let piecesToShow = min(3, remainingPiecesIndices.count)
-
-        print("Showing \(piecesToShow) pieces")
 
         for i in 0..<piecesToShow {
             let pieceIndex = remainingPiecesIndices[i]
@@ -209,10 +205,6 @@ class BankManager {
                 gameScene?.context.gameInfo.pieces.enumerated()
                 .filter { !$0.element.isPlaced }
                 .map { $0.offset } ?? []
-
-            print(
-                "Refreshing bank. Remaining pieces: \(remainingPiecesIndices.count)"
-            )
 
             if !isBankEmpty() {
                 showNextThreePieces()
