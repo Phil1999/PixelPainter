@@ -312,15 +312,7 @@ class MemorizeState: GKState {
         self.iconInstructionLabel = iconInstructionLabel
 
         if !isFirstLevel {
-<<<<<<< Updated upstream
             
-            // Adjust position for iPhone SE to match PlayState
-            let isIPhoneSE = gameScene.size.height <= GameConstants.DeviceSizes.SE_HEIGHT
-            let yPosition = isIPhoneSE ? gameScene.size.height - 55 : gameScene.size.height - 90
-            
-=======
-
-
             // Adjust position for iPhone SE to match PlayState
             let isIPhoneSE =
                 gameScene.size.height <= GameConstants.DeviceSizes.SE_HEIGHT
@@ -328,7 +320,6 @@ class MemorizeState: GKState {
                 isIPhoneSE
                 ? gameScene.size.height - 55 : gameScene.size.height - 90
 
->>>>>>> Stashed changes
             // score is not shown on first round
             let scoreCounter = ScoreCounter(
                 text: "\(gameScene.context.gameInfo.score)")
@@ -350,9 +341,6 @@ class MemorizeState: GKState {
         gameScene.addChild(readyLabel)
         
         adjustLayoutForIPhoneSE()
-
-        adjustLayoutForIPhoneSE()
-
     }
 
     private func transitionToPlayState() {
@@ -836,55 +824,32 @@ extension MemorizeState {
         let screenSize = UIScreen.main.bounds.size
         return screenSize.height <= GameConstants.DeviceSizes.SE_HEIGHT
     }
-<<<<<<< Updated upstream
-    
-    private func adjustLayoutForIPhoneSE() {
-        guard isIPhoneSE else { return }
-        
-=======
 
     private func adjustLayoutForIPhoneSE() {
         guard isIPhoneSE else { return }
 
->>>>>>> Stashed changes
         // Adjust "Choose two" label position
         if let chooseLabel = chooseTwoLabel {
             chooseLabel.position.y = gameScene.size.height / 2 - 155
         }
-<<<<<<< Updated upstream
         
-=======
-
->>>>>>> Stashed changes
         // Adjust instruction text
         if let instructionLabel = iconInstructionLabel {
             instructionLabel.position.y = gameScene.size.height / 2 - 170
         }
-<<<<<<< Updated upstream
         
-=======
-
->>>>>>> Stashed changes
         // Adjust power-up icons and info buttons
         for (index, icon) in powerUpSelectionNodes.enumerated() {
             // Move power-ups up by 50 points
             icon.position.y = gameScene.size.height / 2 - 225
-<<<<<<< Updated upstream
             
-=======
-
->>>>>>> Stashed changes
             // Adjust associated info button
             if index < infoButtons.count {
                 let infoButton = infoButtons[index]
                 infoButton.position.y = icon.position.y + 25
             }
         }
-<<<<<<< Updated upstream
-        
-=======
 
->>>>>>> Stashed changes
         // Adjust confirm button when it appears
         if let confirmButton = confirmButton {
             confirmButton.position.y = gameScene.size.height / 2 - 300
@@ -895,61 +860,34 @@ extension MemorizeState {
 extension MemorizeState {
     // Call this after creating the confirm button
     private func positionConfirmButton(_ button: SKNode) {
-<<<<<<< Updated upstream
         let baseY = isIPhoneSE ?
             gameScene.size.height / 2 - 300 : // Adjusted for SE
             gameScene.size.height / 2 - 350   // Original position
             
-=======
-        let baseY =
-            isIPhoneSE
-            ? gameScene.size.height / 2 - 300
-            :  // Adjusted for SE
-            gameScene.size.height / 2 - 350  // Original position
-
->>>>>>> Stashed changes
         button.position = CGPoint(
             x: gameScene.size.width / 2,
             y: baseY
         )
     }
-<<<<<<< Updated upstream
     
-    // Call this when showing power-up selection
-    private func positionPowerUpIcon(_ icon: PowerUpIcon, at index: Int, totalPowerUps: Int) {
-=======
-
     // Call this when showing power-up selection
     private func positionPowerUpIcon(
         _ icon: PowerUpIcon, at index: Int, totalPowerUps: Int
     ) {
->>>>>>> Stashed changes
         let centerX = gameScene.size.width / 2
         let spacing: CGFloat = 100
         let totalWidth = CGFloat(totalPowerUps - 1) * spacing
         let startX = centerX - (totalWidth / 2)
-<<<<<<< Updated upstream
         
         let baseY = isIPhoneSE ?
             gameScene.size.height / 2 - 225 : // Adjusted for SE
             gameScene.size.height / 2 - 275   // Original position
             
-=======
 
-        let baseY =
-            isIPhoneSE
-            ? gameScene.size.height / 2 - 225
-            :  // Adjusted for SE
-            gameScene.size.height / 2 - 275  // Original position
-
->>>>>>> Stashed changes
         icon.position = CGPoint(
             x: startX + CGFloat(index) * spacing,
             y: baseY
         )
     }
 }
-<<<<<<< Updated upstream
-=======
 
->>>>>>> Stashed changes
