@@ -102,7 +102,6 @@ class PlayState: GKState {
         if !GameConstants.DeviceSizes.isIPad {
             adjustLayoutForIPhoneSE()
         }
-        adjustLayoutForIPhoneSE()
     }
 
     private func startGame() {
@@ -511,8 +510,6 @@ extension PlayState {
             !GameConstants.DeviceSizes.isIPad
                 && gameScene.size.height <= GameConstants.DeviceSizes.SE_HEIGHT
         else { return }
-
-        guard isIPhoneSE else { return }
 
         // Adjust timer position
         if let timerNode = gameScene.childNode(withName: "//circularTimer") {
