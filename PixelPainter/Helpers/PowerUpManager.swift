@@ -159,7 +159,6 @@ class PowerUpManager {
         if powerUpsInCooldown.contains(type) { return }
 
         let shouldApplyCooldown = uses > 1
-
         let impactLight = UIImpactFeedbackGenerator(style: .light)
         impactLight.prepare()
         impactLight.impactOccurred()
@@ -182,15 +181,16 @@ class PowerUpManager {
                 timerNode.setFrozenState(active: true)
                 EffectManager.shared.playFreezeEffect()
 
+                // Always schedule the effect removal
                 DispatchQueue.main.asyncAfter(
                     deadline: .now()
                         + GameConstants.PowerUpTimers.timeStopCooldown
                 ) { [weak self] in
                     timerNode.setFrozenState(active: false)
+                    EffectManager.shared.removeFreezeEffect()
                     if shouldApplyCooldown {
                         self?.powerUpsInCooldown.remove(type)
                     }
-                    EffectManager.shared.removeFreezeEffect()
                 }
             }
 
@@ -221,13 +221,15 @@ class PowerUpManager {
 
             guard !visibleUnplacedPieces.isEmpty else { return }
 
+            // Handle piece placement
             if visibleUnplacedPieces.count == 1,
                 let pieceNode = visibleUnplacedPieces.first
             {
                 if let puzzlePiece = nodeToPuzzlePiece(pieceNode, from: pieces)
                 {
                     placePieceAtCorrectPosition(
-                        puzzlePiece, gridNode: gridNode,
+                        puzzlePiece,
+                        gridNode: gridNode,
                         bankNode: bankManager.bankNode)
                 }
             } else {
@@ -238,15 +240,18 @@ class PowerUpManager {
                         pieceNodeToPlace, from: pieces)
                     {
                         placePieceAtCorrectPosition(
-                            puzzlePiece, gridNode: gridNode,
+                            puzzlePiece,
+                            gridNode: gridNode,
                             bankNode: bankManager.bankNode)
                     }
                 }
             }
 
+            // Always schedule cooldown removal if needed
             if shouldApplyCooldown {
                 DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
-                    self.powerUpsInCooldown.remove(type)
+                    [weak self] in
+                    self?.powerUpsInCooldown.remove(type)
                 }
             }
 
@@ -265,8 +270,8 @@ class PowerUpManager {
                 let shapeNode = SKShapeNode()
                 let size = gameScene.context.layoutInfo.gridSize
                 let rect = CGRect(
-                    x: -size.width / 2, y: -size.height / 2, width: size.width,
-                    height: size.height)
+                    x: -size.width / 2, y: -size.height / 2,
+                    width: size.width, height: size.height)
                 shapeNode.path =
                     UIBezierPath(roundedRect: rect, cornerRadius: 30).cgPath
                 shapeNode.fillTexture = SKTexture(image: image)
@@ -281,12 +286,12 @@ class PowerUpManager {
                 shapeNode.name = "flashImage"
                 gameScene.addChild(shapeNode)
 
-                if shouldApplyCooldown {
-                    DispatchQueue.main.asyncAfter(
-                        deadline: .now()
-                            + GameConstants.PowerUpTimers.flashCooldown
-                    ) { [weak self] in
-                        self?.removeFlashImage()
+                // Always schedule removal of flash effect
+                DispatchQueue.main.asyncAfter(
+                    deadline: .now() + GameConstants.PowerUpTimers.flashCooldown
+                ) { [weak self] in
+                    self?.removeFlashImage()
+                    if shouldApplyCooldown {
                         self?.powerUpsInCooldown.remove(type)
                     }
                 }
@@ -296,7 +301,6 @@ class PowerUpManager {
             showPowerUpAnimation(type)
             SoundManager.shared.playSound(.shuffle)
 
-            let shouldApplyCooldown = uses > 1
             if shouldApplyCooldown {
                 powerUpsInCooldown.insert(type)
                 EffectManager.shared.cooldown(powerUpIcon, duration: 0.5)
@@ -317,9 +321,11 @@ class PowerUpManager {
                 bankManager.showNextThreePieces()
                 playState?.startIdleHintTimer()
 
+                // Always schedule cooldown removal if needed
                 if shouldApplyCooldown {
                     DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
-                        self.powerUpsInCooldown.remove(type)
+                        [weak self] in
+                        self?.powerUpsInCooldown.remove(type)
                     }
                 }
             }
