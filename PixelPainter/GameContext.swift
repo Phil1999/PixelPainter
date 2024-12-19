@@ -73,6 +73,7 @@ struct LayoutInfo {
         self.gridDimension = gridDimension
 
         let isIPhoneSE = screenSize.height <= 667
+        let isIPad = UIDevice.current.userInterfaceIdiom == .pad
 
         if isIPhoneSE {
             // Scale grid and bank size for iPhone SE
@@ -85,8 +86,10 @@ struct LayoutInfo {
                 height: baseGridSize * scale
             )
             self.bankHeight = baseBankHeight * scale
+        } else if isIPad {
+            self.gridSize = defaultGridSize
+            self.bankHeight = defaultBankHeight
         } else {
-            // Use fixed values for other devices
             self.gridSize = defaultGridSize
             self.bankHeight = defaultBankHeight
         }
