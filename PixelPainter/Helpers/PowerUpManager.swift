@@ -14,29 +14,33 @@ class PowerUpManager {
         self.playState = playState
     }
 
-    func setupPowerUps(yPosition: CGFloat? = nil) {
+    func setupPowerUps() {
         guard let gameScene = gameScene else { return }
 
         let centerX = gameScene.size.width / 2
         let spacing: CGFloat = 40 * 2.3
-
+        let yPosition: CGFloat = 210 + 5
+        
+        // Get all possible positions based on PowerUpType order
+        let allPositions = PowerUpType.all.enumerated().reduce(into: [PowerUpType: Int]()) { dict, item in
+            dict[item.element] = item.offset
+        }
+        
         // Get selected powerups and their fixed positions
-        let selectedPowerUpPositions = powerUpUses.keys.map {
-            type -> (PowerUpType, Int) in
-            return (type, PowerUpType.all.firstIndex(of: type) ?? 0)
-        }.sorted { $0.1 < $1.1 }
-
+        let selectedPowerUpPositions = powerUpUses.keys.map { type -> (PowerUpType, Int) in
+            return (type, allPositions[type] ?? 0)
+        }.sorted { $0.1 < $1.1 }  // Sort by their fixed position
+        
         // Calculate layout
-        let totalWidth = spacing
+        let totalWidth = spacing  // Only need one spacing for 2 powerups
         let startX = centerX - (totalWidth / 2)
 
-        // Display powerups
+        // Display only selected powerups in their fixed positions
         for (index, (type, _)) in selectedPowerUpPositions.enumerated() {
             let uses = powerUpUses[type] ?? 0
             let powerUpIcon = PowerUpIcon(type: type, uses: uses)
             let xPos = startX + CGFloat(index) * spacing
-            let yPos = yPosition ?? 210  // Use provided Y position or default
-            powerUpIcon.position = CGPoint(x: xPos, y: yPos)
+            powerUpIcon.position = CGPoint(x: xPos, y: yPosition)
             gameScene.addChild(powerUpIcon)
             powerUps[type] = powerUpIcon
 
@@ -44,6 +48,8 @@ class PowerUpManager {
                 startSmoothPulsatingAnimation(for: powerUpIcon)
             }
         }
+        
+        adjustPowerUpsForIPhoneSE()
     }
 
     private func startSmoothPulsatingAnimation(for node: SKNode) {
@@ -158,8 +164,6 @@ class PowerUpManager {
         // check if power-up is in cooldown
         if powerUpsInCooldown.contains(type) { return }
 
-        let shouldApplyCooldown = uses > 1
-
         let impactLight = UIImpactFeedbackGenerator(style: .light)
         impactLight.prepare()
         impactLight.impactOccurred()
@@ -168,8 +172,7 @@ class PowerUpManager {
         case .timeStop:
             showPowerUpAnimation(type)
             SoundManager.shared.playSound(.freeze)
-
-            if shouldApplyCooldown {
+            if uses > 1 {
                 powerUpsInCooldown.insert(type)
                 EffectManager.shared.cooldown(
                     powerUpIcon,
@@ -180,6 +183,8 @@ class PowerUpManager {
                 as? CircularTimer
             {
                 timerNode.setFrozenState(active: true)
+            
+                
                 EffectManager.shared.playFreezeEffect()
 
                 DispatchQueue.main.asyncAfter(
@@ -187,20 +192,17 @@ class PowerUpManager {
                         + GameConstants.PowerUpTimers.timeStopCooldown
                 ) { [weak self] in
                     timerNode.setFrozenState(active: false)
-                    if shouldApplyCooldown {
-                        self?.powerUpsInCooldown.remove(type)
-                    }
+                    self?.powerUpsInCooldown.remove(type)
                     EffectManager.shared.removeFreezeEffect()
                 }
             }
 
         case .place:
             showPowerUpAnimation(type)
-            if shouldApplyCooldown {
+            if uses > 1 {
                 powerUpsInCooldown.insert(type)
                 EffectManager.shared.cooldown(powerUpIcon, duration: 0.5)
             }
-
             guard
                 let gridNode = gameScene.childNode(withName: "grid")
                     as? SKSpriteNode,
@@ -208,7 +210,11 @@ class PowerUpManager {
             else { return }
 
             let pieces = gameScene.context.gameInfo.pieces
+
+            // Get the currently selected piece if any
             let selectedPieceName = bankManager.getSelectedPiece()?.name
+
+            // Get all visible unplaced pieces
             let visibleUnplacedPieces = bankManager.getVisiblePieces().filter {
                 node in
                 guard let pieceName = node.name else { return false }
@@ -219,8 +225,10 @@ class PowerUpManager {
                 }
             }
 
+            // If there are no visible unplaced pieces, return early
             guard !visibleUnplacedPieces.isEmpty else { return }
 
+            // Handle the last piece case
             if visibleUnplacedPieces.count == 1,
                 let pieceNode = visibleUnplacedPieces.first
             {
@@ -228,9 +236,11 @@ class PowerUpManager {
                 {
                     placePieceAtCorrectPosition(
                         puzzlePiece, gridNode: gridNode,
-                        bankNode: bankManager.bankNode)
+                        bankNode: bankManager.bankNode
+                    )
                 }
             } else {
+                // Handle the case where multiple unplaced pieces exist
                 if let pieceNodeToPlace = visibleUnplacedPieces.first(where: {
                     $0.name != selectedPieceName
                 }) {
@@ -239,22 +249,19 @@ class PowerUpManager {
                     {
                         placePieceAtCorrectPosition(
                             puzzlePiece, gridNode: gridNode,
-                            bankNode: bankManager.bankNode)
+                            bankNode: bankManager.bankNode
+                        )
                     }
                 }
             }
-
-            if shouldApplyCooldown {
-                DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
-                    self.powerUpsInCooldown.remove(type)
-                }
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
+                self.powerUpsInCooldown.remove(type)
             }
 
         case .flash:
             showPowerUpAnimation(type)
             SoundManager.shared.playSound(.shutter)
-
-            if shouldApplyCooldown {
+            if uses > 1 {
                 powerUpsInCooldown.insert(type)
                 EffectManager.shared.cooldown(
                     powerUpIcon,
@@ -262,6 +269,7 @@ class PowerUpManager {
             }
 
             if let image = gameScene.context.gameInfo.currentImage {
+                // Create shape node with rounded corners
                 let shapeNode = SKShapeNode()
                 let size = gameScene.context.layoutInfo.gridSize
                 let rect = CGRect(
@@ -269,35 +277,35 @@ class PowerUpManager {
                     height: size.height)
                 shapeNode.path =
                     UIBezierPath(roundedRect: rect, cornerRadius: 30).cgPath
+
+                // Set up the image as fill texture
                 shapeNode.fillTexture = SKTexture(image: image)
-                shapeNode.fillColor = .white
+                shapeNode.fillColor = .white  // Needed for texture to show
                 shapeNode.strokeColor = .white
                 shapeNode.lineWidth = 2
+
+                // Position and properties
                 shapeNode.position = CGPoint(
                     x: gameScene.size.width / 2,
                     y: gameScene.size.height / 2 + 15)
                 shapeNode.zPosition = 9999
                 shapeNode.alpha = 0.6
                 shapeNode.name = "flashImage"
+
                 gameScene.addChild(shapeNode)
 
-                if shouldApplyCooldown {
-                    DispatchQueue.main.asyncAfter(
-                        deadline: .now()
-                            + GameConstants.PowerUpTimers.flashCooldown
-                    ) { [weak self] in
-                        self?.removeFlashImage()
-                        self?.powerUpsInCooldown.remove(type)
-                    }
+                DispatchQueue.main.asyncAfter(
+                    deadline: .now() + GameConstants.PowerUpTimers.flashCooldown
+                ) { [weak self] in
+                    self?.removeFlashImage()
+                    self?.powerUpsInCooldown.remove(type)
                 }
             }
 
         case .shuffle:
             showPowerUpAnimation(type)
             SoundManager.shared.playSound(.shuffle)
-
-            let shouldApplyCooldown = uses > 1
-            if shouldApplyCooldown {
+            if uses > 1 {
                 powerUpsInCooldown.insert(type)
                 EffectManager.shared.cooldown(powerUpIcon, duration: 0.5)
             }
@@ -307,24 +315,24 @@ class PowerUpManager {
                 playState?.stopHintTimer()
                 playState?.gridManager.hideHint()
 
+                // Safely access the pieces array
                 let pieces = gameScene.context.gameInfo.pieces
                 let placedPieces = pieces.filter { $0.isPlaced }
                 var unplacedPieces = pieces.filter { !$0.isPlaced }
                 unplacedPieces.shuffle()
 
+                // Combine and update
                 gameScene.context.gameInfo.pieces =
                     placedPieces + unplacedPieces
                 bankManager.showNextThreePieces()
+
                 playState?.startIdleHintTimer()
 
-                if shouldApplyCooldown {
-                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
-                        self.powerUpsInCooldown.remove(type)
-                    }
+                DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
+                    self.powerUpsInCooldown.remove(type)
                 }
             }
         }
-
         powerUpUses[type] = uses - 1
         updatePowerUpVisual(type: type)
     }
@@ -415,24 +423,13 @@ class PowerUpManager {
 extension PowerUpManager {
     func adjustPowerUpsForIPhoneSE() {
         guard let gameScene = gameScene else { return }
-
-        let isIPhoneSE =
-            !GameConstants.DeviceSizes.isIPad
-            && gameScene.size.height <= GameConstants.DeviceSizes.SE_HEIGHT
+        
+        let isIPhoneSE = gameScene.size.height <= GameConstants.DeviceSizes.SE_HEIGHT
         guard isIPhoneSE else { return }
-
+        
         // Adjust Y-position for all power-ups
         for (_, powerUpIcon) in powerUps {
-            powerUpIcon.position.y -= 30
-        }
-    }
-
-    func adjustLayoutForIPad(yPosition: CGFloat) {
-        guard GameConstants.DeviceSizes.isIPad else { return }
-
-        for (_, powerUpIcon) in powerUps {
-            // Keep X position the same, update only Y
-            powerUpIcon.position.y = yPosition
+            powerUpIcon.position.y -= 30  // Move them down for smaller screens
         }
     }
 }
