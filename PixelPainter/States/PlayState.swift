@@ -60,20 +60,82 @@ class PlayState: GKState {
         background.name = "backgroundNode"
         gameScene.addChild(background)
 
-        // Then add game elements
         gridManager.createGrid()
         bankManager.clearSelection()
-        bankManager.createPictureBank()
-        hudManager.createHUD()
-        powerUpManager.setupPowerUps()
 
+        // Get grid reference for positioning other elements
+        guard
+            let gridNode = gameScene.childNode(withName: "grid")
+                as? SKSpriteNode
+        else { return }
+
+        // Position grid in center
+        let centerY = gameScene.size.height / 2 + 15
+        gridNode.position = CGPoint(x: gameScene.size.width / 2, y: centerY)
+
+        // Create HUD (timer and score)
+        hudManager.createHUD()
+
+        // Position HUD relative to grid top
         if let timerNode = gameScene.childNode(withName: "//circularTimer")
-            as? CircularTimer
+            as? CircularTimer,
+            let hudNode = timerNode.parent
         {
+            let hudOffset: CGFloat = 160
+            hudNode.position = CGPoint(
+                x: 0,
+                y: gridNode.frame.maxY + hudOffset
+            )
             timerNode.delegate = self
         }
-        
-        adjustLayoutForIPhoneSE()
+
+        // Setup power-ups below grid with some spacing
+        let powerUpOffset: CGFloat = isIPhoneSE ? 20 : 50
+        powerUpManager.setupPowerUps(
+            yPosition: gridNode.frame.minY - powerUpOffset)
+
+        // Create bank below power-ups
+        let bankOffset: CGFloat = isIPhoneSE ? 160 : 180
+        let bankY = gridNode.frame.minY - bankOffset
+        bankManager.createPictureBank(at: bankY)
+
+        if !GameConstants.DeviceSizes.isIPad {
+            adjustLayoutForIPhoneSE()
+        }
+    }
+
+    private func createBankRelativeToGrid(gridNode: SKSpriteNode) {
+        // Fixed offset from bottom of grid to top of bank
+        let bankTopOffset: CGFloat = 60
+
+        // Calculate bank position relative to grid bottom
+        let bankY = gridNode.frame.minY - bankTopOffset
+
+        // Update bank creation in BankManager
+        bankManager.createPictureBank(at: bankY)
+    }
+
+    private func createHUDRelativeToGrid(gridNode: SKSpriteNode) {
+        hudManager.createHUD()
+
+        // Position HUD relative to grid top
+        let hudOffset: CGFloat = 80
+        if let timerNode = gameScene.childNode(withName: "//circularTimer") {
+            if let hudNode = timerNode.parent {
+                hudNode.position = CGPoint(
+                    x: 0,
+                    y: gridNode.frame.maxY + hudOffset
+                )
+            }
+        }
+    }
+
+    private func setupPowerUpsRelativeToGrid(gridNode: SKSpriteNode) {
+        // Position power-ups between grid and bank
+        let powerUpOffset: CGFloat = 30
+        powerUpManager.setupPowerUps(
+            yPosition: gridNode.frame.minY - powerUpOffset
+        )
     }
 
     private func startGame() {
@@ -473,10 +535,14 @@ extension PlayState {
         let screenSize = UIScreen.main.bounds.size
         return screenSize.height <= GameConstants.DeviceSizes.SE_HEIGHT
     }
-    
+
     func adjustLayoutForIPhoneSE() {
-        guard isIPhoneSE else { return }
-        
+        // Only adjust for SE, not iPad
+        guard
+            !GameConstants.DeviceSizes.isIPad
+                && gameScene.size.height <= GameConstants.DeviceSizes.SE_HEIGHT
+        else { return }
+
         // Adjust timer position
         if let timerNode = gameScene.childNode(withName: "//circularTimer") {
             // Move timer up by adjusting its parent (HUD) position
@@ -485,8 +551,40 @@ extension PlayState {
                 hudNode.position = CGPoint(x: 0, y: gameScene.size.height - 45)
             }
         }
-        
+
         // Adjust power-up positions
         powerUpManager.adjustPowerUpsForIPhoneSE()
+    }
+
+    private func adjustLayoutForIPad() {
+        // Fixed positions for iPad
+        let timerYPosition: CGFloat = 1050  // Fixed position from top
+        let powerUpsYPosition: CGFloat = 350  // Fixed Y position for power-ups
+        let bankYPosition: CGFloat = 150  // Fixed Y position for bank
+
+        // Adjust timer position
+        if let timerNode = gameScene.childNode(withName: "//circularTimer") {
+            if let hudNode = timerNode.parent {
+                hudNode.position = CGPoint(x: 0, y: timerYPosition)
+            }
+        }
+
+        // Adjust bank position
+        if let bankNode = bankManager.bankNode {
+            bankNode.position = CGPoint(
+                x: gameScene.size.width / 2, y: bankYPosition)
+        }
+
+        // Adjust grid position to be more centered
+        if let gridNode = gameScene.childNode(withName: "grid") as? SKSpriteNode
+        {
+            gridNode.position = CGPoint(
+                x: gameScene.size.width / 2,
+                y: gameScene.size.height / 2 + 15
+            )
+        }
+
+        // Adjust power-ups position through PowerUpManager
+        powerUpManager.adjustLayoutForIPad(yPosition: powerUpsYPosition)
     }
 }

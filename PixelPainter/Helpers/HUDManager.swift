@@ -33,9 +33,16 @@ class HUDManager {
         hudNode.addChild(timer)
         self.circularTimer = timer
 
+        // Position score counter relative to timer
         let scoreCounter = ScoreCounter(
             text: "\(gameScene.context.gameInfo.score)")
-        scoreCounter.position = CGPoint(x: 65, y: 0)
+
+        let xOffset: CGFloat = 130
+        let yOffset: CGFloat = 40
+        scoreCounter.position = CGPoint(
+            x: timer.position.x - xOffset,
+            y: timer.position.y + yOffset
+        )
         scoreCounter.name = "scoreCounter"
         hudNode.addChild(scoreCounter)
         self.scoreCounter = scoreCounter

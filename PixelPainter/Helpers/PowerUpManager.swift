@@ -14,33 +14,29 @@ class PowerUpManager {
         self.playState = playState
     }
 
-    func setupPowerUps() {
+    func setupPowerUps(yPosition: CGFloat? = nil) {
         guard let gameScene = gameScene else { return }
 
         let centerX = gameScene.size.width / 2
         let spacing: CGFloat = 40 * 2.3
-        let yPosition: CGFloat = 210 + 5
-        
-        // Get all possible positions based on PowerUpType order
-        let allPositions = PowerUpType.all.enumerated().reduce(into: [PowerUpType: Int]()) { dict, item in
-            dict[item.element] = item.offset
-        }
-        
+
         // Get selected powerups and their fixed positions
-        let selectedPowerUpPositions = powerUpUses.keys.map { type -> (PowerUpType, Int) in
-            return (type, allPositions[type] ?? 0)
-        }.sorted { $0.1 < $1.1 }  // Sort by their fixed position
-        
+        let selectedPowerUpPositions = powerUpUses.keys.map {
+            type -> (PowerUpType, Int) in
+            return (type, PowerUpType.all.firstIndex(of: type) ?? 0)
+        }.sorted { $0.1 < $1.1 }
+
         // Calculate layout
-        let totalWidth = spacing  // Only need one spacing for 2 powerups
+        let totalWidth = spacing
         let startX = centerX - (totalWidth / 2)
 
-        // Display only selected powerups in their fixed positions
+        // Display powerups
         for (index, (type, _)) in selectedPowerUpPositions.enumerated() {
             let uses = powerUpUses[type] ?? 0
             let powerUpIcon = PowerUpIcon(type: type, uses: uses)
             let xPos = startX + CGFloat(index) * spacing
-            powerUpIcon.position = CGPoint(x: xPos, y: yPosition)
+            let yPos = yPosition ?? 210  // Use provided Y position or default
+            powerUpIcon.position = CGPoint(x: xPos, y: yPos)
             gameScene.addChild(powerUpIcon)
             powerUps[type] = powerUpIcon
 
@@ -48,8 +44,6 @@ class PowerUpManager {
                 startSmoothPulsatingAnimation(for: powerUpIcon)
             }
         }
-        
-        adjustPowerUpsForIPhoneSE()
     }
 
     private func startSmoothPulsatingAnimation(for node: SKNode) {
@@ -183,8 +177,7 @@ class PowerUpManager {
                 as? CircularTimer
             {
                 timerNode.setFrozenState(active: true)
-            
-                
+
                 EffectManager.shared.playFreezeEffect()
 
                 DispatchQueue.main.asyncAfter(
@@ -423,13 +416,24 @@ class PowerUpManager {
 extension PowerUpManager {
     func adjustPowerUpsForIPhoneSE() {
         guard let gameScene = gameScene else { return }
-        
-        let isIPhoneSE = gameScene.size.height <= GameConstants.DeviceSizes.SE_HEIGHT
+
+        let isIPhoneSE =
+            !GameConstants.DeviceSizes.isIPad
+            && gameScene.size.height <= GameConstants.DeviceSizes.SE_HEIGHT
         guard isIPhoneSE else { return }
-        
+
         // Adjust Y-position for all power-ups
         for (_, powerUpIcon) in powerUps {
-            powerUpIcon.position.y -= 30  // Move them down for smaller screens
+            powerUpIcon.position.y -= 30
+        }
+    }
+
+    func adjustLayoutForIPad(yPosition: CGFloat) {
+        guard GameConstants.DeviceSizes.isIPad else { return }
+
+        for (_, powerUpIcon) in powerUps {
+            // Keep X position the same, update only Y
+            powerUpIcon.position.y = yPosition
         }
     }
 }
