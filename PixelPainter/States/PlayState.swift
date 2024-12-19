@@ -89,7 +89,6 @@ class PlayState: GKState {
             timerNode.delegate = self
         }
 
-<<<<<<< Updated upstream
         // Setup power-ups below grid with some spacing
         let powerUpOffset: CGFloat = isIPhoneSE ? 20 : 50
         powerUpManager.setupPowerUps(
@@ -103,9 +102,7 @@ class PlayState: GKState {
         if !GameConstants.DeviceSizes.isIPad {
             adjustLayoutForIPhoneSE()
         }
-=======
         adjustLayoutForIPhoneSE()
->>>>>>> Stashed changes
     }
 
     private func startGame() {
@@ -509,15 +506,13 @@ extension PlayState {
     }
 
     func adjustLayoutForIPhoneSE() {
-<<<<<<< Updated upstream
         // Only adjust for SE, not iPad
         guard
             !GameConstants.DeviceSizes.isIPad
                 && gameScene.size.height <= GameConstants.DeviceSizes.SE_HEIGHT
         else { return }
-=======
+
         guard isIPhoneSE else { return }
->>>>>>> Stashed changes
 
         // Adjust timer position
         if let timerNode = gameScene.childNode(withName: "//circularTimer") {
