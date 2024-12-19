@@ -104,40 +104,6 @@ class PlayState: GKState {
         }
     }
 
-    private func createBankRelativeToGrid(gridNode: SKSpriteNode) {
-        // Fixed offset from bottom of grid to top of bank
-        let bankTopOffset: CGFloat = 60
-
-        // Calculate bank position relative to grid bottom
-        let bankY = gridNode.frame.minY - bankTopOffset
-
-        // Update bank creation in BankManager
-        bankManager.createPictureBank(at: bankY)
-    }
-
-    private func createHUDRelativeToGrid(gridNode: SKSpriteNode) {
-        hudManager.createHUD()
-
-        // Position HUD relative to grid top
-        let hudOffset: CGFloat = 80
-        if let timerNode = gameScene.childNode(withName: "//circularTimer") {
-            if let hudNode = timerNode.parent {
-                hudNode.position = CGPoint(
-                    x: 0,
-                    y: gridNode.frame.maxY + hudOffset
-                )
-            }
-        }
-    }
-
-    private func setupPowerUpsRelativeToGrid(gridNode: SKSpriteNode) {
-        // Position power-ups between grid and bank
-        let powerUpOffset: CGFloat = 30
-        powerUpManager.setupPowerUps(
-            yPosition: gridNode.frame.minY - powerUpOffset
-        )
-    }
-
     private func startGame() {
         if let timerNode = gameScene.childNode(withName: "//circularTimer")
             as? CircularTimer
