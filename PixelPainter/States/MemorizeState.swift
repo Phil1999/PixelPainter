@@ -312,21 +312,17 @@ class MemorizeState: GKState {
         self.iconInstructionLabel = iconInstructionLabel
 
         if !isFirstLevel {
-            
-            // Adjust position for iPhone SE to match PlayState
-            let isIPhoneSE =
-                gameScene.size.height <= GameConstants.DeviceSizes.SE_HEIGHT
-            let yPosition =
-                isIPhoneSE
-                ? gameScene.size.height - 55 : gameScene.size.height - 90
+            // Calculate score position (relative to image)
+            let xOffset: CGFloat = 130
+            let yOffset: CGFloat = 100
 
-            // score is not shown on first round
             let scoreCounter = ScoreCounter(
                 text: "\(gameScene.context.gameInfo.score)")
             scoreCounter.position = CGPoint(
-                x: gameScene.size.width / 6, y: yPosition)
+                x: imageNode.position.x - xOffset,
+                y: imageNode.frame.maxY + yOffset
+            )
             gameScene.addChild(scoreCounter)
-
             self.scoreCounter = scoreCounter
         }
 
@@ -339,7 +335,7 @@ class MemorizeState: GKState {
         readyLabel.name = "readyLabel"
         readyLabel.alpha = 0  // Start hidden
         gameScene.addChild(readyLabel)
-        
+
         adjustLayoutForIPhoneSE()
     }
 
@@ -660,7 +656,7 @@ extension MemorizeState {
             gameScene.addChild(icon)
             powerUpSelectionNodes.append(icon)
             startPulsatingAnimation(for: icon)
-            
+
             // Add info button
             let infoButton = SKSpriteNode(imageNamed: "info-icon")
             infoButton.size = CGSize(width: 20, height: 20)
@@ -671,7 +667,7 @@ extension MemorizeState {
             infoButton.colorBlendFactor = 1.0
             infoButton.color = type.themeColor
             infoButton.name = "info_\(type.rawValue)"
-            
+
             gameScene.addChild(infoButton)
             infoButtons.append(infoButton)
         }
@@ -832,17 +828,17 @@ extension MemorizeState {
         if let chooseLabel = chooseTwoLabel {
             chooseLabel.position.y = gameScene.size.height / 2 - 155
         }
-        
+
         // Adjust instruction text
         if let instructionLabel = iconInstructionLabel {
             instructionLabel.position.y = gameScene.size.height / 2 - 170
         }
-        
+
         // Adjust power-up icons and info buttons
         for (index, icon) in powerUpSelectionNodes.enumerated() {
             // Move power-ups up by 50 points
             icon.position.y = gameScene.size.height / 2 - 225
-            
+
             // Adjust associated info button
             if index < infoButtons.count {
                 let infoButton = infoButtons[index]
@@ -860,16 +856,18 @@ extension MemorizeState {
 extension MemorizeState {
     // Call this after creating the confirm button
     private func positionConfirmButton(_ button: SKNode) {
-        let baseY = isIPhoneSE ?
-            gameScene.size.height / 2 - 300 : // Adjusted for SE
-            gameScene.size.height / 2 - 350   // Original position
-            
+        let baseY =
+            isIPhoneSE
+            ? gameScene.size.height / 2 - 300
+            :  // Adjusted for SE
+            gameScene.size.height / 2 - 350  // Original position
+
         button.position = CGPoint(
             x: gameScene.size.width / 2,
             y: baseY
         )
     }
-    
+
     // Call this when showing power-up selection
     private func positionPowerUpIcon(
         _ icon: PowerUpIcon, at index: Int, totalPowerUps: Int
@@ -878,11 +876,12 @@ extension MemorizeState {
         let spacing: CGFloat = 100
         let totalWidth = CGFloat(totalPowerUps - 1) * spacing
         let startX = centerX - (totalWidth / 2)
-        
-        let baseY = isIPhoneSE ?
-            gameScene.size.height / 2 - 225 : // Adjusted for SE
-            gameScene.size.height / 2 - 275   // Original position
-            
+
+        let baseY =
+            isIPhoneSE
+            ? gameScene.size.height / 2 - 225
+            :  // Adjusted for SE
+            gameScene.size.height / 2 - 275  // Original position
 
         icon.position = CGPoint(
             x: startX + CGFloat(index) * spacing,
@@ -890,4 +889,3 @@ extension MemorizeState {
         )
     }
 }
-
