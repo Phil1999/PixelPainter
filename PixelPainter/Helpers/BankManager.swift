@@ -30,7 +30,7 @@ class BankManager {
         }
     }
 
-    func createPictureBank() {
+    func createPictureBank(at yPosition: CGFloat? = nil) {
         guard let gameScene = gameScene,
             let image = gameScene.queueManager.getCurrentImage()
         else { return }
@@ -41,15 +41,27 @@ class BankManager {
         let bankColor = UIColor(
             red: 30 / 255, green: 30 / 255, blue: 30 / 255, alpha: 0)
         bankNode = SKSpriteNode(
-            color: bankColor, size: CGSize(width: bankWidth, height: bankHeight)
+            color: bankColor,
+            size: CGSize(width: bankWidth, height: bankHeight)
         )
 
-        let isIPhoneSE = gameScene.size.height <= GameConstants.DeviceSizes.SE_HEIGHT
-        let bankYPosition =
-            isIPhoneSE ? bankHeight / 2 - 55 : bankHeight / 2 - 35
+        let isIPhoneSE =
+            gameScene.size.height <= GameConstants.DeviceSizes.SE_HEIGHT
+
+        // Calculate bank Y position
+        let bankY: CGFloat
+        if let customY = yPosition {
+            bankY = customY
+        } else if GameConstants.DeviceSizes.isIPad {
+            bankY = bankHeight / 2 - 35
+        } else {
+            bankY = isIPhoneSE ? bankHeight / 2 - 55 : bankHeight / 2 - 35
+        }
 
         bankNode?.position = CGPoint(
-            x: gameScene.size.width / 2, y: bankYPosition)
+            x: gameScene.size.width / 2,
+            y: bankY
+        )
         bankNode?.name = "bank"
         gameScene.addChild(bankNode!)
 
