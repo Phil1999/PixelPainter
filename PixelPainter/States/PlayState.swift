@@ -89,6 +89,7 @@ class PlayState: GKState {
             timerNode.delegate = self
         }
 
+<<<<<<< Updated upstream
         // Setup power-ups below grid with some spacing
         let powerUpOffset: CGFloat = isIPhoneSE ? 20 : 50
         powerUpManager.setupPowerUps(
@@ -102,6 +103,9 @@ class PlayState: GKState {
         if !GameConstants.DeviceSizes.isIPad {
             adjustLayoutForIPhoneSE()
         }
+=======
+        adjustLayoutForIPhoneSE()
+>>>>>>> Stashed changes
     }
 
     private func startGame() {
@@ -213,7 +217,9 @@ class PlayState: GKState {
 
         // Play victory animation before transitioning to the next state
         if let backgroundNode = gameScene.childNode(withName: "backgroundNode")
-            as? Background
+            as? Background,
+            let gridNode = gameScene.childNode(withName: "grid")
+                as? SKSpriteNode
         {
 
             if let snow = gameScene.childNode(withName: "snowEffect"),
@@ -223,27 +229,27 @@ class PlayState: GKState {
                 overlay.removeFromParent()
             }
 
+            // Calculate the vertical offset based on the grid position
+            let verticalOffset = gridNode.position.y - gameScene.size.height / 2
+
             backgroundNode.fadeOutWarningOverlay {
-                backgroundNode.playVictoryAnimation { [weak self] in
+                // Pass the grid position to the victory animation
+                backgroundNode.playVictoryAnimation(gridOffset: verticalOffset)
+                { [weak self] in
                     guard let self = self else { return }
                     SoundManager.shared.ensureBackgroundMusic()
-                    // Update board size if needed
+
                     if self.gameScene.context.gameInfo.level % 4 == 0
                         && self.gameScene.context.gameInfo.boardSize < 6
                     {
                         self.gameScene.context.gameInfo.boardSize += 1
-                        print(
-                            "board size is now: ",
-                            self.gameScene.context.gameInfo.boardSize)
                     }
 
-                    // Transition to memorize state after animation completes
                     self.gameScene.context.stateMachine?.enter(
                         MemorizeState.self)
                 }
             }
         } else {
-            // If no background node, directly transition to the next state
             gameScene.context.stateMachine?.enter(MemorizeState.self)
         }
     }
@@ -503,11 +509,15 @@ extension PlayState {
     }
 
     func adjustLayoutForIPhoneSE() {
+<<<<<<< Updated upstream
         // Only adjust for SE, not iPad
         guard
             !GameConstants.DeviceSizes.isIPad
                 && gameScene.size.height <= GameConstants.DeviceSizes.SE_HEIGHT
         else { return }
+=======
+        guard isIPhoneSE else { return }
+>>>>>>> Stashed changes
 
         // Adjust timer position
         if let timerNode = gameScene.childNode(withName: "//circularTimer") {
