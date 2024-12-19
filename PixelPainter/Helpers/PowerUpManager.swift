@@ -158,6 +158,8 @@ class PowerUpManager {
         // check if power-up is in cooldown
         if powerUpsInCooldown.contains(type) { return }
 
+        let shouldApplyCooldown = uses > 1
+
         let impactLight = UIImpactFeedbackGenerator(style: .light)
         impactLight.prepare()
         impactLight.impactOccurred()
@@ -166,7 +168,8 @@ class PowerUpManager {
         case .timeStop:
             showPowerUpAnimation(type)
             SoundManager.shared.playSound(.freeze)
-            if uses > 1 {
+
+            if shouldApplyCooldown {
                 powerUpsInCooldown.insert(type)
                 EffectManager.shared.cooldown(
                     powerUpIcon,
@@ -177,7 +180,6 @@ class PowerUpManager {
                 as? CircularTimer
             {
                 timerNode.setFrozenState(active: true)
-
                 EffectManager.shared.playFreezeEffect()
 
                 DispatchQueue.main.asyncAfter(
@@ -185,17 +187,20 @@ class PowerUpManager {
                         + GameConstants.PowerUpTimers.timeStopCooldown
                 ) { [weak self] in
                     timerNode.setFrozenState(active: false)
-                    self?.powerUpsInCooldown.remove(type)
+                    if shouldApplyCooldown {
+                        self?.powerUpsInCooldown.remove(type)
+                    }
                     EffectManager.shared.removeFreezeEffect()
                 }
             }
 
         case .place:
             showPowerUpAnimation(type)
-            if uses > 1 {
+            if shouldApplyCooldown {
                 powerUpsInCooldown.insert(type)
                 EffectManager.shared.cooldown(powerUpIcon, duration: 0.5)
             }
+
             guard
                 let gridNode = gameScene.childNode(withName: "grid")
                     as? SKSpriteNode,
@@ -203,11 +208,7 @@ class PowerUpManager {
             else { return }
 
             let pieces = gameScene.context.gameInfo.pieces
-
-            // Get the currently selected piece if any
             let selectedPieceName = bankManager.getSelectedPiece()?.name
-
-            // Get all visible unplaced pieces
             let visibleUnplacedPieces = bankManager.getVisiblePieces().filter {
                 node in
                 guard let pieceName = node.name else { return false }
@@ -218,10 +219,8 @@ class PowerUpManager {
                 }
             }
 
-            // If there are no visible unplaced pieces, return early
             guard !visibleUnplacedPieces.isEmpty else { return }
 
-            // Handle the last piece case
             if visibleUnplacedPieces.count == 1,
                 let pieceNode = visibleUnplacedPieces.first
             {
@@ -229,11 +228,9 @@ class PowerUpManager {
                 {
                     placePieceAtCorrectPosition(
                         puzzlePiece, gridNode: gridNode,
-                        bankNode: bankManager.bankNode
-                    )
+                        bankNode: bankManager.bankNode)
                 }
             } else {
-                // Handle the case where multiple unplaced pieces exist
                 if let pieceNodeToPlace = visibleUnplacedPieces.first(where: {
                     $0.name != selectedPieceName
                 }) {
@@ -242,19 +239,22 @@ class PowerUpManager {
                     {
                         placePieceAtCorrectPosition(
                             puzzlePiece, gridNode: gridNode,
-                            bankNode: bankManager.bankNode
-                        )
+                            bankNode: bankManager.bankNode)
                     }
                 }
             }
-            DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
-                self.powerUpsInCooldown.remove(type)
+
+            if shouldApplyCooldown {
+                DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
+                    self.powerUpsInCooldown.remove(type)
+                }
             }
 
         case .flash:
             showPowerUpAnimation(type)
             SoundManager.shared.playSound(.shutter)
-            if uses > 1 {
+
+            if shouldApplyCooldown {
                 powerUpsInCooldown.insert(type)
                 EffectManager.shared.cooldown(
                     powerUpIcon,
@@ -262,7 +262,6 @@ class PowerUpManager {
             }
 
             if let image = gameScene.context.gameInfo.currentImage {
-                // Create shape node with rounded corners
                 let shapeNode = SKShapeNode()
                 let size = gameScene.context.layoutInfo.gridSize
                 let rect = CGRect(
@@ -270,35 +269,35 @@ class PowerUpManager {
                     height: size.height)
                 shapeNode.path =
                     UIBezierPath(roundedRect: rect, cornerRadius: 30).cgPath
-
-                // Set up the image as fill texture
                 shapeNode.fillTexture = SKTexture(image: image)
-                shapeNode.fillColor = .white  // Needed for texture to show
+                shapeNode.fillColor = .white
                 shapeNode.strokeColor = .white
                 shapeNode.lineWidth = 2
-
-                // Position and properties
                 shapeNode.position = CGPoint(
                     x: gameScene.size.width / 2,
                     y: gameScene.size.height / 2 + 15)
                 shapeNode.zPosition = 9999
                 shapeNode.alpha = 0.6
                 shapeNode.name = "flashImage"
-
                 gameScene.addChild(shapeNode)
 
-                DispatchQueue.main.asyncAfter(
-                    deadline: .now() + GameConstants.PowerUpTimers.flashCooldown
-                ) { [weak self] in
-                    self?.removeFlashImage()
-                    self?.powerUpsInCooldown.remove(type)
+                if shouldApplyCooldown {
+                    DispatchQueue.main.asyncAfter(
+                        deadline: .now()
+                            + GameConstants.PowerUpTimers.flashCooldown
+                    ) { [weak self] in
+                        self?.removeFlashImage()
+                        self?.powerUpsInCooldown.remove(type)
+                    }
                 }
             }
 
         case .shuffle:
             showPowerUpAnimation(type)
             SoundManager.shared.playSound(.shuffle)
-            if uses > 1 {
+
+            let shouldApplyCooldown = uses > 1
+            if shouldApplyCooldown {
                 powerUpsInCooldown.insert(type)
                 EffectManager.shared.cooldown(powerUpIcon, duration: 0.5)
             }
@@ -308,24 +307,24 @@ class PowerUpManager {
                 playState?.stopHintTimer()
                 playState?.gridManager.hideHint()
 
-                // Safely access the pieces array
                 let pieces = gameScene.context.gameInfo.pieces
                 let placedPieces = pieces.filter { $0.isPlaced }
                 var unplacedPieces = pieces.filter { !$0.isPlaced }
                 unplacedPieces.shuffle()
 
-                // Combine and update
                 gameScene.context.gameInfo.pieces =
                     placedPieces + unplacedPieces
                 bankManager.showNextThreePieces()
-
                 playState?.startIdleHintTimer()
 
-                DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
-                    self.powerUpsInCooldown.remove(type)
+                if shouldApplyCooldown {
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
+                        self.powerUpsInCooldown.remove(type)
+                    }
                 }
             }
         }
+
         powerUpUses[type] = uses - 1
         updatePowerUpVisual(type: type)
     }
