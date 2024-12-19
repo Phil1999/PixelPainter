@@ -248,9 +248,9 @@ class PowerUpManager {
             }
 
             // Always schedule cooldown removal if needed
-            if shouldApplyCooldown {
-                DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
-                    [weak self] in
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
+                [weak self] in
+                if shouldApplyCooldown {
                     self?.powerUpsInCooldown.remove(type)
                 }
             }
@@ -322,9 +322,9 @@ class PowerUpManager {
                 playState?.startIdleHintTimer()
 
                 // Always schedule cooldown removal if needed
-                if shouldApplyCooldown {
-                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
-                        [weak self] in
+                DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
+                    [weak self] in
+                    if shouldApplyCooldown {
                         self?.powerUpsInCooldown.remove(type)
                     }
                 }
