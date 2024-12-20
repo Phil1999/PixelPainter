@@ -1,5 +1,5 @@
 //
-//  GameContext.swift
+//  PPGameContext.swift
 //  PixelPainter
 //
 //  Created by Tim Hsieh on 10/22/24.
@@ -8,22 +8,25 @@
 import GameplayKit
 import SwiftUI
 
-class GameContext: ObservableObject {
-    @Published private(set) var scene: GameScene!
-    @Published private(set) var stateMachine: GKStateMachine?
+class PPGameContext: GameContext {
+    var gameScene: PPGameScene? { scene as? PPGameScene }
+    private(set) var stateMachine: GKStateMachine?
+    let gameMode: GameModeType
+
     @Published var layoutInfo: LayoutInfo
     @Published var gameInfo: GameInfo
 
-    init() {
-        // First initialize basic info based on screen bounds
+    init(dependencies: Dependencies, gameMode: GameModeType) {
+        self.gameMode = gameMode
         self.layoutInfo = LayoutInfo(
             gridDimension: 3,
             screenSize: UIScreen.main.bounds.size
         )
         self.gameInfo = GameInfo()
+        super.init(dependencies: dependencies)
 
         // Create scene with self as context
-        self.scene = GameScene(context: self, size: UIScreen.main.bounds.size)
+        self.scene = PPGameScene(context: self, size: UIScreen.main.bounds.size)
 
         configureStates()
     }
@@ -31,26 +34,29 @@ class GameContext: ObservableObject {
     func updateGridDimension(_ dimension: Int) {
         layoutInfo = LayoutInfo(
             gridDimension: dimension,
-            screenSize: scene.size
+            screenSize: scene!.size
         )
     }
 
     func configureStates() {
+        guard let scene = gameScene else { return }
         stateMachine = GKStateMachine(states: [
-            MemorizeState(gameScene: scene),
-            PlayState(gameScene: scene),
-            GameOverState(gameScene: scene),
+            PPMemorizeState(gameScene: scene),
+            PPPlayState(gameScene: scene),
+            PPGameOverState(gameScene: scene),
         ])
     }
 
     func resetGame() {
+        guard let scene = gameScene else { return }
+
         gameInfo = GameInfo()
         layoutInfo = LayoutInfo(
             gridDimension: 3,
             screenSize: scene.size
         )
         scene.queueManager.refreshImageQueue(forGridSize: 3)
-        stateMachine?.enter(MemorizeState.self)
+        stateMachine?.enter(PPMemorizeState.self)
     }
 }
 

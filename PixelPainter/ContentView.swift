@@ -9,22 +9,17 @@ import SwiftUI
 import SpriteKit
 
 struct ContentView: View {
-    @StateObject private var gameContext = GameContext()
+    @StateObject private var context = PPGameContext(dependencies: .init(), gameMode: .single)
     
     var body: some View {
-        GeometryReader { geometry in
-            ZStack {
-                SpriteView(scene: gameContext.scene)
-                    .ignoresSafeArea()
-                
-                VStack {
-                    Spacer()
-                    Color.clear
-                        .frame(height: geometry.safeAreaInsets.bottom)
-                }
-            }
+        ZStack {
+            SpriteView(scene: context.scene!, debugOptions: [.showsFPS, .showsNodeCount])
+                .frame(width: UIScreen.main.bounds.width, height: UIScreen.main.bounds.height)
+                .edgesIgnoringSafeArea(.all)
         }
+        .statusBarHidden()
     }
+
 }
 
 struct ContentView_Previews: PreviewProvider {

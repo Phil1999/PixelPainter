@@ -8,8 +8,8 @@
 import AVFoundation
 import SpriteKit
 
-class SoundManager {
-    static let shared = SoundManager()
+class PPSoundManager {
+    static let shared = PPSoundManager()
 
     private var audioEngine: AVAudioEngine
     private var audioPlayers: [String: AVAudioPlayerNode]
@@ -88,7 +88,7 @@ class SoundManager {
         }
     }
 
-    func playSound(_ sound: GameSound) {
+    func playSound(_ sound: PPGameSound) {
         guard isSoundEnabled,
             let player = audioPlayers[sound.rawValue],
             let file = audioFiles[sound.rawValue]
@@ -292,7 +292,7 @@ class SoundManager {
     }
 }
 
-enum GameSound: String {
+enum PPGameSound: String {
     case piecePlaced = "piece_placed"
     case incorrectPiecePlaced = "incorrect_piece_placed"
     case levelComplete = "level_complete"

@@ -8,15 +8,15 @@
 import Foundation
 import SpriteKit
 
-enum PowerUpType: String, CaseIterable {
+enum PPPowerUpType: String, CaseIterable {
     case timeStop = "Time Stop"
     case place = "Place"
     case flash = "Flash"
     case shuffle = "Shuffle"
 }
 
-extension PowerUpType {
-    static var all: [PowerUpType] = Self.allCases.map { $0 }
+extension PPPowerUpType {
+    static var all: [PPPowerUpType] = Self.allCases.map { $0 }
 
 
     var displayName: String {

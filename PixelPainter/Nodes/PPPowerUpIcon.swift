@@ -7,7 +7,7 @@
 
 import SpriteKit
 
-class PowerUpIcon: SKNode {
+class PPPowerUpIcon: SKNode {
     private var mainCircle: SKShapeNode
     private var iconNode: SKSpriteNode
     private var usesBubble: SKShapeNode
@@ -17,7 +17,7 @@ class PowerUpIcon: SKNode {
     private let bubbleRadius: CGFloat = 12
     private let iconSize = CGSize(width: 40, height: 40)
 
-    init(type: PowerUpType, uses: Int, minimal: Bool = false) {
+    init(type: PPPowerUpType, uses: Int, minimal: Bool = false) {
         let iconName = type.iconName
         
         let glowNode = SKShapeNode(circleOfRadius: mainRadius)

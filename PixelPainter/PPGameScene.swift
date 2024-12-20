@@ -1,5 +1,5 @@
 //
-//  GameScene.swift
+//  PPGameScene.swift
 //  PixelPainter
 //
 //  Created by Tim Hsieh on 10/22/24.
@@ -8,23 +8,23 @@
 import GameplayKit
 import SpriteKit
 
-class GameScene: SKScene {
-    unowned let context: GameContext
+class PPGameScene: SKScene {
+    unowned let context: PPGameContext
     var gameInfo: GameInfo { context.gameInfo }
     var layoutInfo: LayoutInfo { context.layoutInfo }
 
-    var playState: PlayState?
-    let queueManager = QueueManager()
-    let background = Background()
+    var playState: PPPlayState?
+    let queueManager = PPQueueManager()
+    let background = PPBackground()
 
-    init(context: GameContext, size: CGSize) {
+    init(context: PPGameContext, size: CGSize) {
         self.context = context
         super.init(size: size)
-        EffectManager.shared.setGameScene(self)
+        PPEffectManager.shared.setGameScene(self)
         
         // Use a short delay to ensure the scene is fully loaded before playing music
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
-            SoundManager.shared.ensureBackgroundMusic()
+            PPSoundManager.shared.ensureBackgroundMusic()
         }
     }
 
@@ -36,7 +36,7 @@ class GameScene: SKScene {
         background.setup(screenSize: self.size)
         addChild(background)
 
-        context.stateMachine?.enter(MemorizeState.self)
+        context.stateMachine?.enter(PPMemorizeState.self)
 
         // Enable user interaction
         self.isUserInteractionEnabled = true
@@ -49,13 +49,13 @@ class GameScene: SKScene {
     override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
         if let currentState = context.stateMachine?.currentState {
             switch currentState {
-            case let playState as PlayState:
+            case let playState as PPPlayState:
                 playState.touchesBegan(touches, with: event)
 
-            case let gameOverState as GameOverState:
+            case let gameOverState as PPGameOverState:
                 gameOverState.handleTouches(touches, with: event)
 
-            case let memorizeState as MemorizeState:
+            case let memorizeState as PPMemorizeState:
                 if let touch = touches.first {
                     let location = touch.location(in: self)
                     memorizeState.handleTouch(at: location)
@@ -69,13 +69,13 @@ class GameScene: SKScene {
     }
 
     override func touchesMoved(_ touches: Set<UITouch>, with event: UIEvent?) {
-        if let playState = context.stateMachine?.currentState as? PlayState {
+        if let playState = context.stateMachine?.currentState as? PPPlayState {
             playState.touchesMoved(touches, with: event)
         }
     }
 
     override func touchesEnded(_ touches: Set<UITouch>, with event: UIEvent?) {
-        if let playState = context.stateMachine?.currentState as? PlayState {
+        if let playState = context.stateMachine?.currentState as? PPPlayState {
             playState.touchesEnded(touches, with: event)
         }
     }

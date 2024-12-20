@@ -7,12 +7,12 @@
 
 import SpriteKit
 
-class GridManager {
-    weak var gameScene: GameScene?
+class PPGridManager {
+    weak var gameScene: PPGameScene?
 
     private var hintNode: SKSpriteNode?
 
-    init(gameScene: GameScene) {
+    init(gameScene: PPGameScene) {
         self.gameScene = gameScene
     }
 
@@ -119,7 +119,7 @@ class GridManager {
 
     func tryPlacePiece(_ piece: SKSpriteNode, at point: CGPoint) -> Bool {
         // Check if game over animation is playing
-        if EffectManager.shared.isPlayingGameOver {
+        if PPEffectManager.shared.isPlayingGameOver {
             return false
         }
 
@@ -306,7 +306,7 @@ class GridManager {
                 })
         else { return }
 
-        SoundManager.shared.playSound(.notifyHint)
+        PPSoundManager.shared.playSound(.notifyHint)
 
         let puzzlePiece = gameScene.context.gameInfo.pieces[pieceIndex]
         let row = Int(puzzlePiece.correctPosition.y)
