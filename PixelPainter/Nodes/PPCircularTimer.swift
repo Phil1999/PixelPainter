@@ -342,25 +342,6 @@ class PPCircularTimer: SKNode {
         timeLabel.run(repeatForever, withKey: "warningAnimation")
     }
     
-    private func triggerWarningHaptics() {
-        let vibrationPattern: [TimeInterval] = [0.1, 0.1, 0.1]
-        var vibrationIndex = 0
-        
-        func vibrateNext() {
-            if vibrationIndex < vibrationPattern.count {
-                DispatchQueue.main.asyncAfter(deadline: .now() + vibrationPattern[vibrationIndex]) {
-                    let generator = UIImpactFeedbackGenerator(style: .heavy)
-                    generator.prepare()
-                    generator.impactOccurred()
-                    vibrationIndex += 1
-                    vibrateNext()
-                }
-            }
-        }
-        
-        vibrateNext()
-    }
-    
     private func stopWarningAnimation() {
         timeLabel.removeAction(forKey: "warningAnimation")
         timeLabel.setScale(1.0)
