@@ -7,12 +7,12 @@
 
 import SpriteKit
 
-class HUDManager {
-    weak var gameScene: GameScene?
-    private var circularTimer: CircularTimer?
-    private var scoreCounter: ScoreCounter?
+class PPHUDManager {
+    weak var gameScene: PPGameScene?
+    private var circularTimer: PPCircularTimer?
+    private var scoreCounter: PPScoreCounter?
 
-    init(gameScene: GameScene) {
+    init(gameScene: PPGameScene) {
         self.gameScene = gameScene
     }
 
@@ -24,7 +24,7 @@ class HUDManager {
         gameScene.addChild(hudNode)
 
         let timerRadius: CGFloat = 55
-        let timer = CircularTimer(
+        let timer = PPCircularTimer(
             radius: timerRadius,
             gameScene: gameScene
         )
@@ -34,7 +34,7 @@ class HUDManager {
         self.circularTimer = timer
 
         // Position score counter relative to timer
-        let scoreCounter = ScoreCounter(
+        let scoreCounter = PPScoreCounter(
             text: "\(gameScene.context.gameInfo.score)")
 
         let xOffset: CGFloat = 130

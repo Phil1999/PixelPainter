@@ -8,10 +8,10 @@
 import GameplayKit
 import SpriteKit
 
-class TutorialState: GKState {
-    unowned let gameScene: GameScene
+class PPTutorialState: GKState {
+    unowned let gameScene: PPGameScene
     
-    init(gameScene: GameScene) {
+    init(gameScene: PPGameScene) {
         self.gameScene = gameScene
         super.init()
     }
@@ -25,7 +25,7 @@ class TutorialState: GKState {
     }
     
     override func isValidNextState(_ stateClass: AnyClass) -> Bool {
-        return stateClass is MemorizeState.Type
+        return stateClass is PPMemorizeState.Type
     }
     
     private func setupTutorialScene() {

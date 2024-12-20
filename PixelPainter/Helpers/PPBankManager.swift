@@ -1,14 +1,14 @@
 import SpriteKit
 
-class BankManager {
-    weak var gameScene: GameScene?
+class PPBankManager {
+    weak var gameScene: PPGameScene?
     var bankNode: SKSpriteNode?
     private var selectedPiece: SKSpriteNode?
     private var visiblePieces: [SKSpriteNode] = []
     private var currentBatchStartIndex = 0
     private var remainingPiecesIndices: [Int] = []
 
-    init(gameScene: GameScene?) {
+    init(gameScene: PPGameScene?) {
         self.gameScene = gameScene
     }
 
@@ -46,13 +46,13 @@ class BankManager {
         )
 
         let isIPhoneSE =
-            gameScene.size.height <= GameConstants.DeviceSizes.SE_HEIGHT
+            gameScene.size.height <= PPGameConstants.PPDeviceSizes.SE_HEIGHT
 
         // Calculate bank Y position
         let bankY: CGFloat
         if let customY = yPosition {
             bankY = customY
-        } else if GameConstants.DeviceSizes.isIPad {
+        } else if PPGameConstants.PPDeviceSizes.isIPad {
             bankY = bankHeight / 2 - 35
         } else {
             bankY = isIPhoneSE ? bankHeight / 2 - 55 : bankHeight / 2 - 35

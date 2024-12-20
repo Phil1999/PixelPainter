@@ -8,12 +8,12 @@
 import GameplayKit
 import SpriteKit
 
-class PlayState: GKState {
-    unowned let gameScene: GameScene
-    let gridManager: GridManager
-    let bankManager: BankManager
-    let hudManager: HUDManager
-    var powerUpManager: PowerUpManager!
+class PPPlayState: GKState {
+    unowned let gameScene: PPGameScene
+    let gridManager: PPGridManager
+    let bankManager: PPBankManager
+    let hudManager: PPHUDManager
+    var powerUpManager: PPPowerUpManager!
 
     private var hintTimer: Timer?
     private var idleHintTimer: Timer?
@@ -21,13 +21,13 @@ class PlayState: GKState {
     private var piecePlacedFromPowerup: Bool = false
     private var isLevelComplete: Bool = false
 
-    init(gameScene: GameScene) {
+    init(gameScene: PPGameScene) {
         self.gameScene = gameScene
-        self.gridManager = GridManager(gameScene: gameScene)
-        self.bankManager = BankManager(gameScene: gameScene)
-        self.hudManager = HUDManager(gameScene: gameScene)
+        self.gridManager = PPGridManager(gameScene: gameScene)
+        self.bankManager = PPBankManager(gameScene: gameScene)
+        self.hudManager = PPHUDManager(gameScene: gameScene)
         super.init()
-        self.powerUpManager = PowerUpManager(
+        self.powerUpManager = PPPowerUpManager(
             gameScene: gameScene, playState: self)
     }
 
@@ -43,7 +43,7 @@ class PlayState: GKState {
         gridManager.hideHint()
 
         if let timerNode = gameScene.childNode(withName: "//circularTimer")
-            as? CircularTimer
+            as? PPCircularTimer
         {
             timerNode.stopTimer()
         }
@@ -54,7 +54,7 @@ class PlayState: GKState {
 
     private func setupPlayScene() {
         // Create and add background first
-        let background = Background()
+        let background = PPBackground()
         background.setup(screenSize: gameScene.size)
         background.zPosition = -2
         background.name = "backgroundNode"
@@ -78,7 +78,7 @@ class PlayState: GKState {
 
         // Position HUD relative to grid top
         if let timerNode = gameScene.childNode(withName: "//circularTimer")
-            as? CircularTimer,
+            as? PPCircularTimer,
             let hudNode = timerNode.parent
         {
             let hudOffset: CGFloat = 160
@@ -99,14 +99,14 @@ class PlayState: GKState {
         let bankY = gridNode.frame.minY - bankOffset
         bankManager.createPictureBank(at: bankY)
 
-        if !GameConstants.DeviceSizes.isIPad {
+        if !PPGameConstants.PPDeviceSizes.isIPad {
             adjustLayoutForIPhoneSE()
         }
     }
 
     private func startGame() {
         if let timerNode = gameScene.childNode(withName: "//circularTimer")
-            as? CircularTimer
+            as? PPCircularTimer
         {
             timerNode.delegate = self
             timerNode.startTimer(
@@ -134,7 +134,7 @@ class PlayState: GKState {
 
     func updateTime(by seconds: Double) {
         if let timerNode = gameScene.childNode(withName: "//circularTimer")
-            as? CircularTimer
+            as? PPCircularTimer
         {
             timerNode.modifyTime(by: seconds)
             timerNode.showTimeBonus(seconds: seconds)  // Show the bonus animation
@@ -142,7 +142,7 @@ class PlayState: GKState {
     }
 
     private func didSuccessfullyPlacePiece() {
-        SoundManager.shared.playSound(.piecePlaced)
+        PPSoundManager.shared.playSound(.piecePlaced)
 
         updateTime(by: 2)
 
@@ -169,7 +169,7 @@ class PlayState: GKState {
 
     private func placePieceWithPowerUp() {
         print("placed with powerup")
-        SoundManager.shared.playSound(.piecePlaced)
+        PPSoundManager.shared.playSound(.piecePlaced)
         updateTime(by: 2)
 
         // Update score and refresh the bank
@@ -196,16 +196,16 @@ class PlayState: GKState {
         stopIdleHintTimer()
 
         if let timerNode = gameScene.childNode(withName: "//circularTimer")
-            as? CircularTimer
+            as? PPCircularTimer
         {
             timerNode.stopTimer()
         }
 
-        SoundManager.shared.stopBackgroundMusic()
-        SoundManager.shared.playSound(.levelComplete)
+        PPSoundManager.shared.stopBackgroundMusic()
+        PPSoundManager.shared.playSound(.levelComplete)
 
         // Disable interaction during victory sequence
-        EffectManager.shared.temporarilyDisableInteraction(for: 5.5)  // Match total animation duration
+        PPEffectManager.shared.temporarilyDisableInteraction(for: 5.5)  // Match total animation duration
 
         let timeBonus = Int(gameScene.context.gameInfo.timeRemaining)
         gameScene.context.gameInfo.score += timeBonus
@@ -213,7 +213,7 @@ class PlayState: GKState {
 
         // Play victory animation before transitioning to the next state
         if let backgroundNode = gameScene.childNode(withName: "backgroundNode")
-            as? Background,
+            as? PPBackground,
             let gridNode = gameScene.childNode(withName: "grid")
                 as? SKSpriteNode
         {
@@ -233,7 +233,7 @@ class PlayState: GKState {
                 backgroundNode.playVictoryAnimation(gridOffset: verticalOffset)
                 { [weak self] in
                     guard let self = self else { return }
-                    SoundManager.shared.ensureBackgroundMusic()
+                    PPSoundManager.shared.ensureBackgroundMusic()
 
                     if self.gameScene.context.gameInfo.level % 4 == 0
                         && self.gameScene.context.gameInfo.boardSize < 6
@@ -242,24 +242,24 @@ class PlayState: GKState {
                     }
 
                     self.gameScene.context.stateMachine?.enter(
-                        MemorizeState.self)
+                        PPMemorizeState.self)
                 }
             }
         } else {
-            gameScene.context.stateMachine?.enter(MemorizeState.self)
+            gameScene.context.stateMachine?.enter(PPMemorizeState.self)
         }
     }
 
     private func handleGameOver() {
 
-        EffectManager.shared.temporarilyDisableInteraction()
-        EffectManager.shared.triggerGameOverVibrations()
+        PPEffectManager.shared.temporarilyDisableInteraction()
+        PPEffectManager.shared.triggerGameOverVibrations()
 
         stopHintTimer()
         stopIdleHintTimer()
         gridManager.hideHint()
         self.bankManager.clearSelection()
-        SoundManager.shared.stopBackgroundMusic()
+        PPSoundManager.shared.stopBackgroundMusic()
 
         let impactHeavy = UIImpactFeedbackGenerator(style: .heavy)
         impactHeavy.prepare()
@@ -273,15 +273,15 @@ class PlayState: GKState {
         {
             // Only play animation if there are pieces
             self.powerUpManager.removeFlashImage()  // Add this line
-            EffectManager.shared.playGameOverEffect { [weak self] in
+            PPEffectManager.shared.playGameOverEffect { [weak self] in
                 guard let self = self else { return }
-                self.gameScene.context.stateMachine?.enter(GameOverState.self)
+                self.gameScene.context.stateMachine?.enter(PPGameOverState.self)
             }
         } else {
             // Go directly to game over if no pieces
             self.powerUpManager.removeFlashImage()  // Add this line
-            self.gameScene.context.stateMachine?.enter(GameOverState.self)
-            SoundManager.shared.playSound(.gameOverNoPieces)
+            self.gameScene.context.stateMachine?.enter(PPGameOverState.self)
+            PPSoundManager.shared.playSound(.gameOverNoPieces)
         }
     }
 
@@ -310,16 +310,16 @@ class PlayState: GKState {
     private func showWrongPlacementAnimation(
         for piece: SKSpriteNode, at location: CGPoint
     ) {
-        SoundManager.shared.playSound(.incorrectPiecePlaced)
-        EffectManager.shared.temporarilyDisableInteraction(
-            for: GameConstants.GeneralGamePlay.wrongPlacementBufferTime)
+        PPSoundManager.shared.playSound(.incorrectPiecePlaced)
+        PPEffectManager.shared.temporarilyDisableInteraction(
+            for: PPGameConstants.PPGeneralGamePlay.wrongPlacementBufferTime)
         if let cropNode = piece.children.first as? SKCropNode {
-            EffectManager.shared.cooldown(
+            PPEffectManager.shared.cooldown(
                 cropNode,
-                duration: GameConstants.GeneralGamePlay.wrongPlacementBufferTime
+                duration: PPGameConstants.PPGeneralGamePlay.wrongPlacementBufferTime
             )
         }
-        EffectManager.shared.shakeNode(piece)
+        PPEffectManager.shared.shakeNode(piece)
 
         let impactMedium = UIImpactFeedbackGenerator(style: .medium)
         impactMedium.prepare()
@@ -419,7 +419,7 @@ class PlayState: GKState {
     // MARK: - Hint System
     private func startHintTimer() {
         hintTimer = Timer.scheduledTimer(
-            withTimeInterval: GameConstants.GeneralGamePlay.hintWaitTime,
+            withTimeInterval: PPGameConstants.PPGeneralGamePlay.hintWaitTime,
             repeats: false
         ) { [weak self] _ in
             guard let self = self,
@@ -439,7 +439,7 @@ class PlayState: GKState {
         stopIdleHintTimer()
 
         idleHintTimer = Timer.scheduledTimer(
-            withTimeInterval: GameConstants.GeneralGamePlay.idleHintWaitTime,
+            withTimeInterval: PPGameConstants.PPGeneralGamePlay.idleHintWaitTime,
             repeats: false
         ) { [weak self] _ in
             guard let self = self,
@@ -483,7 +483,7 @@ class PlayState: GKState {
 }
 
 // MARK: - CircularTimerDelegate
-extension PlayState: CircularTimerDelegate {
+extension PPPlayState: PPCircularTimerDelegate {
     func timerDidComplete() {
         handleGameOver()
     }
@@ -491,24 +491,24 @@ extension PlayState: CircularTimerDelegate {
     func timerDidUpdate(currentTime: TimeInterval) {
         gameScene.context.gameInfo.timeRemaining = currentTime
         if let background = gameScene.childNode(withName: "backgroundNode")
-            as? Background
+            as? PPBackground
         {
             background.updateWarningLevel(timeRemaining: currentTime)
         }
     }
 }
 
-extension PlayState {
+extension PPPlayState {
     private var isIPhoneSE: Bool {
         let screenSize = UIScreen.main.bounds.size
-        return screenSize.height <= GameConstants.DeviceSizes.SE_HEIGHT
+        return screenSize.height <= PPGameConstants.PPDeviceSizes.SE_HEIGHT
     }
 
     func adjustLayoutForIPhoneSE() {
         // Only adjust for SE, not iPad
         guard
-            !GameConstants.DeviceSizes.isIPad
-                && gameScene.size.height <= GameConstants.DeviceSizes.SE_HEIGHT
+            !PPGameConstants.PPDeviceSizes.isIPad
+                && gameScene.size.height <= PPGameConstants.PPDeviceSizes.SE_HEIGHT
         else { return }
 
         // Adjust timer position

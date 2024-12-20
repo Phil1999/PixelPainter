@@ -10,26 +10,26 @@ import GameplayKit
 import SpriteKit
 import UIKit
 
-class MemorizeState: GKState {
-    unowned let gameScene: GameScene
+class PPMemorizeState: GKState {
+    unowned let gameScene: PPGameScene
     private let memorizeTime: TimeInterval = 3
     private var isFirstLevel: Bool = false
 
-    private var powerUpSelectionNodes: [PowerUpIcon] = []
-    private var selectedPowerUps: Set<PowerUpType> = []
+    private var powerUpSelectionNodes: [PPPowerUpIcon] = []
+    private var selectedPowerUps: Set<PPPowerUpType> = []
     private var chooseTwoLabel: SKLabelNode?
     private var levelLabelContainer: SKNode?
     private var countdownStarted = false
     private var currentInfoModal: SKNode?
     private var confirmButton: SKNode?
     private var infoButtons: [SKSpriteNode] = []
-    private var scoreCounter: ScoreCounter?
+    private var scoreCounter: PPScoreCounter?
     private var powerUpSelectionComplete = false
     private var iconInstructionLabel: SKNode?
 
     private var tutorialVideoLooper: AVPlayerLooper?
 
-    init(gameScene: GameScene) {
+    init(gameScene: PPGameScene) {
         self.gameScene = gameScene
         super.init()
     }
@@ -106,7 +106,7 @@ class MemorizeState: GKState {
             name.starts(with: "info_")
         {
             let powerUpType = name.replacingOccurrences(of: "info_", with: "")
-            if let type = PowerUpType(rawValue: powerUpType) {
+            if let type = PPPowerUpType(rawValue: powerUpType) {
                 showPowerUpInfo(for: type)
             }
             return
@@ -182,11 +182,11 @@ class MemorizeState: GKState {
     }
 
     override func isValidNextState(_ stateClass: AnyClass) -> Bool {
-        return stateClass is PlayState.Type
+        return stateClass is PPPlayState.Type
     }
 
     private func setupMemorizeScene() {
-        let background = Background()
+        let background = PPBackground()
         background.setup(screenSize: gameScene.size)
         background.zPosition = -2
         gameScene.addChild(background)
@@ -316,7 +316,7 @@ class MemorizeState: GKState {
             let xOffset: CGFloat = 130
             let yOffset: CGFloat = 100
 
-            let scoreCounter = ScoreCounter(
+            let scoreCounter = PPScoreCounter(
                 text: "\(gameScene.context.gameInfo.score)")
             scoreCounter.position = CGPoint(
                 x: imageNode.position.x - xOffset,
@@ -341,7 +341,7 @@ class MemorizeState: GKState {
 
     private func transitionToPlayState() {
         gameScene.queueManager.printCurrentQueue()
-        gameScene.context.stateMachine?.enter(PlayState.self)
+        gameScene.context.stateMachine?.enter(PPPlayState.self)
     }
 
     private func blinkCountdownLabel(readyLabel: SKLabelNode, blinkCount: Int) {
@@ -462,7 +462,7 @@ class MemorizeState: GKState {
 
             piece.run(group)
         }
-        SoundManager.shared.playSound(.memorizeBreak)
+        PPSoundManager.shared.playSound(.memorizeBreak)
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.6) { [weak self] in
             piecesContainer.removeFromParent()
             self?.transitionToPlayState()
@@ -472,9 +472,9 @@ class MemorizeState: GKState {
 }
 
 // MARK: Power-Up Selection UI
-extension MemorizeState {
+extension PPMemorizeState {
 
-    private func showPowerUpInfo(for type: PowerUpType) {
+    private func showPowerUpInfo(for type: PPPowerUpType) {
         // Remove any existing modal
         currentInfoModal?.removeFromParent()
 
@@ -618,7 +618,7 @@ extension MemorizeState {
         currentInfoModal = modal
     }
 
-    private func getPowerUpDescription(_ type: PowerUpType) -> String {
+    private func getPowerUpDescription(_ type: PPPowerUpType) -> String {
         switch type {
         case .timeStop:
             return
@@ -635,7 +635,7 @@ extension MemorizeState {
         }
     }
 
-    private func getCooldownText(_ type: PowerUpType) -> String {
+    private func getCooldownText(_ type: PPPowerUpType) -> String {
         switch type {
         case .timeStop: return "5s"
         case .place: return "None"
@@ -647,10 +647,10 @@ extension MemorizeState {
     // Add power-up selection UI
     private func showPowerUpSelection() {
 
-        let powerUps = PowerUpType.allCases
+        let powerUps = PPPowerUpType.allCases
 
         for (index, type) in powerUps.enumerated() {
-            let icon = PowerUpIcon(type: type, uses: type.uses, minimal: true)
+            let icon = PPPowerUpIcon(type: type, uses: type.uses, minimal: true)
             positionPowerUpIcon(icon, at: index, totalPowerUps: powerUps.count)
             icon.alpha = 0.5
             gameScene.addChild(icon)
@@ -673,9 +673,9 @@ extension MemorizeState {
         }
     }
 
-    private func handlePowerUpSelection(_ icon: PowerUpIcon) {
+    private func handlePowerUpSelection(_ icon: PPPowerUpIcon) {
         guard
-            let type = PowerUpType(
+            let type = PPPowerUpType(
                 rawValue: icon.name?.replacingOccurrences(
                     of: "powerup_", with: "") ?? "")
         else { return }
@@ -688,12 +688,12 @@ extension MemorizeState {
             confirmButton = nil
             let impact = UIImpactFeedbackGenerator(style: .light)
             impact.impactOccurred()
-            SoundManager.shared.playSound(.deselect)
+            PPSoundManager.shared.playSound(.deselect)
 
             // Pulsate all unselected icons
             powerUpSelectionNodes.forEach { node in
                 if !selectedPowerUps.contains(
-                    PowerUpType(
+                    PPPowerUpType(
                         rawValue: node.name?.replacingOccurrences(
                             of: "powerup_", with: "") ?? "") ?? .timeStop)
                 {
@@ -707,7 +707,7 @@ extension MemorizeState {
             icon.setScale(1.0)  // Reset to default size when selected
             let impact = UIImpactFeedbackGenerator(style: .light)
             impact.impactOccurred()
-            SoundManager.shared.playSound(.select)
+            PPSoundManager.shared.playSound(.select)
 
             // Show confirm button when we have 2 selections
             if selectedPowerUps.count == 2 {
@@ -721,7 +721,7 @@ extension MemorizeState {
                 // Pulsate only unselected icons
                 powerUpSelectionNodes.forEach { node in
                     if !selectedPowerUps.contains(
-                        PowerUpType(
+                        PPPowerUpType(
                             rawValue: node.name?.replacingOccurrences(
                                 of: "powerup_", with: "") ?? "") ?? .timeStop)
                     {
@@ -769,9 +769,9 @@ extension MemorizeState {
     }
 
     private func completePowerUpSelection() {
-        SoundManager.shared.playSound(.confirm)
+        PPSoundManager.shared.playSound(.confirm)
         if let playState = gameScene.context.stateMachine?.state(
-            forClass: PlayState.self) as? PlayState
+            forClass: PPPlayState.self) as? PPPlayState
         {
             playState.powerUpManager.setPowerUps(Array(selectedPowerUps))
         }
@@ -815,10 +815,10 @@ extension MemorizeState {
     }
 }
 
-extension MemorizeState {
+extension PPMemorizeState {
     private var isIPhoneSE: Bool {
         let screenSize = UIScreen.main.bounds.size
-        return screenSize.height <= GameConstants.DeviceSizes.SE_HEIGHT
+        return screenSize.height <= PPGameConstants.PPDeviceSizes.SE_HEIGHT
     }
 
     private func adjustLayoutForIPhoneSE() {
@@ -853,7 +853,7 @@ extension MemorizeState {
     }
 }
 
-extension MemorizeState {
+extension PPMemorizeState {
     // Call this after creating the confirm button
     private func positionConfirmButton(_ button: SKNode) {
         let baseY =
@@ -870,7 +870,7 @@ extension MemorizeState {
 
     // Call this when showing power-up selection
     private func positionPowerUpIcon(
-        _ icon: PowerUpIcon, at index: Int, totalPowerUps: Int
+        _ icon: PPPowerUpIcon, at index: Int, totalPowerUps: Int
     ) {
         let centerX = gameScene.size.width / 2
         let spacing: CGFloat = 100

@@ -6,7 +6,7 @@
 //
 import SpriteKit
 
-enum TimerState {
+enum PPTimerState {
     case normal
     case frozen
     case overtime
@@ -40,13 +40,13 @@ enum TimerState {
 }
 
 
-class CircularTimer: SKNode {
+class PPCircularTimer: SKNode {
     private var backgroundCircle: SKShapeNode
     private var timerCircle: SKShapeNode
     private var timeLabel: SKLabelNode
     private var radius: CGFloat
 
-    weak var delegate: CircularTimerDelegate?
+    weak var delegate: PPCircularTimerDelegate?
     private var displayLink: CADisplayLink?
 
     // Core timer states
@@ -56,14 +56,14 @@ class CircularTimer: SKNode {
     private var isRunning = false
 
     // Visual states
-    private var currentState: TimerState = .normal
+    private var currentState: PPTimerState = .normal
     private var isFrozen = false
     private var isOvertime = false
     private var glowNode: SKShapeNode?
     private var pulseAction: SKAction?
 
 
-    init(radius: CGFloat, gameScene: GameScene) {
+    init(radius: CGFloat, gameScene: PPGameScene) {
         self.radius = radius
 
         backgroundCircle = SKShapeNode(circleOfRadius: radius)
@@ -73,7 +73,7 @@ class CircularTimer: SKNode {
         backgroundCircle.alpha = 0.65
 
         timerCircle = SKShapeNode()
-        timerCircle.strokeColor = TimerState.normal.color
+        timerCircle.strokeColor = PPTimerState.normal.color
         timerCircle.lineWidth = 4
 
         timeLabel = SKLabelNode(fontNamed: "PPNeueMontreal-Bold")
@@ -192,7 +192,7 @@ class CircularTimer: SKNode {
             currentState = .frozen
         } else if isOvertime {
             currentState = .overtime
-        } else if currentTime <= GameConstants.GeneralGamePlay.timeWarningThreshold {
+        } else if currentTime <= PPGameConstants.PPGeneralGamePlay.timeWarningThreshold {
             currentState = .warning
         } else {
             currentState = .normal
@@ -243,9 +243,9 @@ class CircularTimer: SKNode {
             // insert behind timer circle
             insertChild(glowNode, at: 0)
 
-            EffectManager.shared.applyPulseEffect(to: glowNode)
+            PPEffectManager.shared.applyPulseEffect(to: glowNode)
         }
-        EffectManager.shared.applyPulseEffect(to: timeLabel)
+        PPEffectManager.shared.applyPulseEffect(to: timeLabel)
     }
 
     private func removeOvertimeEffects() {
@@ -289,12 +289,12 @@ class CircularTimer: SKNode {
 
             // Cooldown animation
             let animate = SKAction.customAction(
-                withDuration: GameConstants.PowerUpTimers.timeStopCooldown
+                withDuration: PPGameConstants.PPPowerUpTimers.timeStopCooldown
             ) {
                 node, elapsedTime in
                 guard let cooldown = node as? SKShapeNode else { return }
                 let progress =
-                    elapsedTime / GameConstants.PowerUpTimers.timeStopCooldown
+                    elapsedTime / PPGameConstants.PPPowerUpTimers.timeStopCooldown
                 let endAngle = startAngle + (.pi * 2 * progress)
 
                 let newPath = CGMutablePath()
@@ -331,8 +331,8 @@ class CircularTimer: SKNode {
         
         timeLabel.removeAllActions()
         
-        timerCircle.strokeColor = TimerState.warning.color
-        timeLabel.fontColor = TimerState.warning.color
+        timerCircle.strokeColor = PPTimerState.warning.color
+        timeLabel.fontColor = PPTimerState.warning.color
 
         let scaleUp = SKAction.scale(to: 1.8, duration: 0.3)
         let scaleDown = SKAction.scale(to: 1.0, duration: 0.3)
@@ -368,7 +368,7 @@ class CircularTimer: SKNode {
 }
 
 // MARK: - Time Bonus
-extension CircularTimer {
+extension PPCircularTimer {
     func showTimeBonus(seconds: Double) {
         if !isRunning { return }
         let bonusLabel = SKLabelNode(fontNamed: "PPNeueMontreal-Bold")
@@ -397,7 +397,7 @@ extension CircularTimer {
     }
 }
 
-protocol CircularTimerDelegate: AnyObject {
+protocol PPCircularTimerDelegate: AnyObject {
     func timerDidComplete()
     func timerDidUpdate(currentTime: TimeInterval)
 }

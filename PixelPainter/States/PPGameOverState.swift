@@ -8,10 +8,10 @@
 import GameplayKit
 import SpriteKit
 
-class GameOverState: GKState {
-    unowned let gameScene: GameScene
+class PPGameOverState: GKState {
+    unowned let gameScene: PPGameScene
     
-    init(gameScene: GameScene) {
+    init(gameScene: PPGameScene) {
         self.gameScene = gameScene
         super.init()
     }
@@ -24,11 +24,11 @@ class GameOverState: GKState {
     override func willExit(to nextState: GKState) {
         gameScene.removeAllChildren()
         // May not need this later on (only used for restarting game)
-        SoundManager.shared.ensureBackgroundMusic()
+        PPSoundManager.shared.ensureBackgroundMusic()
     }
     
     override func isValidNextState(_ stateClass: AnyClass) -> Bool {
-        return stateClass is MemorizeState.Type
+        return stateClass is PPMemorizeState.Type
     }
     
     private func setupGameOverScene() {

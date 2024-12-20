@@ -1,6 +1,6 @@
 import SpriteKit
 
-class Background: SKNode {
+class PPBackground: SKNode {
     private var mainBackground: SKSpriteNode!
     private var gradientLayer: SKSpriteNode!
     private var fogEffect: SKSpriteNode!
@@ -23,7 +23,7 @@ class Background: SKNode {
     }
 }
 
-extension Background {
+extension PPBackground {
     private func setupLayers() {
         setupGradient()
         setupWarningOverlay()

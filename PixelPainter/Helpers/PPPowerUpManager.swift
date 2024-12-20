@@ -1,15 +1,15 @@
 import AVFoundation
 import SpriteKit
 
-class PowerUpManager {
-    weak var gameScene: GameScene?
-    weak var playState: PlayState?
-    private var powerUps: [PowerUpType: PowerUpIcon] = [:]
-    private var powerUpsInCooldown: Set<PowerUpType> = []
+class PPPowerUpManager {
+    weak var gameScene: PPGameScene?
+    weak var playState: PPPlayState?
+    private var powerUps: [PPPowerUpType: PPPowerUpIcon] = [:]
+    private var powerUpsInCooldown: Set<PPPowerUpType> = []
 
-    private var powerUpUses: [PowerUpType: Int] = [:]
+    private var powerUpUses: [PPPowerUpType: Int] = [:]
 
-    init(gameScene: GameScene, playState: PlayState) {
+    init(gameScene: PPGameScene, playState: PPPlayState) {
         self.gameScene = gameScene
         self.playState = playState
     }
@@ -22,8 +22,8 @@ class PowerUpManager {
 
         // Get selected powerups and their fixed positions
         let selectedPowerUpPositions = powerUpUses.keys.map {
-            type -> (PowerUpType, Int) in
-            return (type, PowerUpType.all.firstIndex(of: type) ?? 0)
+            type -> (PPPowerUpType, Int) in
+            return (type, PPPowerUpType.all.firstIndex(of: type) ?? 0)
         }.sorted { $0.1 < $1.1 }
 
         // Calculate layout
@@ -33,7 +33,7 @@ class PowerUpManager {
         // Display powerups
         for (index, (type, _)) in selectedPowerUpPositions.enumerated() {
             let uses = powerUpUses[type] ?? 0
-            let powerUpIcon = PowerUpIcon(type: type, uses: uses)
+            let powerUpIcon = PPPowerUpIcon(type: type, uses: uses)
             let xPos = startX + CGFloat(index) * spacing
             let yPos = yPosition ?? 210  // Use provided Y position or default
             powerUpIcon.position = CGPoint(x: xPos, y: yPos)
@@ -71,7 +71,7 @@ class PowerUpManager {
         node.run(repeatForever, withKey: "smoothPulsate")
     }
 
-    func setPowerUps(_ types: [PowerUpType]) {
+    func setPowerUps(_ types: [PPPowerUpType]) {
         // Clear existing power-ups
         powerUps.values.forEach { $0.removeFromParent() }
         powerUps.removeAll()
@@ -80,7 +80,7 @@ class PowerUpManager {
             uniqueKeysWithValues: types.map { ($0, $0.uses) })
     }
 
-    private func updatePowerUpVisual(type: PowerUpType) {
+    private func updatePowerUpVisual(type: PPPowerUpType) {
         guard let powerUpIcon = powerUps[type] else { return }
 
         let uses = powerUpUses[type] ?? 0
@@ -114,18 +114,18 @@ class PowerUpManager {
         return false
     }
 
-    private func getPowerUpType(from nodeName: String?) -> PowerUpType? {
+    private func getPowerUpType(from nodeName: String?) -> PPPowerUpType? {
         guard let name = nodeName,
             name.starts(with: "powerup_"),
             let typeString = name.split(separator: "_").last,
-            let type = PowerUpType(rawValue: String(typeString))
+            let type = PPPowerUpType(rawValue: String(typeString))
         else {
             return nil
         }
         return type
     }
 
-    private func showPowerUpAnimation(_ type: PowerUpType) {
+    private func showPowerUpAnimation(_ type: PPPowerUpType) {
         guard let gameScene = gameScene else { return }
 
         let iconTexture = SKTexture(imageNamed: type.iconName)
@@ -144,7 +144,7 @@ class PowerUpManager {
         iconNode.run(SKAction.sequence([fadeIn, fadeOut, remove]))
     }
 
-    private func activatePowerUp(_ type: PowerUpType) {
+    private func activatePowerUp(_ type: PPPowerUpType) {
         // check if timer isn't 0 before letting player use power-up
         if gameScene?.context.gameInfo.timeRemaining ?? 0 <= 0 {
             return
@@ -166,28 +166,28 @@ class PowerUpManager {
         switch type {
         case .timeStop:
             showPowerUpAnimation(type)
-            SoundManager.shared.playSound(.freeze)
+            PPSoundManager.shared.playSound(.freeze)
 
             if shouldApplyCooldown {
                 powerUpsInCooldown.insert(type)
-                EffectManager.shared.cooldown(
+                PPEffectManager.shared.cooldown(
                     powerUpIcon,
-                    duration: GameConstants.PowerUpTimers.timeStopCooldown)
+                    duration: PPGameConstants.PPPowerUpTimers.timeStopCooldown)
             }
 
             if let timerNode = gameScene.childNode(withName: "//circularTimer")
-                as? CircularTimer
+                as? PPCircularTimer
             {
                 timerNode.setFrozenState(active: true)
-                EffectManager.shared.playFreezeEffect()
+                PPEffectManager.shared.playFreezeEffect()
 
                 // Always schedule the effect removal
                 DispatchQueue.main.asyncAfter(
                     deadline: .now()
-                        + GameConstants.PowerUpTimers.timeStopCooldown
+                        + PPGameConstants.PPPowerUpTimers.timeStopCooldown
                 ) { [weak self] in
                     timerNode.setFrozenState(active: false)
-                    EffectManager.shared.removeFreezeEffect()
+                    PPEffectManager.shared.removeFreezeEffect()
                     if shouldApplyCooldown {
                         self?.powerUpsInCooldown.remove(type)
                     }
@@ -198,7 +198,7 @@ class PowerUpManager {
             showPowerUpAnimation(type)
             if shouldApplyCooldown {
                 powerUpsInCooldown.insert(type)
-                EffectManager.shared.cooldown(powerUpIcon, duration: 0.5)
+                PPEffectManager.shared.cooldown(powerUpIcon, duration: 0.5)
             }
 
             guard
@@ -257,13 +257,13 @@ class PowerUpManager {
 
         case .flash:
             showPowerUpAnimation(type)
-            SoundManager.shared.playSound(.shutter)
+            PPSoundManager.shared.playSound(.shutter)
 
             if shouldApplyCooldown {
                 powerUpsInCooldown.insert(type)
-                EffectManager.shared.cooldown(
+                PPEffectManager.shared.cooldown(
                     powerUpIcon,
-                    duration: GameConstants.PowerUpTimers.flashCooldown)
+                    duration: PPGameConstants.PPPowerUpTimers.flashCooldown)
             }
 
             if let image = gameScene.context.gameInfo.currentImage {
@@ -288,7 +288,7 @@ class PowerUpManager {
 
                 // Always schedule removal of flash effect
                 DispatchQueue.main.asyncAfter(
-                    deadline: .now() + GameConstants.PowerUpTimers.flashCooldown
+                    deadline: .now() + PPGameConstants.PPPowerUpTimers.flashCooldown
                 ) { [weak self] in
                     self?.removeFlashImage()
                     if shouldApplyCooldown {
@@ -299,11 +299,11 @@ class PowerUpManager {
 
         case .shuffle:
             showPowerUpAnimation(type)
-            SoundManager.shared.playSound(.shuffle)
+            PPSoundManager.shared.playSound(.shuffle)
 
             if shouldApplyCooldown {
                 powerUpsInCooldown.insert(type)
-                EffectManager.shared.cooldown(powerUpIcon, duration: 0.5)
+                PPEffectManager.shared.cooldown(powerUpIcon, duration: 0.5)
             }
 
             if let bankManager = playState?.bankManager {
@@ -418,13 +418,13 @@ class PowerUpManager {
     }
 }
 
-extension PowerUpManager {
+extension PPPowerUpManager {
     func adjustPowerUpsForIPhoneSE() {
         guard let gameScene = gameScene else { return }
 
         let isIPhoneSE =
-            !GameConstants.DeviceSizes.isIPad
-            && gameScene.size.height <= GameConstants.DeviceSizes.SE_HEIGHT
+            !PPGameConstants.PPDeviceSizes.isIPad
+            && gameScene.size.height <= PPGameConstants.PPDeviceSizes.SE_HEIGHT
         guard isIPhoneSE else { return }
 
         // Adjust Y-position for all power-ups
@@ -434,7 +434,7 @@ extension PowerUpManager {
     }
 
     func adjustLayoutForIPad(yPosition: CGFloat) {
-        guard GameConstants.DeviceSizes.isIPad else { return }
+        guard PPGameConstants.PPDeviceSizes.isIPad else { return }
 
         for (_, powerUpIcon) in powerUps {
             // Keep X position the same, update only Y

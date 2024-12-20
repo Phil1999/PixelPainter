@@ -1,6 +1,6 @@
 import UIKit
 
-class QueueManager {
+class PPQueueManager {
     private var imageQueue: [String] = []
     private var currentIndex = 0
     private var currentGridSize: Int = 3

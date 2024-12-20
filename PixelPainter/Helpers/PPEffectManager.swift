@@ -8,14 +8,14 @@
 import Foundation
 import SpriteKit
 
-class EffectManager {
-    static let shared = EffectManager()
-    private weak var gameScene: GameScene?
+class PPEffectManager {
+    static let shared = PPEffectManager()
+    private weak var gameScene: PPGameScene?
     private var isFlashing = false
 
     init() {}
 
-    func setGameScene(_ scene: GameScene) {
+    func setGameScene(_ scene: PPGameScene) {
         self.gameScene = scene
     }
 
@@ -103,7 +103,7 @@ class EffectManager {
         isPlayingGameOver = true  // Set flag when starting animation
 
         // Play the game end sound effect
-        SoundManager.shared.playSound(.gameOverWithPieces)
+        PPSoundManager.shared.playSound(.gameOverWithPieces)
 
         // Step 1: Shake effect (left-right only)
         let shakeSequence = createShakeSequence()
@@ -193,12 +193,12 @@ class EffectManager {
 
     func playFreezeEffect() {
         guard let gameScene = gameScene,
-            gameScene.childNode(withName: "backgroundNode") as? Background
+            gameScene.childNode(withName: "backgroundNode") as? PPBackground
                 != nil
         else { return }
 
         // Dim the bg music
-        SoundManager.shared.dimBackgroundMusic()
+        PPSoundManager.shared.dimBackgroundMusic()
 
         let freezeOverlay = SKSpriteNode(
             color: UIColor.cyan.withAlphaComponent(0.15), size: gameScene.size)
@@ -281,7 +281,7 @@ class EffectManager {
 
         // After all visual effects are cleaned up, restore the background music volume
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
-            SoundManager.shared.restoreBackgroundMusicVolume()
+            PPSoundManager.shared.restoreBackgroundMusicVolume()
         }
     }
 
@@ -309,7 +309,7 @@ class EffectManager {
 }
 
 // MARK: - Cooldown Effects
-extension EffectManager {
+extension PPEffectManager {
 
     private struct NodeState {
         let alpha: CGFloat

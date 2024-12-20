@@ -1,6 +1,6 @@
 import SpriteKit
 
-class ScoreCounter: SKNode {
+class PPScoreCounter: SKNode {
     private var container: SKShapeNode
     private var scoreLabel: SKLabelNode
     private var valueLabel: SKLabelNode
@@ -84,7 +84,7 @@ class ScoreCounter: SKNode {
 }
 
 // MARK: - Score bonus animation
-extension ScoreCounter {
+extension PPScoreCounter {
     func showScoreBonus(points: Int) {
         let bonusLabel = SKLabelNode(fontNamed: "PPNeueMontreal-Bold")
         bonusLabel.text = "+\(points)"
