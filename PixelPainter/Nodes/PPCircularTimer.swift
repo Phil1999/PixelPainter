@@ -209,7 +209,6 @@ class PPCircularTimer: SKNode {
         case .warning:
             if !isFrozen && timeLabel.action(forKey: "warningAnimation") == nil {
                 triggerWarningAnimation()
-                triggerWarningHaptics()
             }
         case .frozen:
             stopWarningAnimation()
