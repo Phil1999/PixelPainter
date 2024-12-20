@@ -38,7 +38,7 @@ class PPHUDManager {
             text: "\(gameScene.context.gameInfo.score)")
 
         let xOffset: CGFloat = 130
-        let yOffset: CGFloat = 40
+        let yOffset: CGFloat = 60
         scoreCounter.position = CGPoint(
             x: timer.position.x - xOffset,
             y: timer.position.y + yOffset
