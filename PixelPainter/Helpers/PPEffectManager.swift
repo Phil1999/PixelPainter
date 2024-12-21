@@ -141,25 +141,24 @@ class PPEffectManager {
 
             // Jump up with random x offset
             let jumpUpAction = SKAction.moveBy(
-                x: jumpOffsetX, y: jumpHeight, duration: 0.3)
+                x: jumpOffsetX, y: jumpHeight, duration: 0.2)
             jumpUpAction.timingMode = .easeOut
 
-            // Fall down with different random x offset
+            // Fall down with different random x offset and simultaneous fade
             let fallDownAction = SKAction.moveBy(
-                x: fallOffsetX, y: -800, duration: 1.0)
+                x: fallOffsetX, y: -800, duration: 0.6)
             fallDownAction.timingMode = .easeIn
-
-            let fadeOutAction = SKAction.fadeOut(withDuration: 0.5)
+            let fadeOutAction = SKAction.fadeOut(withDuration: 0.6)
 
             // Combine the actions with initial random delay
             let jumpAndFallSequence = SKAction.sequence([
                 initialDelay,
                 jumpUpAction,
                 SKAction.group([fallDownAction, fadeOutAction]),
+                SKAction.removeFromParent(),
             ])
 
             piece.run(jumpAndFallSequence) {
-                piece.removeFromParent()
                 group.leave()
             }
         }
